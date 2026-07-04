@@ -548,46 +548,32 @@ function CTASection() {
 /* ---------- Footer ---------- */
 function Footer() {
   return (
-    <footer className="border-t border-border pb-10 pt-20">
+    <footer className="pb-10 pt-16">
       <div className="mx-auto max-w-7xl px-6 lg:px-10">
-        <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-4">
-          <div>
-            <TretnixLogo variant="horizontal" className="h-8" />
-            <p className="mt-5 max-w-xs text-sm text-muted-foreground">
-              Software su misura per aziende che vogliono lavorare meglio.
-            </p>
+        <div className="border-t border-white/10 pt-10">
+          <div className="flex flex-col gap-10 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <TretnixLogo variant="horizontal" className="h-8" />
+              <p className="mt-5 max-w-xs text-sm text-muted-foreground">
+                Software su misura per aziende che vogliono lavorare meglio.
+              </p>
+            </div>
+            <div className="flex flex-col gap-1.5 text-sm text-muted-foreground sm:text-right">
+              <a href="tel:+390490000000" className="hover:text-foreground transition-colors">
+                +39 049 000 0000
+              </a>
+              <a href="mailto:hello@tretnix.com" className="hover:text-primary-glow transition-colors">
+                hello@tretnix.com
+              </a>
+              <span className="text-subtle">Padova, Italia</span>
+            </div>
           </div>
-          <div>
-            <div className="section-label mb-4">Navigazione</div>
-            <ul className="space-y-2.5 text-sm text-muted-foreground">
-              {NAV.map((n) => (
-                <li key={n.href}><a href={n.href} className="hover:text-foreground">{n.label}</a></li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <div className="section-label mb-4">Studio</div>
-            <ul className="space-y-2.5 text-sm text-muted-foreground">
-              <li><a href="#studio" className="hover:text-foreground">Chi siamo</a></li>
-              <li><a href="#processo" className="hover:text-foreground">Approccio</a></li>
-              <li><a href="#servizi" className="hover:text-foreground">Tecnologie</a></li>
-              <li><a href="#contatti" className="hover:text-foreground">Lavora con noi</a></li>
-            </ul>
-          </div>
-          <div>
-            <div className="section-label mb-4">Contatti</div>
-            <ul className="space-y-3 text-sm text-muted-foreground">
-              <li className="flex items-center gap-2"><Mail className="h-3.5 w-3.5" /> hello@tretnix.com</li>
-              <li className="flex items-center gap-2"><Phone className="h-3.5 w-3.5" /> +39 000 000 0000</li>
-              <li className="flex items-center gap-2"><MapPin className="h-3.5 w-3.5" /> Padova, Italia</li>
-            </ul>
-          </div>
-        </div>
-        <div className="mt-16 flex flex-col items-start justify-between gap-4 border-t border-border pt-8 text-xs text-subtle sm:flex-row sm:items-center">
-          <span>© 2026 Tretnix Studio — Tutti i diritti riservati.</span>
-          <div className="flex gap-6">
-            <a href="#" className="hover:text-foreground">Privacy Policy</a>
-            <a href="#" className="hover:text-foreground">Cookie Policy</a>
+          <div className="mt-10 flex flex-col items-start justify-between gap-3 text-xs text-subtle sm:flex-row sm:items-center">
+            <span>© 2026 Tretnix Studio</span>
+            <div className="flex gap-5">
+              <a href="#" className="hover:text-foreground transition-colors">Privacy</a>
+              <a href="#" className="hover:text-foreground transition-colors">Cookie</a>
+            </div>
           </div>
         </div>
       </div>
