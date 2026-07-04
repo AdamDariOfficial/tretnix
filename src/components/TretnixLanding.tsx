@@ -530,7 +530,7 @@ function CTASection() {
               di <span className="text-accent italic">straordinario</span> insieme.
             </h2>
             <p className="text-muted-foreground lg:text-lg">
-              Raccontaci la tua idea. Trasformiamola in una soluzione concreta entro 24 ore.
+              Raccontaci la tua idea. Ti risponderemo entro 24 ore con una prima direzione concreta.
             </p>
             <a
               href="mailto:hello@tretnix.com?subject=Nuovo progetto Tretnix"
