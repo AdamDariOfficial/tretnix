@@ -3,13 +3,14 @@ import {
   ArrowRight, ArrowDown, ArrowUp, Menu, X, Search, Bell,
   LayoutDashboard, BarChart3, ListChecks, Users, ShoppingBag,
   Package, UsersRound, Settings, Boxes, Layers, ShieldCheck,
-  Home, PieChart, Activity, User, Mail, Phone, MapPin,
+  Home, PieChart, Activity, User, ShieldAlert, Timer, Gauge,
 } from "lucide-react";
 import { TretnixLogo } from "./TretnixLogo";
 
 const NAV = [
   { href: "#servizi", label: "Servizi" },
-  { href: "#progetti", label: "Progetti" },
+  { href: "#perche-serve", label: "Perché serve" },
+  { href: "#progetti", label: "Case study" },
   { href: "#processo", label: "Processo" },
   { href: "#studio", label: "Studio" },
   { href: "#contatti", label: "Contatti" },
@@ -391,30 +392,30 @@ function ProjectsSection() {
       <div className="mx-auto max-w-7xl px-6 lg:px-10">
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-[0.9fr_1.4fr]">
           <div>
-            <SectionLabel>Progetti selezionati</SectionLabel>
+            <SectionLabel>Case study selezionati</SectionLabel>
             <h2 className="mt-6 text-4xl leading-[1.05] sm:text-5xl lg:text-[56px]">
-              Risultati concreti<br />
-              per sistemi <span className="text-accent italic">ambiziosi.</span>
+              Sistemi digitali<br />
+              pensati per il <span className="text-accent italic">lavoro reale.</span>
             </h2>
             <p className="mt-6 max-w-md text-muted-foreground">
-              Ogni progetto nasce da un problema reale. Ogni interfaccia è progettata
-              per rendere il lavoro più semplice, veloce e controllabile.
+              Esempi di sistemi digitali progettati per mostrare il tipo di soluzioni
+              che Tretnix può realizzare per aziende e team operativi.
             </p>
-            <a href="#contatti" className="mt-8 inline-flex items-center gap-2 text-sm text-foreground hover:text-primary-glow">
-              Vedi tutti i progetti <ArrowRight className="h-4 w-4" />
+            <a href="#contatti" className="mt-8 inline-flex items-center gap-2 text-sm text-foreground hover:text-primary-glow transition-colors">
+              Parliamo del tuo caso <ArrowRight className="h-4 w-4" />
             </a>
           </div>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <ProjectCard
               title="FitZone"
               category="Fitness Management Platform"
-              desc="Piattaforma digitale per centri fitness e wellness con gestione utenti, programmi di allenamento, community, messaggi, statistiche e area personale."
+              desc="Concept di piattaforma digitale per centri fitness e wellness con gestione utenti, programmi di allenamento, community, messaggi, statistiche e area personale."
               gradient="bg-[radial-gradient(ellipse_at_top,#0B2A4A,#020814_70%),linear-gradient(135deg,#061326,#020814)]"
             />
             <ProjectCard
               title="SupplyFlow"
               category="Supplier & Operations System"
-              desc="Web app mobile-first per gestire fornitori, prodotti, sessioni d'acquisto, quantità, storico operativo e flussi interni da un'unica piattaforma."
+              desc="Concept di web app mobile-first per gestire fornitori, prodotti, sessioni d'acquisto, quantità, storico operativo e flussi interni da un'unica piattaforma."
               gradient="bg-[radial-gradient(ellipse_at_bottom_right,#123055,#020814_70%),linear-gradient(135deg,#030B1A,#061326)]"
             />
           </div>
@@ -422,7 +423,7 @@ function ProjectsSection() {
 
         {/* strip */}
         <div className="mt-20 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 border-y border-border py-5 text-xs text-subtle">
-          {["Gestionale palestra", "Sistema fornitori", "Dashboard finanziaria", "Gestionale ristorante"].map((s, i) => (
+          {["Gestionale palestra", "Sistema fornitori", "Dashboard finanziaria", "Gestionale ristorante", "CRM operativo"].map((s, i) => (
             <span key={s} className="flex items-center gap-6">
               {i > 0 && <span className="h-1 w-1 rounded-full bg-subtle/60" />}
               {s}
@@ -430,8 +431,59 @@ function ProjectsSection() {
           ))}
           <span className="flex items-center gap-6">
             <span className="h-1 w-1 rounded-full bg-subtle/60" />
-            <a href="#contatti" className="text-muted-foreground hover:text-foreground">E altri progetti →</a>
+            <a href="#contatti" className="text-muted-foreground hover:text-foreground transition-colors">E altri sistemi →</a>
           </span>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- Perché serve ---------- */
+function PercheServeSection() {
+  const cards = [
+    { Icon: ShieldAlert, t: "Riduci gli errori", d: "Centralizza dati e processi per evitare informazioni duplicate, dimenticate o difficili da trovare." },
+    { Icon: Timer, t: "Risparmia tempo", d: "Automatizza attività ripetitive e semplifica il lavoro quotidiano del team." },
+    { Icon: Gauge, t: "Controlla meglio", d: "Usa dashboard e report per avere una visione chiara di attività, clienti, ordini e risultati." },
+  ];
+  return (
+    <section id="perche-serve" className="border-t border-border py-28 lg:py-36">
+      <div className="mx-auto max-w-7xl px-6 lg:px-10">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-[0.9fr_1.4fr]">
+          <div>
+            <SectionLabel>Perché serve</SectionLabel>
+            <h2 className="mt-6 text-4xl leading-[1.05] sm:text-5xl lg:text-[56px]">
+              Meno caos operativo.<br />
+              Più <span className="text-accent italic">controllo</span> sul lavoro.
+            </h2>
+          </div>
+          <div className="space-y-6 text-muted-foreground">
+            <p className="text-base leading-relaxed sm:text-lg">
+              Molte aziende gestiscono ancora ordini, clienti, documenti e attività interne
+              con Excel, WhatsApp o strumenti scollegati. Questo crea errori, rallentamenti
+              e poca visibilità sui processi.
+            </p>
+            <p className="text-base leading-relaxed sm:text-lg">
+              Tretnix trasforma questi flussi in software chiari, centralizzati e costruiti
+              su misura, così ogni informazione è al posto giusto e ogni attività diventa
+              più semplice da gestire.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-16 grid grid-cols-1 gap-5 md:grid-cols-3">
+          {cards.map(({ Icon, t, d }) => (
+            <div
+              key={t}
+              className="glass-panel group rounded-2xl p-7 transition-all duration-300 hover:border-primary-glow/50 hover:shadow-[0_20px_60px_-20px_rgba(11,99,255,0.4)]"
+            >
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-primary/40 bg-primary/10 text-primary-glow transition-colors group-hover:border-primary-glow/70">
+                <Icon className="h-5 w-5" strokeWidth={1.5} />
+              </div>
+              <h3 className="mt-5 font-serif text-2xl text-foreground">{t}</h3>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{d}</p>
+            </div>
+          ))}
         </div>
       </div>
     </section>
@@ -529,7 +581,7 @@ function CTASection() {
               di <span className="text-accent italic">straordinario</span> insieme.
             </h2>
             <p className="text-muted-foreground lg:text-lg">
-              Raccontaci la tua idea. Trasformiamola in una soluzione concreta entro 24 ore.
+              Raccontaci la tua idea. Ti risponderemo entro 24 ore con una prima direzione concreta.
             </p>
             <a
               href="mailto:hello@tretnix.com?subject=Nuovo progetto Tretnix"
@@ -547,46 +599,32 @@ function CTASection() {
 /* ---------- Footer ---------- */
 function Footer() {
   return (
-    <footer className="border-t border-border pb-10 pt-20">
+    <footer className="pb-10 pt-16">
       <div className="mx-auto max-w-7xl px-6 lg:px-10">
-        <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-4">
-          <div>
-            <TretnixLogo variant="horizontal" className="h-8" />
-            <p className="mt-5 max-w-xs text-sm text-muted-foreground">
-              Software su misura per aziende che vogliono lavorare meglio.
-            </p>
+        <div className="border-t border-white/10 pt-10">
+          <div className="flex flex-col gap-10 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <TretnixLogo variant="horizontal" className="h-8" />
+              <p className="mt-5 max-w-xs text-sm text-muted-foreground">
+                Software su misura per aziende che vogliono lavorare meglio.
+              </p>
+            </div>
+            <div className="flex flex-col gap-1.5 text-sm text-muted-foreground sm:text-right">
+              <a href="tel:+390490000000" className="hover:text-foreground transition-colors">
+                +39 049 000 0000
+              </a>
+              <a href="mailto:hello@tretnix.com" className="hover:text-primary-glow transition-colors">
+                hello@tretnix.com
+              </a>
+              <span className="text-subtle">Padova, Italia</span>
+            </div>
           </div>
-          <div>
-            <div className="section-label mb-4">Navigazione</div>
-            <ul className="space-y-2.5 text-sm text-muted-foreground">
-              {NAV.map((n) => (
-                <li key={n.href}><a href={n.href} className="hover:text-foreground">{n.label}</a></li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <div className="section-label mb-4">Studio</div>
-            <ul className="space-y-2.5 text-sm text-muted-foreground">
-              <li><a href="#studio" className="hover:text-foreground">Chi siamo</a></li>
-              <li><a href="#processo" className="hover:text-foreground">Approccio</a></li>
-              <li><a href="#servizi" className="hover:text-foreground">Tecnologie</a></li>
-              <li><a href="#contatti" className="hover:text-foreground">Lavora con noi</a></li>
-            </ul>
-          </div>
-          <div>
-            <div className="section-label mb-4">Contatti</div>
-            <ul className="space-y-3 text-sm text-muted-foreground">
-              <li className="flex items-center gap-2"><Mail className="h-3.5 w-3.5" /> hello@tretnix.com</li>
-              <li className="flex items-center gap-2"><Phone className="h-3.5 w-3.5" /> +39 000 000 0000</li>
-              <li className="flex items-center gap-2"><MapPin className="h-3.5 w-3.5" /> Padova, Italia</li>
-            </ul>
-          </div>
-        </div>
-        <div className="mt-16 flex flex-col items-start justify-between gap-4 border-t border-border pt-8 text-xs text-subtle sm:flex-row sm:items-center">
-          <span>© 2026 Tretnix Studio — Tutti i diritti riservati.</span>
-          <div className="flex gap-6">
-            <a href="#" className="hover:text-foreground">Privacy Policy</a>
-            <a href="#" className="hover:text-foreground">Cookie Policy</a>
+          <div className="mt-10 flex flex-col items-start justify-between gap-3 text-xs text-subtle sm:flex-row sm:items-center">
+            <span>© 2026 Tretnix Studio</span>
+            <div className="flex gap-5">
+              <a href="#" className="hover:text-foreground transition-colors">Privacy</a>
+              <a href="#" className="hover:text-foreground transition-colors">Cookie</a>
+            </div>
           </div>
         </div>
       </div>
@@ -622,6 +660,7 @@ export default function TretnixLanding() {
       <main>
         <HeroSection />
         <ServicesSection />
+        <PercheServeSection />
         <ProjectsSection />
         <ProcessSection />
         <StudioSection />
