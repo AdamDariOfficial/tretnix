@@ -660,6 +660,7 @@ export default function TretnixLanding() {
       <main>
         <HeroSection />
         <ServicesSection />
+        <PercheServeSection />
         <ProjectsSection />
         <ProcessSection />
         <StudioSection />
