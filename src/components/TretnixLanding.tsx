@@ -3,13 +3,14 @@ import {
   ArrowRight, ArrowDown, ArrowUp, Menu, X, Search, Bell,
   LayoutDashboard, BarChart3, ListChecks, Users, ShoppingBag,
   Package, UsersRound, Settings, Boxes, Layers, ShieldCheck,
-  Home, PieChart, Activity, User, Mail, Phone, MapPin,
+  Home, PieChart, Activity, User, ShieldAlert, Timer, Gauge,
 } from "lucide-react";
 import { TretnixLogo } from "./TretnixLogo";
 
 const NAV = [
   { href: "#servizi", label: "Servizi" },
-  { href: "#progetti", label: "Progetti" },
+  { href: "#perche-serve", label: "Perché serve" },
+  { href: "#progetti", label: "Case study" },
   { href: "#processo", label: "Processo" },
   { href: "#studio", label: "Studio" },
   { href: "#contatti", label: "Contatti" },
