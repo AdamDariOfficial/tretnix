@@ -3,6 +3,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { ArrowRight, ArrowUp, Menu, X } from "lucide-react";
 import { TretnixLogo } from "./TretnixLogo";
 import { trackEvent } from "@/lib/analytics";
+import { useSiteSettings } from "@/lib/site-settings";
 
 /* Nav sections shown on the homepage. */
 const NAV = [
