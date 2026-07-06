@@ -13,7 +13,7 @@ import {
 import { Navbar, Footer, BackToTopButton } from "./TretnixChrome";
 import { HeroMockup } from "./HeroMockup";
 import { listFeaturedProjects, type Project } from "@/lib/projects";
-import { useSiteSettings, mailtoHref } from "@/lib/site-settings";
+import { useSiteSettings } from "@/lib/site-settings";
 import { trackEvent } from "@/lib/analytics";
 import {
   contactRequestSchema,
