@@ -339,7 +339,7 @@ function MetodoSection() {
           </Reveal>
           <ul className="border-t border-border">
             {rows.map((r, i) => (
-              <Reveal as="li" key={r.n} delay={i * 70}
+              <Reveal key={r.n} delay={i * 70}
                 className="grid grid-cols-[auto_1fr] items-start gap-6 border-b border-border py-7"
               >
                 <div className="flex h-11 w-11 items-center justify-center rounded-full border border-primary/40 bg-background text-primary-glow soft-glow">
