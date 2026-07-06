@@ -6,7 +6,8 @@ export type AnalyticsEventType =
   | "email_click"
   | "phone_click"
   | "case_study_view"
-  | "project_card_click";
+  | "project_card_click"
+  | "contact_form_submit";
 
 let lastPageViewPath: string | null = null;
 
@@ -37,7 +38,6 @@ export function trackEvent(
 ) {
   if (typeof window === "undefined") return;
   const path = (opts.path ?? window.location.pathname).slice(0, 200);
-  // Never track admin pages
   if (path.startsWith("/admin")) return;
 
   if (event_type === "page_view") {
@@ -45,7 +45,6 @@ export function trackEvent(
     lastPageViewPath = path;
   }
 
-  // Fire-and-forget
   try {
     void supabase
       .from("analytics_events")
