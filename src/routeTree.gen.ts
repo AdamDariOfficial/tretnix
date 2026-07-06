@@ -18,6 +18,7 @@ import { Route as CaseStudiesIndexRouteImport } from './routes/case-studies.inde
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as CaseStudiesSlugRouteImport } from './routes/case-studies.$slug'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as AdminContactRequestsRouteImport } from './routes/admin.contact-requests'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AdminProjectsIndexRouteImport } from './routes/admin.projects.index'
 import { Route as AdminProjectsNewRouteImport } from './routes/admin.projects.new'
@@ -68,6 +69,11 @@ const AdminSettingsRoute = AdminSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminContactRequestsRoute = AdminContactRequestsRouteImport.update({
+  id: '/contact-requests',
+  path: '/contact-requests',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
   id: '/analytics',
   path: '/analytics',
@@ -96,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/cookie-policy': typeof CookiePolicyRoute
   '/privacy': typeof PrivacyRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/contact-requests': typeof AdminContactRequestsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/case-studies/$slug': typeof CaseStudiesSlugRoute
   '/admin/': typeof AdminIndexRoute
@@ -110,6 +117,7 @@ export interface FileRoutesByTo {
   '/cookie-policy': typeof CookiePolicyRoute
   '/privacy': typeof PrivacyRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/contact-requests': typeof AdminContactRequestsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/case-studies/$slug': typeof CaseStudiesSlugRoute
   '/admin': typeof AdminIndexRoute
@@ -126,6 +134,7 @@ export interface FileRoutesById {
   '/cookie-policy': typeof CookiePolicyRoute
   '/privacy': typeof PrivacyRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/contact-requests': typeof AdminContactRequestsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/case-studies/$slug': typeof CaseStudiesSlugRoute
   '/admin/': typeof AdminIndexRoute
@@ -143,6 +152,7 @@ export interface FileRouteTypes {
     | '/cookie-policy'
     | '/privacy'
     | '/admin/analytics'
+    | '/admin/contact-requests'
     | '/admin/settings'
     | '/case-studies/$slug'
     | '/admin/'
@@ -157,6 +167,7 @@ export interface FileRouteTypes {
     | '/cookie-policy'
     | '/privacy'
     | '/admin/analytics'
+    | '/admin/contact-requests'
     | '/admin/settings'
     | '/case-studies/$slug'
     | '/admin'
@@ -172,6 +183,7 @@ export interface FileRouteTypes {
     | '/cookie-policy'
     | '/privacy'
     | '/admin/analytics'
+    | '/admin/contact-requests'
     | '/admin/settings'
     | '/case-studies/$slug'
     | '/admin/'
@@ -256,6 +268,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSettingsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/contact-requests': {
+      id: '/admin/contact-requests'
+      path: '/contact-requests'
+      fullPath: '/admin/contact-requests'
+      preLoaderRoute: typeof AdminContactRequestsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/analytics': {
       id: '/admin/analytics'
       path: '/analytics'
@@ -289,6 +308,7 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteChildren {
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
+  AdminContactRequestsRoute: typeof AdminContactRequestsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminProjectsIdRoute: typeof AdminProjectsIdRoute
@@ -298,6 +318,7 @@ interface AdminRouteChildren {
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminAnalyticsRoute: AdminAnalyticsRoute,
+  AdminContactRequestsRoute: AdminContactRequestsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminProjectsIdRoute: AdminProjectsIdRoute,
