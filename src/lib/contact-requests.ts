@@ -24,13 +24,13 @@ export const CONTACT_STATUSES = ["new", "contacted", "archived"] as const;
 export type ContactStatus = (typeof CONTACT_STATUSES)[number];
 
 export const contactRequestSchema = z.object({
-  full_name: z.string().trim().min(2, "Inserisci nome e cognome").max(200),
-  email: z.string().trim().email("Email non valida").max(320),
-  phone: z.string().trim().max(60).optional().or(z.literal("")),
-  business_name: z.string().trim().max(200).optional().or(z.literal("")),
-  needs: z.array(z.string()).max(20),
+  full_name: z.string().trim().min(2, "Inserisci nome e cognome").max(120),
+  email: z.string().trim().email("Email non valida").max(180),
+  phone: z.string().trim().max(40).optional().or(z.literal("")),
+  business_name: z.string().trim().max(160).optional().or(z.literal("")),
+  needs: z.array(z.string().max(80)).max(20),
   starting_point: z.string().max(200).optional().or(z.literal("")),
-  message: z.string().trim().min(10, "Scrivi almeno 10 caratteri").max(5000),
+  message: z.string().trim().min(10, "Scrivi almeno 10 caratteri").max(3000),
   privacy_accepted: z.literal(true, { errorMap: () => ({ message: "Devi accettare la privacy" }) }),
 });
 
@@ -52,7 +52,13 @@ export type ContactRequest = {
   updated_at: string;
 };
 
-export async function submitContactRequest(input: ContactRequestInput, source_path: string) {
+export async function submitContactRequest(
+  input: ContactRequestInput,
+  source_path: string,
+  honeypot?: string,
+) {
+  // Silent honeypot: pretend success, do nothing.
+  if (honeypot && honeypot.trim().length > 0) return;
   const payload = {
     full_name: input.full_name.trim(),
     email: input.email.trim(),
