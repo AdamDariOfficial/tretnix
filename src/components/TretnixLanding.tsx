@@ -42,14 +42,12 @@ function Reveal({
   children,
   delay = 0,
   className = "",
-  as: Tag = "div",
 }: {
   children: React.ReactNode;
   delay?: number;
   className?: string;
-  as?: keyof React.JSX.IntrinsicElements;
 }) {
-  const ref = useRef<HTMLElement | null>(null);
+  const ref = useRef<HTMLDivElement | null>(null);
   const [shown, setShown] = useState(false);
   useEffect(() => {
     const el = ref.current;
@@ -70,20 +68,16 @@ function Reveal({
     io.observe(el);
     return () => io.disconnect();
   }, []);
-  const style: React.CSSProperties = {
-    transitionDelay: `${delay}ms`,
-  };
   return (
-    // @ts-expect-error dynamic tag
-    <Tag
+    <div
       ref={ref}
-      style={style}
+      style={{ transitionDelay: `${delay}ms` }}
       className={`transition-all duration-700 ease-out ${
         shown ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
       } motion-reduce:transition-none motion-reduce:translate-y-0 motion-reduce:opacity-100 ${className}`}
     >
       {children}
-    </Tag>
+    </div>
   );
 }
 
