@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/admin/analytics")({
-  component: AdminAnalytics;,
+  component: AdminAnalytics,
 });
 
 type EventRow = {
