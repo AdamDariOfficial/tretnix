@@ -1,6 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { Navbar, Footer, BackToTopButton, Breadcrumb } from "./TretnixChrome";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _keep = { Link, ArrowLeft };
 
 type Props = {
   title: string;
