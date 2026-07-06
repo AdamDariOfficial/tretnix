@@ -20,7 +20,7 @@ function CookiePolicyPage() {
     <LegalPageLayout
       title="Cookie Policy"
       subtitle="Informazioni sull'uso di cookie e strumenti simili nel sito Tretnix."
-      intro="Questa Cookie Policy è una bozza iniziale e dovrà essere aggiornata in base agli strumenti effettivamente installati sul sito, come analytics, pixel, mappe, video embed, chat o strumenti di consenso."
+      intro="Il sito Tretnix non utilizza cookie di profilazione, cookie di marketing o cookie di terze parti. Non è richiesto alcun banner di consenso perché non tracciamo gli utenti."
     >
       <LegalSection n={1} title="Cosa sono i cookie">
         <p>
@@ -52,17 +52,12 @@ function CookiePolicyPage() {
         </div>
       </LegalSection>
 
-      <LegalSection n={3} title="Cookie attualmente previsti">
+      <LegalSection n={3} title="Cookie utilizzati da questo sito">
         <p>
-          Al momento, il sito Tretnix è pensato come landing page informativa e potrebbe utilizzare
-          solo strumenti tecnici necessari al funzionamento della pagina.
-        </p>
-        <p className="text-sm text-subtle">
-          Nessun cookie di profilazione dichiarato in questa fase.
-        </p>
-        <p className="text-sm text-subtle">
-          Aggiungere qui la lista completa degli strumenti effettivamente installati prima della
-          pubblicazione definitiva.
+          <strong className="text-foreground">Nessun cookie viene installato sul dispositivo dell'utente.</strong>
+          Il sito utilizza esclusivamente un sistema di analytics interno di prima parte, che non
+          scrive cookie, non genera identificatori persistenti e non traccia il comportamento del
+          singolo utente. Vedi la sezione dedicata nella Privacy Policy per i dettagli.
         </p>
       </LegalSection>
 

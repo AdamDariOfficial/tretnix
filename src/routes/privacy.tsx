@@ -20,18 +20,33 @@ function PrivacyPage() {
     <LegalPageLayout
       title="Privacy Policy"
       subtitle="Informativa sul trattamento dei dati personali del sito Tretnix."
-      intro="Questa informativa è una bozza iniziale e potrà essere aggiornata quando saranno definiti i dati societari, gli strumenti di analisi, i fornitori tecnici e i canali di contatto definitivi."
+      intro="Tretnix raccoglie solo i dati necessari a rispondere alle richieste ricevute e a monitorare in forma completamente anonima l'utilizzo del sito. Non usiamo cookie, non profiliamo gli utenti, non condividiamo dati con circuiti pubblicitari."
     >
       <LegalSection n={1} title="Titolare del trattamento">
         <p>Il titolare del trattamento è Tretnix Studio.</p>
         <p>
-          <strong className="text-foreground">Dati temporanei:</strong>
-          <br />Tretnix Studio
+          <strong className="text-foreground">Tretnix Studio</strong>
           <br />Padova, Italia
           <br />Email: hello@tretnix.com
         </p>
-        <p className="text-sm text-subtle">
-          Nota: i dati identificativi completi saranno aggiornati quando l'attività sarà formalizzata.
+      </LegalSection>
+
+      <LegalSection n={2} title="Analytics anonime di prima parte">
+        <p>
+          Il sito utilizza un sistema di analytics interno, di prima parte, progettato per rispettare
+          la privacy degli utenti. Registriamo solo eventi anonimi come:
+        </p>
+        <ul className="list-disc space-y-1 pl-6">
+          <li>visualizzazione di una pagina (page_view);</li>
+          <li>clic sui pulsanti di contatto (cta_click, email_click, phone_click);</li>
+          <li>apertura di un case study (case_study_view);</li>
+          <li>clic su una card progetto (project_card_click).</li>
+        </ul>
+        <p>Per ogni evento salviamo solo: tipo di evento, percorso della pagina, tipo di device
+          (mobile/tablet/desktop), larghezza della finestra e host del referrer se proviene da un
+          altro dominio. <strong className="text-foreground">Non usiamo cookie, non generiamo un ID
+          persistente del visitatore, non registriamo l'indirizzo IP né lo user agent completo.</strong>
+          Non è possibile ricostruire il comportamento di un singolo utente.
         </p>
       </LegalSection>
 
