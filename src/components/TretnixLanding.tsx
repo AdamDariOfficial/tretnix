@@ -337,7 +337,7 @@ function MetodoSection() {
               dopo la consegna.
             </p>
           </Reveal>
-          <ul className="border-t border-border">
+          <div className="border-t border-border">
             {rows.map((r, i) => (
               <Reveal key={r.n} delay={i * 70}
                 className="grid grid-cols-[auto_1fr] items-start gap-6 border-b border-border py-7"
@@ -351,7 +351,7 @@ function MetodoSection() {
                 </div>
               </Reveal>
             ))}
-          </ul>
+          </div>
         </div>
       </div>
     </section>
