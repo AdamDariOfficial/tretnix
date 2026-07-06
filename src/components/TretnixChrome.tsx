@@ -8,10 +8,9 @@ import { trackEvent } from "@/lib/analytics";
 /* Nav sections shown on the homepage. */
 const NAV = [
   { hash: "servizi", label: "Servizi" },
-  { hash: "perche-serve", label: "Perché serve" },
+  { hash: "cosa-possiamo-costruire", label: "Soluzioni" },
   { hash: "progetti", label: "Case study" },
-  { hash: "processo", label: "Processo" },
-  { hash: "studio", label: "Studio" },
+  { hash: "faq", label: "FAQ" },
   { hash: "contatti", label: "Contatti" },
 ];
 

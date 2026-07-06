@@ -50,6 +50,25 @@ function PrivacyPage() {
         </p>
       </LegalSection>
 
+      <LegalSection n={3} title="Modulo di contatto">
+        <p>
+          Quando invii una richiesta tramite il modulo di contatto raccogliamo solo i dati che ci
+          servono per risponderti:
+        </p>
+        <ul className="list-disc space-y-1 pl-6">
+          <li>nome e cognome, email;</li>
+          <li>telefono e nome dell'attività (opzionali);</li>
+          <li>tipo di esigenza e punto di partenza indicati nel modulo;</li>
+          <li>il messaggio che ci invii.</li>
+        </ul>
+        <p>
+          Questi dati vengono utilizzati <strong className="text-foreground">esclusivamente per
+          rispondere alla tua richiesta</strong> e gestire la comunicazione preliminare di
+          progetto. Non vengono usati per newsletter, profilazione o comunicazioni commerciali non
+          richieste, e non vengono condivisi con terze parti a fini di marketing.
+        </p>
+      </LegalSection>
+
       <LegalSection n={2} title="Tipologie di dati raccolti">
         <p>Attraverso questo sito possono essere trattati:</p>
         <ul className="list-disc space-y-1 pl-6">

@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
-import { LogOut, LayoutDashboard, Folders, Settings, BarChart3 } from "lucide-react";
+import { LogOut, LayoutDashboard, Folders, Settings, BarChart3, Inbox } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { TretnixLogo } from "@/components/TretnixLogo";
 import { useAdminSession } from "@/lib/admin-auth";
@@ -17,6 +17,7 @@ export const Route = createFileRoute("/admin")({
 const NAV = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/admin/projects", label: "Progetti", icon: Folders },
+  { to: "/admin/contact-requests", label: "Richieste", icon: Inbox },
   { to: "/admin/settings", label: "Impostazioni", icon: Settings },
   { to: "/admin/analytics", label: "Analytics", icon: BarChart3 },
 ];

@@ -47,6 +47,54 @@ export type Database = {
         }
         Relationships: []
       }
+      contact_requests: {
+        Row: {
+          business_name: string | null
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          message: string
+          needs: string[]
+          phone: string | null
+          privacy_accepted: boolean
+          source_path: string | null
+          starting_point: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          business_name?: string | null
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          message: string
+          needs?: string[]
+          phone?: string | null
+          privacy_accepted?: boolean
+          source_path?: string | null
+          starting_point?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          business_name?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          message?: string
+          needs?: string[]
+          phone?: string | null
+          privacy_accepted?: boolean
+          source_path?: string | null
+          starting_point?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       projects: {
         Row: {
           audience: string
