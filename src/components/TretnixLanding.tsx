@@ -1,14 +1,16 @@
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   ArrowRight, ArrowDown,
   Boxes, Layers, ShieldCheck,
   ShieldAlert, Timer, Gauge,
-  Check,
 } from "lucide-react";
 import { Navbar, Footer, BackToTopButton } from "./TretnixChrome";
 import { HeroMockup } from "./HeroMockup";
+import { listFeaturedProjects, type Project } from "@/lib/projects";
+import { useSiteSettings, mailtoHref } from "@/lib/site-settings";
+import { trackEvent } from "@/lib/analytics";
 
-/* ---------- Section Label ---------- */
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-3">
@@ -20,9 +22,9 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 /* ---------- Hero ---------- */
 function HeroSection() {
+  const s = useSiteSettings();
   return (
     <section id="top" className="relative overflow-hidden pt-40 pb-32 lg:pt-44 lg:pb-40">
-      {/* bg */}
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-grid opacity-40 [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_75%)]" />
         <div className="absolute left-1/2 top-0 h-[600px] w-[900px] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse,rgba(11,99,255,0.25),transparent_70%)] blur-3xl" />
@@ -34,7 +36,7 @@ function HeroSection() {
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-16 px-6 lg:grid-cols-[1.05fr_1fr] lg:items-center lg:gap-8 lg:px-10">
         <div className="animate-fade-up">
           <SectionLabel>Software su misura</SectionLabel>
-          <h1 className="mt-6 text-[44px] leading-[1.02] tracking-tight sm:text-[54px] lg:text-[72px]">
+          <h1 className="font-serif mt-6 text-[44px] leading-[1.02] tracking-tight sm:text-[54px] lg:text-[72px]">
             Soluzioni digitali<br />
             su misura per aziende<br />
             che vogliono lavorare <span className="text-accent italic">meglio.</span>
@@ -44,7 +46,7 @@ function HeroSection() {
             riduce gli errori e fa crescere la tua azienda in modo sostenibile.
           </p>
           <div className="mt-10 flex flex-wrap gap-3">
-            <a href="#contatti" className="btn-primary">
+            <a href={mailtoHref(s)} onClick={() => trackEvent("cta_click")} className="btn-primary">
               Parliamo del tuo progetto <ArrowRight className="h-4 w-4" />
             </a>
             <a href="#servizi" className="btn-ghost">Scopri i nostri servizi</a>
@@ -82,7 +84,7 @@ function ServicesSection() {
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-16 px-6 lg:grid-cols-[0.9fr_1.4fr] lg:px-10">
         <div>
           <SectionLabel>Servizi</SectionLabel>
-          <h2 className="mt-6 text-4xl leading-[1.05] sm:text-5xl lg:text-[56px]">
+          <h2 className="font-serif mt-6 text-4xl leading-[1.05] sm:text-5xl lg:text-[56px]">
             Tecnologia su misura.<br />
             Impatto <span className="text-accent italic">reale.</span>
           </h2>
@@ -101,98 +103,12 @@ function ServicesSection() {
                 <Icon className="h-5 w-5" strokeWidth={1.4} />
               </div>
               <div>
-                <h3 className="font-serif text-2xl text-foreground sm:text-3xl">{title}</h3>
+                <h3 className="text-xl font-medium text-foreground sm:text-2xl">{title}</h3>
                 <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base">{desc}</p>
               </div>
               <div className="font-serif text-lg text-subtle">{n}</div>
             </div>
           ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ---------- Projects ---------- */
-type ProjectCardProps = {
-  title: string;
-  category: string;
-  desc: string;
-  gradient: string;
-  to: string;
-};
-
-function ProjectCard({ title, category, desc, gradient, to }: ProjectCardProps) {
-  return (
-    <Link
-      to={to}
-      className="group relative block overflow-hidden rounded-2xl border border-border transition-all hover:border-primary-glow/50 hover:shadow-[0_30px_80px_-20px_rgba(11,99,255,0.35)]"
-    >
-      <div className={`aspect-[4/5] w-full ${gradient} transition-transform duration-700 group-hover:scale-105`}>
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
-        <div className="absolute inset-0 opacity-30 bg-grid" />
-      </div>
-      <div className="absolute inset-x-0 bottom-0 p-7">
-        <div className="section-label !text-primary-glow">{category}</div>
-        <h3 className="mt-2 font-serif text-3xl text-foreground sm:text-4xl">{title}</h3>
-        <p className="mt-3 max-w-md text-sm text-muted-foreground">{desc}</p>
-        <span className="mt-5 inline-flex items-center gap-1.5 text-sm text-foreground">
-          Visualizza concept <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-        </span>
-      </div>
-    </Link>
-  );
-}
-
-function ProjectsSection() {
-  return (
-    <section id="progetti" className="border-t border-border py-28 lg:py-36">
-      <div className="mx-auto max-w-7xl px-6 lg:px-10">
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-[0.9fr_1.4fr]">
-          <div>
-            <SectionLabel>Case study selezionati</SectionLabel>
-            <h2 className="mt-6 text-4xl leading-[1.05] sm:text-5xl lg:text-[56px]">
-              Sistemi digitali<br />
-              pensati per il <span className="text-accent italic">lavoro reale.</span>
-            </h2>
-            <p className="mt-6 max-w-md text-muted-foreground">
-              Esempi di sistemi digitali progettati per mostrare il tipo di soluzioni
-              che Tretnix può realizzare per aziende e team operativi.
-            </p>
-            <a href="#contatti" className="mt-8 inline-flex items-center gap-2 text-sm text-foreground hover:text-primary-glow transition-colors">
-              Parliamo del tuo caso <ArrowRight className="h-4 w-4" />
-            </a>
-          </div>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            <ProjectCard
-              title="FitZone"
-              category="Fitness Management Platform"
-              desc="Concept di piattaforma digitale per centri fitness e wellness con gestione utenti, programmi, community, messaggi e statistiche."
-              gradient="bg-[radial-gradient(ellipse_at_top,#0B2A4A,#020814_70%),linear-gradient(135deg,#061326,#020814)]"
-              to="/case-studies/fitzone"
-            />
-            <ProjectCard
-              title="SupplyFlow"
-              category="Supplier & Operations System"
-              desc="Concept di web app mobile-first per gestire fornitori, prodotti, sessioni d'acquisto, quantità e storico operativo."
-              gradient="bg-[radial-gradient(ellipse_at_bottom_right,#123055,#020814_70%),linear-gradient(135deg,#030B1A,#061326)]"
-              to="/case-studies/supplyflow"
-            />
-          </div>
-        </div>
-
-        {/* strip */}
-        <div className="mt-20 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 border-y border-border py-5 text-xs text-subtle">
-          {["Gestionale palestra", "Sistema fornitori", "Dashboard finanziaria", "Gestionale ristorante", "CRM operativo"].map((s, i) => (
-            <span key={s} className="flex items-center gap-6">
-              {i > 0 && <span className="h-1 w-1 rounded-full bg-subtle/60" />}
-              {s}
-            </span>
-          ))}
-          <span className="flex items-center gap-6">
-            <span className="h-1 w-1 rounded-full bg-subtle/60" />
-            <a href="#contatti" className="text-muted-foreground hover:text-foreground transition-colors">E altri sistemi →</a>
-          </span>
         </div>
       </div>
     </section>
@@ -212,7 +128,7 @@ function PercheServeSection() {
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-[0.9fr_1.4fr]">
           <div>
             <SectionLabel>Perché serve</SectionLabel>
-            <h2 className="mt-6 text-4xl leading-[1.05] sm:text-5xl lg:text-[56px]">
+            <h2 className="font-serif mt-6 text-4xl leading-[1.05] sm:text-5xl lg:text-[56px]">
               Meno caos operativo.<br />
               Più <span className="text-accent italic">controllo</span> sul lavoro.
             </h2>
@@ -240,7 +156,7 @@ function PercheServeSection() {
               <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-primary/40 bg-primary/10 text-primary-glow transition-colors group-hover:border-primary-glow/70">
                 <Icon className="h-5 w-5" strokeWidth={1.5} />
               </div>
-              <h3 className="mt-5 font-serif text-2xl text-foreground">{t}</h3>
+              <h3 className="mt-5 text-xl font-medium text-foreground">{t}</h3>
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{d}</p>
             </div>
           ))}
@@ -250,7 +166,79 @@ function PercheServeSection() {
   );
 }
 
-/* ---------- Process ---------- */
+/* ---------- Projects ---------- */
+function ProjectCard({ p }: { p: Project }) {
+  return (
+    <Link
+      to="/case-studies/$slug"
+      params={{ slug: p.slug }}
+      onClick={() => trackEvent("project_card_click", { project_slug: p.slug })}
+      className="group relative block overflow-hidden rounded-2xl border border-border transition-all hover:border-primary-glow/50 hover:shadow-[0_30px_80px_-20px_rgba(11,99,255,0.35)]"
+    >
+      <div className={`aspect-[4/5] w-full ${p.gradient} transition-transform duration-700 group-hover:scale-105`}>
+        {p.image_url && (
+          <img src={p.image_url} alt={p.title} className="absolute inset-0 h-full w-full object-cover opacity-60" />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
+        <div className="absolute inset-0 opacity-30 bg-grid" />
+      </div>
+      <div className="absolute inset-x-0 bottom-0 p-7">
+        <div className="section-label !text-primary-glow">{p.category}</div>
+        <h3 className="font-serif mt-2 text-3xl text-foreground sm:text-4xl">{p.title}</h3>
+        <p className="mt-3 max-w-md text-sm text-muted-foreground line-clamp-3">{p.short_description}</p>
+        <span className="mt-5 inline-flex items-center gap-1.5 text-sm text-foreground">
+          Visualizza concept <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+        </span>
+      </div>
+    </Link>
+  );
+}
+
+function ProjectsSection() {
+  const [projects, setProjects] = useState<Project[]>([]);
+  useEffect(() => {
+    void listFeaturedProjects(2).then(setProjects);
+  }, []);
+
+  return (
+    <section id="progetti" className="border-t border-border py-28 lg:py-36">
+      <div className="mx-auto max-w-7xl px-6 lg:px-10">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-[0.9fr_1.4fr]">
+          <div>
+            <SectionLabel>Case study selezionati</SectionLabel>
+            <h2 className="font-serif mt-6 text-4xl leading-[1.05] sm:text-5xl lg:text-[56px]">
+              Sistemi digitali<br />
+              pensati per il <span className="text-accent italic">lavoro reale.</span>
+            </h2>
+            <p className="mt-6 max-w-md text-muted-foreground">
+              Esempi di sistemi digitali progettati per mostrare il tipo di soluzioni
+              che Tretnix può realizzare per aziende e team operativi.
+            </p>
+            <Link
+              to="/case-studies"
+              className="mt-8 inline-flex items-center gap-2 text-sm text-foreground hover:text-primary-glow transition-colors"
+            >
+              Vedi tutti i progetti <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            {projects.map((p) => (
+              <ProjectCard key={p.id} p={p} />
+            ))}
+            {projects.length === 0 && (
+              <>
+                <div className="aspect-[4/5] rounded-2xl border border-border bg-white/[0.02]" />
+                <div className="aspect-[4/5] rounded-2xl border border-border bg-white/[0.02]" />
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- Process (fixed timeline: segments between circles) ---------- */
 function ProcessSection() {
   const steps = [
     { n: 1, t: "Ascoltiamo", d: "Analizziamo obiettivi, processi e sfide per definire la direzione migliore." },
@@ -263,24 +251,28 @@ function ProcessSection() {
       <div className="mx-auto max-w-7xl px-6 lg:px-10">
         <div className="max-w-3xl">
           <SectionLabel>Come lavoriamo</SectionLabel>
-          <h2 className="mt-6 text-4xl leading-[1.05] sm:text-5xl lg:text-[56px]">
+          <h2 className="font-serif mt-6 text-4xl leading-[1.05] sm:text-5xl lg:text-[56px]">
             Un processo chiaro.<br />
             Dalla visione al <span className="text-accent italic">risultato.</span>
           </h2>
         </div>
-        <div className="relative mt-20">
-          <div className="absolute left-6 top-6 hidden h-px w-[calc(100%-3rem)] bg-gradient-to-r from-transparent via-border-strong to-transparent lg:block" />
-          <div className="grid grid-cols-1 gap-10 lg:grid-cols-4 lg:gap-6">
-            {steps.map((s) => (
-              <div key={s.n} className="relative">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full border border-primary/40 bg-primary/10 text-primary-glow soft-glow">
-                  <span className="font-serif text-lg">{s.n}</span>
-                </div>
-                <h3 className="mt-6 font-serif text-2xl text-foreground">{s.t}</h3>
-                <p className="mt-3 max-w-xs text-sm leading-relaxed text-muted-foreground">{s.d}</p>
+        <div className="mt-20 grid grid-cols-1 gap-10 lg:grid-cols-4 lg:gap-6">
+          {steps.map((s, i) => (
+            <div key={s.n} className="relative">
+              {/* connector segment (desktop only, not before first step) */}
+              {i > 0 && (
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute right-[calc(50%+2rem)] top-6 hidden h-px w-[calc(100%-4rem)] bg-gradient-to-r from-transparent via-border-strong to-transparent lg:block"
+                />
+              )}
+              <div className="relative z-10 flex h-12 w-12 items-center justify-center rounded-full border border-primary/40 bg-background text-primary-glow soft-glow">
+                <span className="font-serif text-lg">{s.n}</span>
               </div>
-            ))}
-          </div>
+              <h3 className="mt-6 text-xl font-medium text-foreground sm:text-2xl">{s.t}</h3>
+              <p className="mt-3 max-w-xs text-sm leading-relaxed text-muted-foreground">{s.d}</p>
+            </div>
+          ))}
         </div>
       </div>
     </section>
@@ -300,7 +292,7 @@ function StudioSection() {
         <div className="grid grid-cols-1 gap-16 lg:grid-cols-[0.9fr_1.4fr]">
           <div>
             <SectionLabel>Studio</SectionLabel>
-            <h2 className="mt-6 text-4xl leading-[1.05] sm:text-5xl lg:text-[56px]">
+            <h2 className="font-serif mt-6 text-4xl leading-[1.05] sm:text-5xl lg:text-[56px]">
               Piccolo studio.<br />
               Standard <span className="text-accent italic">elevati.</span>
             </h2>
@@ -315,7 +307,7 @@ function StudioSection() {
               {values.map((v) => (
                 <div key={v.t} className="glass-card rounded-2xl p-6 transition-all hover:border-border-strong">
                   <div className="mb-4 h-8 w-8 rounded-md border border-primary/40 bg-primary/10" />
-                  <h3 className="font-serif text-xl text-foreground">{v.t}</h3>
+                  <h3 className="text-lg font-medium text-foreground">{v.t}</h3>
                   <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{v.d}</p>
                 </div>
               ))}
@@ -329,6 +321,7 @@ function StudioSection() {
 
 /* ---------- CTA ---------- */
 function CTASection() {
+  const s = useSiteSettings();
   const trust = [
     "Prima analisi gratuita",
     "Risposta entro 24 ore",
@@ -341,7 +334,7 @@ function CTASection() {
           <div className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-[radial-gradient(circle,rgba(11,99,255,0.35),transparent_70%)] blur-2xl" />
           <div className="pointer-events-none absolute inset-0 bg-grid opacity-30 [mask-image:radial-gradient(ellipse_at_left,black,transparent_75%)]" />
           <div className="relative grid grid-cols-1 items-center gap-10 lg:grid-cols-[1.2fr_1fr_auto]">
-            <h2 className="text-4xl leading-[1.05] sm:text-5xl lg:text-[56px]">
+            <h2 className="font-serif text-4xl leading-[1.05] sm:text-5xl lg:text-[56px]">
               Costruiamo qualcosa<br />
               di <span className="text-accent italic">straordinario</span> insieme.
             </h2>
@@ -349,7 +342,8 @@ function CTASection() {
               Raccontaci la tua idea. Ti risponderemo entro 24 ore con una prima direzione concreta.
             </p>
             <a
-              href="mailto:hello@tretnix.com?subject=Nuovo progetto Tretnix"
+              href={mailtoHref(s)}
+              onClick={() => trackEvent("cta_click")}
               className="btn-primary shrink-0"
             >
               Parliamo del tuo progetto <ArrowRight className="h-4 w-4" />
@@ -358,8 +352,8 @@ function CTASection() {
           <ul className="relative mt-10 flex flex-col gap-3 border-t border-white/10 pt-6 text-sm text-muted-foreground sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-8 sm:gap-y-3">
             {trust.map((t) => (
               <li key={t} className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-primary-glow" strokeWidth={2.2} />
-                <span>{t}</span>
+                <span className="h-1.5 w-1.5 rounded-full bg-primary-glow" />
+                {t}
               </li>
             ))}
           </ul>
@@ -371,6 +365,9 @@ function CTASection() {
 
 /* ---------- Page ---------- */
 export default function TretnixLanding() {
+  useEffect(() => {
+    trackEvent("page_view", { path: "/" });
+  }, []);
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
