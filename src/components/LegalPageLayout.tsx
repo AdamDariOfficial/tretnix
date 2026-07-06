@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
-import { Navbar, Footer, BackToTopButton } from "./TretnixChrome";
+import { Navbar, Footer, BackToTopButton, Breadcrumb } from "./TretnixChrome";
 
 type Props = {
   title: string;
@@ -26,14 +26,9 @@ export function LegalPageLayout({
         </div>
 
         <div className="mx-auto w-full max-w-[850px] px-6 lg:px-8">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
-          >
-            <ArrowLeft className="h-4 w-4" /> Torna alla homepage
-          </Link>
+          <Breadcrumb items={[{ label: "Home", to: "/" }, { label: title }]} />
 
-          <header className="mt-10 border-b border-border pb-10">
+          <header className="mt-6 border-b border-border pb-10">
             <h1 className="text-4xl leading-[1.05] sm:text-5xl lg:text-[56px]">{title}</h1>
             <p className="mt-5 max-w-2xl text-base text-muted-foreground sm:text-lg">
               {subtitle}
