@@ -329,10 +329,6 @@ export function Footer() {
 }
 
 function FooterContact() {
-  // Lazy import to avoid circular
-  const {
-    useSiteSettings,
-  } = require("@/lib/site-settings") as typeof import("@/lib/site-settings");
   const s = useSiteSettings();
   const telClean = s.contact_phone.replace(/\s+/g, "");
   return (
