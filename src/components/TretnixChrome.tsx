@@ -2,24 +2,28 @@ import { useEffect, useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { ArrowRight, ArrowUp, Menu, X } from "lucide-react";
 import { TretnixLogo } from "./TretnixLogo";
-import { useSiteSettings, mailtoHref } from "@/lib/site-settings";
 import { trackEvent } from "@/lib/analytics";
 
 /* Nav sections shown on the homepage. */
 const NAV = [
-  { hash: "servizi", label: "Servizi" },
   { hash: "cosa-possiamo-costruire", label: "Soluzioni" },
   { hash: "progetti", label: "Case study" },
+  { hash: "metodo", label: "Metodo" },
+  { hash: "automazioni-ai", label: "Automazioni AI" },
   { hash: "faq", label: "FAQ" },
   { hash: "contatti", label: "Contatti" },
 ];
 
-/** Scroll-spy: return the id of the section currently in view. */
+/** Scroll-spy: return the id of the section currently in view. Pure state only. */
 function useActiveSection(ids: string[]): string | null {
   const [active, setActive] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (ids.length === 0) {
+      setActive(null);
+      return;
+    }
     const els = ids
       .map((id) => document.getElementById(id))
       .filter((el): el is HTMLElement => Boolean(el));
@@ -27,25 +31,47 @@ function useActiveSection(ids: string[]): string | null {
 
     const observer = new IntersectionObserver(
       (entries) => {
+        // Only update internal state — never scroll or change hash.
         const visible = entries
           .filter((e) => e.isIntersecting)
           .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
-        if (visible[0]) setActive(visible[0].target.id);
+        if (visible[0]) {
+          setActive(visible[0].target.id);
+        } else if (window.scrollY < 200) {
+          setActive(null);
+        }
       },
-      { rootMargin: "-35% 0px -55% 0px", threshold: [0, 0.25, 0.5, 0.75, 1] },
+      { rootMargin: "-40% 0px -55% 0px", threshold: [0, 0.25, 0.5, 0.75, 1] },
     );
 
     els.forEach((el) => observer.observe(el));
     return () => observer.disconnect();
-  }, [ids]);
+  }, [ids.join("|")]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return active;
+}
+
+/** Smoothly scroll to a section by id (used on-page). */
+function scrollToId(id: string) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const top = el.getBoundingClientRect().top + window.scrollY - 80;
+  window.scrollTo({ top, behavior: "smooth" });
+}
+
+/** Trigger the contact form to reset to step 1 and focus. */
+export function openContactForm(preselectNeed?: string) {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(
+    new CustomEvent("tretnix:openContact", { detail: { preselectNeed } }),
+  );
+  // Small delay so contact section can subscribe if not yet mounted.
+  setTimeout(() => scrollToId("contatti"), 30);
 }
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
-  const settings = useSiteSettings();
 
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isHome = pathname === "/";
@@ -57,7 +83,7 @@ export function Navbar() {
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     onScroll();
-    window.addEventListener("scroll", onScroll);
+    window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
@@ -70,14 +96,26 @@ export function Navbar() {
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
-  // Close mobile menu on route change
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
 
-  const linkHref = (hash: string) => `/#${hash}`;
+  const linkHref = (hash: string) => (isHome ? `#${hash}` : `/#${hash}`);
 
-  const onCtaClick = () => trackEvent("cta_click", { path: pathname });
+  function onNavClick(e: React.MouseEvent<HTMLAnchorElement>, hash: string) {
+    if (!isHome) return; // let browser navigate to /#hash
+    e.preventDefault();
+    scrollToId(hash);
+  }
+
+  function onCtaClick(e: React.MouseEvent<HTMLAnchorElement>) {
+    trackEvent("cta_click", { path: pathname });
+    if (isHome) {
+      e.preventDefault();
+      openContactForm();
+    }
+    // On other pages, the anchor href "/#contatti" navigates home then anchor logic scrolls.
+  }
 
   return (
     <div className="fixed top-4 left-0 right-0 z-50 flex justify-center px-4">
@@ -91,25 +129,26 @@ export function Navbar() {
           <Link to="/" className="flex items-center" aria-label="Vai alla homepage Tretnix">
             <TretnixLogo
               variant="horizontal"
-              className="h-[30px] w-[130px] sm:h-[34px] sm:w-[160px]"
+              className="h-[30px] w-[130px] sm:h-[34px] sm:w-[150px]"
             />
           </Link>
 
-          <ul className="hidden items-center gap-1 md:flex">
+          <ul className="hidden items-center gap-0.5 md:flex">
             {NAV.map((n) => {
               const isActive = activeHash === n.hash;
               return (
                 <li key={n.hash}>
                   <a
                     href={linkHref(n.hash)}
+                    onClick={(e) => onNavClick(e, n.hash)}
                     aria-current={isActive ? "true" : undefined}
-                    className={`group relative rounded-full px-4 py-2 text-sm transition-colors ${
+                    className={`group relative rounded-full px-3 py-2 text-[13px] transition-colors ${
                       isActive ? "nav-link-active" : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
                     {n.label}
                     <span
-                      className={`absolute bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-primary-glow transition-opacity ${
+                      className={`pointer-events-none absolute bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-primary-glow transition-opacity ${
                         isActive ? "opacity-100" : "opacity-0 group-hover:opacity-60"
                       }`}
                     />
@@ -121,13 +160,15 @@ export function Navbar() {
 
           <div className="flex items-center gap-2">
             <a
-              href={mailtoHref(settings)}
+              href={linkHref("contatti")}
               onClick={onCtaClick}
-              className="btn-primary hidden md:inline-flex !py-2 !px-4 text-sm"
+              className="btn-primary group hidden md:inline-flex !py-2 !px-4 text-sm"
             >
-              Parliamo del tuo progetto <ArrowRight className="h-4 w-4" />
+              Parliamo del tuo progetto
+              <ArrowRight className="h-4 w-4 transition-transform duration-200 ease-out group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0" />
             </a>
             <button
+              type="button"
               className="glass-panel flex h-11 w-11 items-center justify-center rounded-full md:hidden"
               onClick={() => setOpen((v) => !v)}
               aria-label={open ? "Chiudi menu" : "Apri menu"}
@@ -162,13 +203,16 @@ export function Navbar() {
                   <li
                     key={n.hash}
                     className="animate-menu-item-in"
-                    style={{ animationDelay: `${60 + i * 45}ms` }}
+                    style={{ animationDelay: `${60 + i * 40}ms` }}
                   >
                     <a
                       href={linkHref(n.hash)}
                       aria-current={isActive ? "true" : undefined}
-                      onClick={() => setOpen(false)}
-                      className={`flex items-center justify-between rounded-2xl px-4 py-3 text-base transition-colors ${
+                      onClick={(e) => {
+                        onNavClick(e, n.hash);
+                        setOpen(false);
+                      }}
+                      className={`group flex items-center justify-between rounded-2xl px-4 py-3 text-base transition-colors ${
                         isActive
                           ? "bg-white/[0.05] text-foreground"
                           : "text-muted-foreground hover:bg-white/[0.04] hover:text-foreground"
@@ -178,7 +222,7 @@ export function Navbar() {
                         {isActive && <span className="h-1.5 w-1.5 rounded-full bg-primary-glow" />}
                         {n.label}
                       </span>
-                      <ArrowRight className="h-4 w-4 text-subtle" />
+                      <ArrowRight className="h-4 w-4 text-subtle transition-transform duration-200 ease-out group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0" />
                     </a>
                   </li>
                 );
@@ -186,17 +230,18 @@ export function Navbar() {
             </ul>
             <div
               className="animate-menu-item-in mt-2 px-1 pb-1"
-              style={{ animationDelay: `${60 + NAV.length * 45}ms` }}
+              style={{ animationDelay: `${60 + NAV.length * 40}ms` }}
             >
               <a
-                href={mailtoHref(settings)}
-                onClick={() => {
-                  onCtaClick();
+                href={linkHref("contatti")}
+                onClick={(e) => {
+                  onCtaClick(e);
                   setOpen(false);
                 }}
-                className="btn-primary w-full justify-center"
+                className="btn-primary group w-full justify-center"
               >
-                Parliamo del tuo progetto <ArrowRight className="h-4 w-4" />
+                Parliamo del tuo progetto
+                <ArrowRight className="h-4 w-4 transition-transform duration-200 ease-out group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0" />
               </a>
             </div>
           </div>
@@ -206,9 +251,36 @@ export function Navbar() {
   );
 }
 
+/** Breadcrumb: minimal, muted, above the page title. */
+export function Breadcrumb({
+  items,
+}: {
+  items: Array<{ label: string; to?: string }>;
+}) {
+  return (
+    <nav aria-label="Breadcrumb" className="text-xs text-subtle">
+      <ol className="flex flex-wrap items-center gap-1.5">
+        {items.map((it, i) => (
+          <li key={i} className="flex items-center gap-1.5">
+            {i > 0 && <span aria-hidden="true" className="text-subtle/60">/</span>}
+            {it.to && i < items.length - 1 ? (
+              <Link to={it.to} className="transition-colors hover:text-foreground">
+                {it.label}
+              </Link>
+            ) : (
+              <span className={i === items.length - 1 ? "text-muted-foreground" : ""}>
+                {it.label}
+              </span>
+            )}
+          </li>
+        ))}
+      </ol>
+    </nav>
+  );
+}
+
 export function Footer() {
-  const s = useSiteSettings();
-  const telClean = s.contact_phone.replace(/\s+/g, "");
+  const telClean = "+390490000000";
   return (
     <footer className="pb-10 pt-16">
       <div className="mx-auto max-w-7xl px-6 lg:px-10">
@@ -223,21 +295,14 @@ export function Footer() {
               </p>
             </div>
             <div className="flex flex-col gap-1.5 text-sm text-muted-foreground sm:text-right">
+              <FooterContact />
               <a
                 href={`tel:${telClean}`}
                 onClick={() => trackEvent("phone_click")}
-                className="hover:text-foreground transition-colors"
+                className="hover:text-foreground transition-colors sr-only"
               >
-                {s.contact_phone}
+                phone fallback
               </a>
-              <a
-                href={`mailto:${s.contact_email}`}
-                onClick={() => trackEvent("email_click")}
-                className="hover:text-primary-glow transition-colors"
-              >
-                {s.contact_email}
-              </a>
-              <span className="text-subtle">{s.location}</span>
             </div>
           </div>
           <div className="mt-10 flex flex-col items-start justify-between gap-3 text-xs text-subtle sm:flex-row sm:items-center">
@@ -259,6 +324,34 @@ export function Footer() {
         </div>
       </div>
     </footer>
+  );
+}
+
+function FooterContact() {
+  // Lazy import to avoid circular
+  const {
+    useSiteSettings,
+  } = require("@/lib/site-settings") as typeof import("@/lib/site-settings");
+  const s = useSiteSettings();
+  const telClean = s.contact_phone.replace(/\s+/g, "");
+  return (
+    <>
+      <a
+        href={`tel:${telClean}`}
+        onClick={() => trackEvent("phone_click")}
+        className="hover:text-foreground transition-colors"
+      >
+        {s.contact_phone}
+      </a>
+      <a
+        href={`mailto:${s.contact_email}`}
+        onClick={() => trackEvent("email_click")}
+        className="hover:text-primary-glow transition-colors"
+      >
+        {s.contact_email}
+      </a>
+      <span className="text-subtle">{s.location}</span>
+    </>
   );
 }
 
@@ -287,6 +380,7 @@ export function BackToTopButton() {
 
   return (
     <button
+      type="button"
       onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
       aria-label="Torna all'inizio"
       className="animate-btt-in glass-panel fixed bottom-5 right-5 z-40 flex h-12 w-12 items-center justify-center rounded-full text-foreground transition-colors hover:border-primary-glow/60 sm:bottom-6 sm:right-6"
