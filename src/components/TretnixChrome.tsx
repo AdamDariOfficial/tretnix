@@ -31,23 +31,34 @@ function useActiveSection(ids: string[]): string | null {
       .filter((el): el is HTMLElement => Boolean(el));
     if (!els.length) return;
 
+    let latest: string | null = null;
+    const update = () => {
+      // Reset when clearly in hero.
+      if (window.scrollY < 240) {
+        setActive(null);
+        return;
+      }
+      setActive(latest);
+    };
+
     const observer = new IntersectionObserver(
       (entries) => {
-        // Only update internal state — never scroll or change hash.
         const visible = entries
           .filter((e) => e.isIntersecting)
           .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
-        if (visible[0]) {
-          setActive(visible[0].target.id);
-        } else if (window.scrollY < 200) {
-          setActive(null);
-        }
+        if (visible[0]) latest = visible[0].target.id;
+        update();
       },
       { rootMargin: "-40% 0px -55% 0px", threshold: [0, 0.25, 0.5, 0.75, 1] },
     );
 
     els.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
+    window.addEventListener("scroll", update, { passive: true });
+    update();
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", update);
+    };
   }, [ids.join("|")]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return active;
