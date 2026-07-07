@@ -71,27 +71,51 @@ function ContactRequestsPage() {
     <div>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-serif text-4xl">Richieste di contatto</h1>
+          <h1 className="font-serif text-4xl">
+            Richieste di contatto
+            {newCount > 0 && (
+              <span className="ml-3 inline-flex items-center rounded-full border border-primary/50 bg-primary/15 px-2.5 py-0.5 align-middle text-xs text-primary-glow">
+                {newCount} {newCount === 1 ? "nuova" : "nuove"}
+              </span>
+            )}
+          </h1>
           <p className="mt-2 text-muted-foreground">
             Messaggi inviati tramite il form di contatto sulla homepage.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          {(["all", ...CONTACT_STATUSES] as const).map((k) => (
-            <button
-              key={k}
-              onClick={() => setFilter(k)}
-              className={`rounded-full border px-3 py-1.5 text-sm transition-colors ${
-                filter === k
-                  ? "border-primary/50 bg-primary/15 text-foreground"
-                  : "border-border text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {k === "all" ? "Tutti" : STATUS_LABEL[k]}
-            </button>
-          ))}
+          {(["all", ...CONTACT_STATUSES] as const).map((k) => {
+            const count = k === "all" ? items.length : items.filter((i) => i.status === k).length;
+            return (
+              <button
+                key={k}
+                onClick={() => setFilter(k)}
+                className={`rounded-full border px-3 py-1.5 text-sm transition-colors ${
+                  filter === k
+                    ? "border-primary/50 bg-primary/15 text-foreground"
+                    : "border-border text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {k === "all" ? "Tutti" : STATUS_LABEL[k]}
+                <span className="ml-1.5 text-xs text-subtle">{count}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
+
+      <label className="glass-panel mt-6 flex items-center gap-2 rounded-full px-4 py-2 text-sm">
+        <Search className="h-4 w-4 text-subtle" />
+        <input
+          type="search"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Cerca per nome, email, azienda o testo del messaggio…"
+          className="w-full bg-transparent text-sm text-foreground placeholder:text-subtle focus:outline-none"
+          aria-label="Cerca richieste"
+        />
+      </label>
+
 
       <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[1.1fr_1fr]">
         <div className="glass-card overflow-hidden rounded-2xl">
