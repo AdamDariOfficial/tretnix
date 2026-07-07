@@ -650,18 +650,10 @@ function FAQSection() {
           </Reveal>
 
           <Reveal delay={80}>
-            <div className="glass-card divide-y divide-white/10 rounded-2xl">
-              {primary.map((f, i) => renderItem(f, i))}
-              <div
-                id="faq-extra"
-                aria-hidden={!expanded}
-                className={`grid overflow-hidden transition-[grid-template-rows,opacity] duration-500 ease-out motion-reduce:transition-none ${
-                  expanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
-                }`}
-              >
-                <div className="min-h-0 divide-y divide-white/10">
-                  {secondary.map((f, i) => renderItem(f, primary.length + i))}
-                </div>
+            <div className="glass-card overflow-hidden rounded-2xl">
+              <div className="divide-y divide-white/10">
+                {primary.map((f, i) => renderItem(f, i))}
+                {expanded && secondary.map((f, i) => renderItem(f, primary.length + i))}
               </div>
             </div>
             <div className="mt-5 text-center lg:text-left">
@@ -670,9 +662,12 @@ function FAQSection() {
                 onClick={() => setExpanded((v) => !v)}
                 aria-expanded={expanded}
                 aria-controls="faq-extra"
-                className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                className="group inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
               >
-                {expanded ? "Nascondi domande ↑" : "Mostra altre domande →"}
+                {expanded ? "Nascondi domande" : "Mostra altre domande"}
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform duration-300 ${expanded ? "rotate-180" : "rotate-0"}`}
+                />
               </button>
             </div>
           </Reveal>
