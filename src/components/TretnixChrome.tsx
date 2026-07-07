@@ -16,7 +16,7 @@ const NAV = [
   { hash: "contatti", label: "Contatti" },
 ];
 
-/** Scroll-spy: return the id of the section currently in view. Pure state only. */
+/** Scroll-spy: return the id of the section currently in view. Offset-based, stable, sequential. */
 function useActiveSection(ids: string[]): string | null {
   const [active, setActive] = useState<string | null>(null);
 
@@ -26,38 +26,55 @@ function useActiveSection(ids: string[]): string | null {
       setActive(null);
       return;
     }
-    const els = ids
-      .map((id) => document.getElementById(id))
-      .filter((el): el is HTMLElement => Boolean(el));
-    if (!els.length) return;
 
-    let latest: string | null = null;
-    const update = () => {
-      // Reset when clearly in hero.
-      if (window.scrollY < 240) {
+    let raf = 0;
+    const compute = () => {
+      raf = 0;
+      const els = ids
+        .map((id) => document.getElementById(id))
+        .filter((el): el is HTMLElement => Boolean(el));
+      if (!els.length) {
         setActive(null);
         return;
       }
-      setActive(latest);
+
+      const scrollY = window.scrollY;
+      const activationLine = scrollY + window.innerHeight * 0.35;
+
+      const firstTop = els[0].getBoundingClientRect().top + scrollY;
+      // Hero threshold: nothing active until we approach the first section.
+      if (scrollY + 120 < firstTop) {
+        setActive(null);
+        return;
+      }
+
+      // Bottom-of-page: activate the last section.
+      const docHeight = document.documentElement.scrollHeight;
+      if (scrollY + window.innerHeight >= docHeight - 4) {
+        setActive(els[els.length - 1].id);
+        return;
+      }
+
+      let currentId: string | null = els[0].id;
+      for (const el of els) {
+        const top = el.getBoundingClientRect().top + scrollY;
+        if (top <= activationLine) currentId = el.id;
+        else break;
+      }
+      setActive(currentId);
     };
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
-        if (visible[0]) latest = visible[0].target.id;
-        update();
-      },
-      { rootMargin: "-40% 0px -55% 0px", threshold: [0, 0.25, 0.5, 0.75, 1] },
-    );
-
-    els.forEach((el) => observer.observe(el));
-    window.addEventListener("scroll", update, { passive: true });
-    update();
+    const onScroll = () => {
+      if (raf) return;
+      raf = window.requestAnimationFrame(compute);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    compute();
     return () => {
-      observer.disconnect();
-      window.removeEventListener("scroll", update);
+      if (raf) window.cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
     };
   }, [ids.join("|")]); // eslint-disable-line react-hooks/exhaustive-deps
 
