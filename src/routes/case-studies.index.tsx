@@ -137,7 +137,7 @@ function CaseStudiesIndex() {
                 >
                   <div className={`aspect-[4/5] w-full ${p.gradient} transition-transform duration-700 group-hover:scale-105`}>
                     {p.image_url && (
-                      <img src={p.image_url} alt={p.title} className="absolute inset-0 h-full w-full object-cover opacity-60" />
+                      <StorageImage src={p.image_url} alt={p.title} className="absolute inset-0 h-full w-full object-cover opacity-60" />
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
                     <div className="absolute inset-0 opacity-30 bg-grid" />
