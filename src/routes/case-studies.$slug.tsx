@@ -195,7 +195,7 @@ function CaseStudyPage() {
                 {media.map((m) => (
                   <figure
                     key={m.id}
-                    className="group overflow-hidden rounded-2xl border border-border bg-white/[0.02]"
+                    className="overflow-hidden rounded-2xl border border-border bg-white/[0.02] transition-all duration-200 ease-out hover:-translate-y-1 hover:border-primary-glow/50 hover:shadow-[0_20px_60px_-20px_rgba(11,99,255,0.35)] motion-reduce:transition-none motion-reduce:hover:translate-y-0"
                   >
                     {m.type === "video" ? (
                       <StorageVideo
@@ -208,7 +208,7 @@ function CaseStudyPage() {
                       <StorageImage
                         src={m.url}
                         alt={m.alt_text ?? m.caption ?? p.title}
-                        className="aspect-video w-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+                        className="aspect-video w-full object-cover"
                         loading="lazy"
                       />
                     )}
