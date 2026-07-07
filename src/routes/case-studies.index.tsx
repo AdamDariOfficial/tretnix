@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, Search } from "lucide-react";
 import { Navbar, Footer, BackToTopButton, Breadcrumb } from "@/components/TretnixChrome";
+import { StorageImage } from "@/components/StorageMedia";
 import { listVisibleProjects, type Project } from "@/lib/projects";
 import { trackEvent } from "@/lib/analytics";
 
