@@ -133,7 +133,7 @@ function CaseStudyPage() {
           {/* Main visual */}
           <div className={`relative mt-10 aspect-[16/9] w-full overflow-hidden rounded-3xl border border-border ${p.gradient}`}>
             {p.image_url ? (
-              <img src={p.image_url} alt={p.title} className="absolute inset-0 h-full w-full object-cover" />
+              <StorageImage src={p.image_url} alt={p.title} className="absolute inset-0 h-full w-full object-cover" />
             ) : (
               <>
                 <div className="absolute inset-0 bg-grid opacity-30" />
