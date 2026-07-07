@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, Search } from "lucide-react";
-import { Navbar, Footer, BackToTopButton } from "@/components/TretnixChrome";
+import { Navbar, Footer, BackToTopButton, Breadcrumb } from "@/components/TretnixChrome";
 import { listVisibleProjects, type Project } from "@/lib/projects";
 import { trackEvent } from "@/lib/analytics";
 
@@ -70,7 +70,8 @@ function CaseStudiesIndex() {
         </div>
 
         <div className="mx-auto max-w-7xl px-6 lg:px-10">
-          <header className="max-w-3xl">
+          <Breadcrumb items={[{ label: "Home", to: "/" }, { label: "Case study" }]} />
+          <header className="mt-6 max-w-3xl">
             <div className="flex items-center gap-3">
               <span className="h-px w-8 bg-primary-glow/60" />
               <span className="section-label">Case study</span>
