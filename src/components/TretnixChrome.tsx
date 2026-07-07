@@ -7,6 +7,7 @@ import { useSiteSettings } from "@/lib/site-settings";
 
 /* Nav sections shown on the homepage. */
 const NAV = [
+  { hash: "perche-serve", label: "Perché serve" },
   { hash: "cosa-possiamo-costruire", label: "Soluzioni" },
   { hash: "progetti", label: "Case study" },
   { hash: "metodo", label: "Metodo" },
