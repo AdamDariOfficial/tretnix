@@ -4,9 +4,11 @@ import {
   ArrowRight, ArrowLeft, Check,
   ShieldAlert, Timer, Gauge,
   Sparkles, Bot, ListChecks, MessageSquareText,
-  Plus, Minus,
+  Plus, Minus, ChevronDown,
+  Phone, Video, MoreVertical, Smile, Paperclip, Mic, Send,
 } from "lucide-react";
 import { Navbar, Footer, BackToTopButton, openContactForm } from "./TretnixChrome";
+import { StorageImage } from "./StorageMedia";
 import { HeroMockup } from "./HeroMockup";
 import { listFeaturedProjects, type Project } from "@/lib/projects";
 import { trackEvent } from "@/lib/analytics";
