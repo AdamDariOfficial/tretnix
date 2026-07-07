@@ -248,9 +248,9 @@ function ProjectCard({ p }: { p: Project }) {
       to="/case-studies/$slug"
       params={{ slug: p.slug }}
       onClick={() => trackEvent("project_card_click", { project_slug: p.slug })}
-      className="group relative block overflow-hidden rounded-2xl border border-border transition-all hover:border-primary-glow/50 hover:shadow-[0_30px_80px_-20px_rgba(11,99,255,0.35)]"
+      className="group relative block overflow-hidden rounded-2xl border border-border transition-all duration-200 ease-out hover:-translate-y-1 hover:border-primary-glow/60 hover:shadow-[0_30px_80px_-20px_rgba(11,99,255,0.35)] motion-reduce:transition-none motion-reduce:hover:translate-y-0"
     >
-      <div className={`aspect-[4/5] w-full ${p.gradient} transition-transform duration-700 group-hover:scale-105`}>
+      <div className={`aspect-[4/5] w-full ${p.gradient}`}>
         {p.image_url && (
           <StorageImage src={p.image_url} alt={p.title} className="absolute inset-0 h-full w-full object-cover opacity-60" />
         )}
