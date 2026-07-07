@@ -92,11 +92,17 @@ function scrollToId(id: string) {
 /** Trigger the contact form to reset to step 1 and focus. */
 export function openContactForm(preselectNeed?: string) {
   if (typeof window === "undefined") return;
-  window.dispatchEvent(
-    new CustomEvent("tretnix:openContact", { detail: { preselectNeed } }),
-  );
-  // Small delay so contact section can subscribe if not yet mounted.
-  setTimeout(() => scrollToId("contatti"), 30);
+  // Scroll first — same helper the navbar uses — so no layout jump can interrupt it.
+  scrollToId("contatti");
+  // Reset/open the form only after the smooth scroll has settled.
+  // Focus inside the event handler is skipped (see ContactSection) to avoid page snap.
+  window.setTimeout(() => {
+    window.dispatchEvent(
+      new CustomEvent("tretnix:openContact", {
+        detail: { preselectNeed, skipFocus: true },
+      }),
+    );
+  }, 650);
 }
 
 export function Navbar() {
