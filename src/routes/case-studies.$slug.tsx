@@ -1,7 +1,8 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowRight, Check } from "lucide-react";
-import { Navbar, Footer, BackToTopButton, Breadcrumb, openContactForm } from "@/components/TretnixChrome";
+import { Navbar, Footer, BackToTopButton, Breadcrumb } from "@/components/TretnixChrome";
+import { StorageImage, StorageVideo } from "@/components/StorageMedia";
 import { getProjectBySlug, type Project } from "@/lib/projects";
 import { listProjectMedia, type ProjectMedia } from "@/lib/project-media";
 import { trackEvent } from "@/lib/analytics";
