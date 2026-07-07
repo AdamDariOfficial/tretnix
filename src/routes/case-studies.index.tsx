@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, Search } from "lucide-react";
-import { Navbar, Footer, BackToTopButton } from "@/components/TretnixChrome";
+import { Navbar, Footer, BackToTopButton, Breadcrumb } from "@/components/TretnixChrome";
 import { listVisibleProjects, type Project } from "@/lib/projects";
 import { trackEvent } from "@/lib/analytics";
 
