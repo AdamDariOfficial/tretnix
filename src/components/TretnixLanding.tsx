@@ -698,7 +698,9 @@ function ContactSection() {
 
   useEffect(() => {
     function onOpen(e: Event) {
-      const detail = (e as CustomEvent).detail as { preselectNeed?: string } | undefined;
+      const detail = (e as CustomEvent).detail as
+        | { preselectNeed?: string; skipFocus?: boolean }
+        | undefined;
       setStep(0);
       setDone(false);
       setErrors({});
@@ -709,7 +711,11 @@ function ContactSection() {
             : { ...f, needs: [...f.needs, detail.preselectNeed!] },
         );
       }
-      setTimeout(() => firstFieldRef.current?.focus(), 250);
+      // Skip focus when opened via the CTA (scroll has just finished) —
+      // focusing an offscreen input causes a visible page snap.
+      if (!detail?.skipFocus) {
+        setTimeout(() => firstFieldRef.current?.focus(), 250);
+      }
     }
     window.addEventListener("tretnix:openContact", onOpen);
     return () => window.removeEventListener("tretnix:openContact", onOpen);
