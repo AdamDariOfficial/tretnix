@@ -1,7 +1,8 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowRight, Check } from "lucide-react";
-import { Navbar, Footer, BackToTopButton, Breadcrumb, openContactForm } from "@/components/TretnixChrome";
+import { Navbar, Footer, BackToTopButton, Breadcrumb } from "@/components/TretnixChrome";
+import { StorageImage, StorageVideo } from "@/components/StorageMedia";
 import { getProjectBySlug, type Project } from "@/lib/projects";
 import { listProjectMedia, type ProjectMedia } from "@/lib/project-media";
 import { trackEvent } from "@/lib/analytics";
@@ -132,7 +133,7 @@ function CaseStudyPage() {
           {/* Main visual */}
           <div className={`relative mt-10 aspect-[16/9] w-full overflow-hidden rounded-3xl border border-border ${p.gradient}`}>
             {p.image_url ? (
-              <img src={p.image_url} alt={p.title} className="absolute inset-0 h-full w-full object-cover" />
+              <StorageImage src={p.image_url} alt={p.title} className="absolute inset-0 h-full w-full object-cover" />
             ) : (
               <>
                 <div className="absolute inset-0 bg-grid opacity-30" />
@@ -197,14 +198,14 @@ function CaseStudyPage() {
                     className="group overflow-hidden rounded-2xl border border-border bg-white/[0.02]"
                   >
                     {m.type === "video" ? (
-                      <video
+                      <StorageVideo
                         src={m.url}
                         controls
                         className="aspect-video w-full object-cover"
                         aria-label={m.alt_text ?? m.caption ?? "Video del progetto"}
                       />
                     ) : (
-                      <img
+                      <StorageImage
                         src={m.url}
                         alt={m.alt_text ?? m.caption ?? p.title}
                         className="aspect-video w-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"

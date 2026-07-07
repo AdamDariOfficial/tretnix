@@ -4,9 +4,11 @@ import {
   ArrowRight, ArrowLeft, Check,
   ShieldAlert, Timer, Gauge,
   Sparkles, Bot, ListChecks, MessageSquareText,
-  Plus, Minus,
+  Plus, Minus, ChevronDown,
+  Phone, Video, MoreVertical, Smile, Paperclip, Mic, Send,
 } from "lucide-react";
 import { Navbar, Footer, BackToTopButton, openContactForm } from "./TretnixChrome";
+import { StorageImage } from "./StorageMedia";
 import { HeroMockup } from "./HeroMockup";
 import { listFeaturedProjects, type Project } from "@/lib/projects";
 import { trackEvent } from "@/lib/analytics";
@@ -250,7 +252,7 @@ function ProjectCard({ p }: { p: Project }) {
     >
       <div className={`aspect-[4/5] w-full ${p.gradient} transition-transform duration-700 group-hover:scale-105`}>
         {p.image_url && (
-          <img src={p.image_url} alt={p.title} className="absolute inset-0 h-full w-full object-cover opacity-60" />
+          <StorageImage src={p.image_url} alt={p.title} className="absolute inset-0 h-full w-full object-cover opacity-60" />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
         <div className="absolute inset-0 opacity-30 bg-grid" />
@@ -463,85 +465,116 @@ function AIAutomationSection() {
           </Reveal>
 
           <Reveal delay={100}>
-            <div className="glass-panel relative overflow-hidden rounded-[28px] p-0 shadow-[0_40px_100px_-30px_rgba(11,99,255,0.35)]">
-              {/* Chat header (WhatsApp-inspired) */}
-              <div className="flex items-center gap-3 border-b border-white/10 bg-white/[0.03] px-4 py-3">
-                <div className="relative flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-primary/40 to-primary/10 text-primary-glow ring-1 ring-primary/40">
-                  <Bot className="h-4 w-4" />
-                  <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-background bg-emerald-400" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="text-sm font-medium text-foreground">Assistente della tua attività</div>
-                  <div className="mt-0.5 text-[11px] text-subtle">online · risponde in pochi secondi</div>
-                </div>
-              </div>
-
-              {/* Chat body */}
-              <div
-                className="relative min-h-[360px] max-h-[440px] space-y-2 overflow-hidden bg-[#0a1220]/60 px-4 py-5"
-                style={{
-                  backgroundImage:
-                    "radial-gradient(circle at 20% 10%, rgba(11,99,255,0.10), transparent 55%), radial-gradient(circle at 80% 90%, rgba(52,211,153,0.06), transparent 60%)",
-                }}
-              >
-                {messages.slice(0, step).map((m, i) => {
-                  const mine = m.from === "customer";
-                  return (
-                    <div
-                      key={i}
-                      className={`animate-fade-up flex ${mine ? "justify-end" : "justify-start"}`}
-                    >
-                      <div
-                        className={`relative max-w-[82%] rounded-2xl px-3 py-2 text-sm leading-snug shadow-sm ${
-                          mine
-                            ? "bg-white/[0.07] text-foreground rounded-br-md border border-white/10"
-                            : "bg-[#0b3d2e]/70 text-foreground rounded-bl-md border border-emerald-400/20"
-                        }`}
-                      >
-                        <p>{m.text}</p>
-                        <div className="mt-1 flex items-center justify-end gap-1 text-[10px] text-subtle">
-                          <span>{m.time}</span>
-                          {mine && (
-                            <svg viewBox="0 0 16 11" className="h-3 w-3 text-primary-glow" fill="none">
-                              <path d="M1 5.5l3 3L10 2M6 8.5l3 3L15 5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-                {typing && step < messages.length && (
-                  <div className="flex justify-start">
-                    <div className="rounded-2xl rounded-bl-md border border-emerald-400/20 bg-[#0b3d2e]/70 px-3 py-2">
-                      <span className="inline-flex gap-1">
-                        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-300" />
-                        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-300 [animation-delay:150ms]" />
-                        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-300 [animation-delay:300ms]" />
-                      </span>
+            <div className="space-y-3">
+              {/* Phone-style chat */}
+              <div className="glass-panel relative overflow-hidden rounded-[28px] p-0 shadow-[0_40px_100px_-30px_rgba(11,99,255,0.35)]">
+                {/* Chat header */}
+                <div className="flex items-center gap-3 border-b border-white/10 bg-white/[0.04] px-4 py-3">
+                  <div className="relative flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary/50 to-primary/10 text-primary-glow ring-1 ring-primary/40">
+                    <Bot className="h-4 w-4" />
+                    <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-background bg-emerald-400" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-medium text-foreground">Assistente della tua attività</div>
+                    <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-subtle">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                      online · risponde in pochi secondi
                     </div>
                   </div>
-                )}
+                  <div className="flex items-center gap-1 text-muted-foreground">
+                    <button type="button" tabIndex={-1} aria-hidden="true" className="rounded-full p-1.5 hover:text-foreground"><Video className="h-4 w-4" /></button>
+                    <button type="button" tabIndex={-1} aria-hidden="true" className="rounded-full p-1.5 hover:text-foreground"><Phone className="h-4 w-4" /></button>
+                    <button type="button" tabIndex={-1} aria-hidden="true" className="rounded-full p-1.5 hover:text-foreground"><MoreVertical className="h-4 w-4" /></button>
+                  </div>
+                </div>
+
+                {/* Chat body — subtle original wallpaper */}
+                <div
+                  className="relative min-h-[380px] max-h-[460px] space-y-1.5 overflow-hidden px-3 py-4"
+                  style={{
+                    backgroundColor: "#0a1220",
+                    backgroundImage: [
+                      "radial-gradient(circle at 15% 20%, rgba(11,99,255,0.10), transparent 60%)",
+                      "radial-gradient(circle at 85% 85%, rgba(16,185,129,0.06), transparent 60%)",
+                      "radial-gradient(rgba(255,255,255,0.025) 1px, transparent 1px)",
+                    ].join(","),
+                    backgroundSize: "auto, auto, 18px 18px",
+                  }}
+                >
+                  {messages.slice(0, step).map((m, i) => {
+                    const mine = m.from === "customer";
+                    return (
+                      <div key={i} className={`animate-fade-up flex ${mine ? "justify-end" : "justify-start"}`}>
+                        <div
+                          className={`relative max-w-[80%] px-3 py-2 text-[13px] leading-snug shadow-[0_1px_0_rgba(0,0,0,0.25)] ${
+                            mine
+                              ? "rounded-2xl rounded-br-sm bg-[#075e54]/85 text-emerald-50 border border-emerald-400/15"
+                              : "rounded-2xl rounded-bl-sm bg-[#1c2733] text-foreground border border-white/5"
+                          }`}
+                        >
+                          <p className="pr-10">{m.text}</p>
+                          <div className="absolute bottom-1 right-2 flex items-center gap-1 text-[10px] text-emerald-100/60">
+                            <span>{m.time}</span>
+                            {mine && (
+                              <svg viewBox="0 0 16 11" className="h-3 w-3 text-sky-300" fill="none">
+                                <path d="M1 5.5l3 3L10 2M6 8.5l3 3L15 5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                              </svg>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {typing && step < messages.length && (
+                    <div className="flex justify-start">
+                      <div className="rounded-2xl rounded-bl-sm border border-white/5 bg-[#1c2733] px-3 py-2.5">
+                        <span className="inline-flex gap-1">
+                          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-muted-foreground/70" />
+                          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-muted-foreground/70 [animation-delay:150ms]" />
+                          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-muted-foreground/70 [animation-delay:300ms]" />
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Fake input bar */}
+                <div className="flex items-center gap-2 border-t border-white/10 bg-white/[0.02] px-3 py-2.5">
+                  <div className="flex flex-1 items-center gap-2 rounded-full border border-white/10 bg-[#1c2733] px-3 py-2 text-xs text-subtle">
+                    <Smile className="h-4 w-4 text-muted-foreground" />
+                    <span className="flex-1 truncate">Messaggio</span>
+                    <Paperclip className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500/90 text-white">
+                    {step >= messages.length ? <Send className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                  </div>
+                </div>
               </div>
 
-              {/* Automation status cards */}
-              <div className="grid grid-cols-2 gap-2 border-t border-white/10 bg-white/[0.02] px-4 py-4">
-                {statuses.map(({ Icon, t }, i) => {
-                  const done = step > i;
-                  return (
-                    <div
-                      key={t}
-                      className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-[11px] transition-colors ${
-                        done
-                          ? "border-emerald-400/40 bg-emerald-400/10 text-emerald-200"
-                          : "border-white/10 bg-white/[0.02] text-subtle"
-                      }`}
-                    >
-                      <Icon className="h-3.5 w-3.5" />
-                      {t}
-                    </div>
-                  );
-                })}
+              {/* Automation outcome — visually separated from the chat */}
+              <div className="glass-card rounded-2xl px-4 py-4">
+                <div className="mb-3 flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-subtle">
+                  <Sparkles className="h-3 w-3 text-primary-glow" />
+                  Azioni automatiche generate
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {statuses.map(({ Icon, t }, i) => {
+                    const done = step > i;
+                    return (
+                      <div
+                        key={t}
+                        className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-[11px] transition-colors ${
+                          done
+                            ? "border-emerald-400/40 bg-emerald-400/10 text-emerald-200"
+                            : "border-white/10 bg-white/[0.02] text-subtle"
+                        }`}
+                      >
+                        <Icon className="h-3.5 w-3.5" />
+                        {t}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </Reveal>
@@ -617,18 +650,10 @@ function FAQSection() {
           </Reveal>
 
           <Reveal delay={80}>
-            <div className="glass-card divide-y divide-white/10 rounded-2xl">
-              {primary.map((f, i) => renderItem(f, i))}
-              <div
-                id="faq-extra"
-                aria-hidden={!expanded}
-                className={`grid overflow-hidden transition-[grid-template-rows,opacity] duration-500 ease-out motion-reduce:transition-none ${
-                  expanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
-                }`}
-              >
-                <div className="min-h-0 divide-y divide-white/10">
-                  {secondary.map((f, i) => renderItem(f, primary.length + i))}
-                </div>
+            <div className="glass-card overflow-hidden rounded-2xl">
+              <div className="divide-y divide-white/10">
+                {primary.map((f, i) => renderItem(f, i))}
+                {expanded && secondary.map((f, i) => renderItem(f, primary.length + i))}
               </div>
             </div>
             <div className="mt-5 text-center lg:text-left">
@@ -637,9 +662,12 @@ function FAQSection() {
                 onClick={() => setExpanded((v) => !v)}
                 aria-expanded={expanded}
                 aria-controls="faq-extra"
-                className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                className="group inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
               >
-                {expanded ? "Nascondi domande ↑" : "Mostra altre domande →"}
+                {expanded ? "Nascondi domande" : "Mostra altre domande"}
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform duration-300 ${expanded ? "rotate-180" : "rotate-0"}`}
+                />
               </button>
             </div>
           </Reveal>
