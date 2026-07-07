@@ -648,11 +648,6 @@ function FAQSection() {
     </section>
   );
 }
-        </div>
-      </div>
-    </section>
-  );
-}
 
 /* ============ Contact — step by step ============ */
 function ContactSection() {
