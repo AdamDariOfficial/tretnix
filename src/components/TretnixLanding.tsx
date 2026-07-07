@@ -605,34 +605,6 @@ function FAQSection() {
   const [expanded, setExpanded] = useState(false);
   const [openIdx, setOpenIdx] = useState<number | null>(0);
 
-  const renderItem = (f: { q: string; a: string }, i: number) => {
-    const open = openIdx === i;
-    return (
-      <div key={f.q}>
-        <button
-          type="button"
-          onClick={() => setOpenIdx(open ? null : i)}
-          aria-expanded={open}
-          className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left text-base font-medium text-foreground transition-colors hover:text-primary-glow sm:text-lg"
-        >
-          <span>{f.q}</span>
-          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/15 text-primary-glow">
-            {open ? <Minus className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
-          </span>
-        </button>
-        <div
-          className={`grid overflow-hidden px-6 transition-[grid-template-rows,padding] duration-300 ease-out ${
-            open ? "grid-rows-[1fr] pb-5" : "grid-rows-[0fr]"
-          }`}
-        >
-          <div className="min-h-0 text-sm leading-relaxed text-muted-foreground sm:text-base">
-            {f.a}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   return (
     <section id="faq" className="border-t border-border py-24 lg:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-10">
@@ -652,8 +624,30 @@ function FAQSection() {
           <Reveal delay={80}>
             <div className="glass-card overflow-hidden rounded-2xl">
               <div className="divide-y divide-white/10">
-                {primary.map((f, i) => renderItem(f, i))}
-                {expanded && secondary.map((f, i) => renderItem(f, primary.length + i))}
+                {primary.map((f, i) => (
+                  <FAQItem
+                    key={f.q}
+                    q={f.q}
+                    a={f.a}
+                    open={openIdx === i}
+                    onToggle={() => setOpenIdx(openIdx === i ? null : i)}
+                  />
+                ))}
+                <FAQCollapse open={expanded}>
+                  {secondary.map((f, i) => {
+                    const idx = primary.length + i;
+                    return (
+                      <FAQItem
+                        key={f.q}
+                        q={f.q}
+                        a={f.a}
+                        open={openIdx === idx}
+                        onToggle={() => setOpenIdx(openIdx === idx ? null : idx)}
+                        withTopBorder
+                      />
+                    );
+                  })}
+                </FAQCollapse>
               </div>
             </div>
             <div className="mt-5 text-center lg:text-left">
@@ -674,6 +668,100 @@ function FAQSection() {
         </div>
       </div>
     </section>
+  );
+}
+
+/** Single FAQ row with smooth height + opacity + translate animation. */
+function FAQItem({
+  q,
+  a,
+  open,
+  onToggle,
+  withTopBorder = false,
+}: {
+  q: string;
+  a: string;
+  open: boolean;
+  onToggle: () => void;
+  withTopBorder?: boolean;
+}) {
+  const innerRef = useRef<HTMLDivElement>(null);
+  const [maxH, setMaxH] = useState(0);
+
+  useEffect(() => {
+    const el = innerRef.current;
+    if (!el) return;
+    const measure = () => setMaxH(el.scrollHeight);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [a]);
+
+  return (
+    <div className={withTopBorder ? "border-t border-white/10" : ""}>
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={open}
+        className={`flex w-full items-center justify-between gap-4 px-6 py-5 text-left text-base font-medium transition-colors sm:text-lg ${
+          open ? "text-foreground" : "text-foreground/90 hover:text-primary-glow"
+        }`}
+      >
+        <span>{q}</span>
+        <span
+          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-primary-glow transition-all duration-300 ${
+            open ? "border-primary/60 bg-primary/10 rotate-180" : "border-white/15"
+          }`}
+        >
+          {open ? <Minus className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+        </span>
+      </button>
+      <div
+        className="overflow-hidden transition-[max-height,opacity] duration-400 ease-[cubic-bezier(0.22,0.61,0.36,1)] motion-reduce:transition-none"
+        style={{
+          maxHeight: open ? `${maxH}px` : "0px",
+          opacity: open ? 1 : 0,
+        }}
+        aria-hidden={!open}
+      >
+        <div
+          ref={innerRef}
+          className={`px-6 pb-5 text-sm leading-relaxed text-muted-foreground transition-transform duration-400 ease-[cubic-bezier(0.22,0.61,0.36,1)] sm:text-base motion-reduce:transition-none ${
+            open ? "translate-y-0" : "-translate-y-1"
+          }`}
+        >
+          {a}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Smooth collapse for the "extra questions" group. */
+function FAQCollapse({ open, children }: { open: boolean; children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [h, setH] = useState(0);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const measure = () => setH(el.scrollHeight);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [children]);
+
+  return (
+    <div
+      id="faq-extra"
+      className="overflow-hidden transition-[max-height,opacity] duration-500 ease-[cubic-bezier(0.22,0.61,0.36,1)] motion-reduce:transition-none"
+      style={{ maxHeight: open ? `${h}px` : "0px", opacity: open ? 1 : 0 }}
+      aria-hidden={!open}
+    >
+      <div ref={ref}>{children}</div>
+    </div>
   );
 }
 
