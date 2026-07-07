@@ -1,8 +1,16 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Upload } from "lucide-react";
+import { ArrowLeft, Upload, ArrowUp, ArrowDown, Trash2, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { adminGetProject, adminUpsertProject, type Project } from "@/lib/projects";
+import {
+  listProjectMedia,
+  adminAddMedia,
+  adminUpdateMedia,
+  adminDeleteMedia,
+  adminSwapMediaOrder,
+  type ProjectMedia,
+} from "@/lib/project-media";
 
 const GRADIENTS = [
   { label: "Blu profondo (top)", value: "bg-[radial-gradient(ellipse_at_top,#0B2A4A,#020814_70%),linear-gradient(135deg,#061326,#020814)]" },
