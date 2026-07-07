@@ -571,7 +571,34 @@ function FAQSection() {
   ];
   const [expanded, setExpanded] = useState(false);
   const [openIdx, setOpenIdx] = useState<number | null>(0);
-  const all = expanded ? [...primary, ...secondary] : primary;
+
+  const renderItem = (f: { q: string; a: string }, i: number) => {
+    const open = openIdx === i;
+    return (
+      <div key={f.q}>
+        <button
+          type="button"
+          onClick={() => setOpenIdx(open ? null : i)}
+          aria-expanded={open}
+          className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left text-base font-medium text-foreground transition-colors hover:text-primary-glow sm:text-lg"
+        >
+          <span>{f.q}</span>
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/15 text-primary-glow">
+            {open ? <Minus className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+          </span>
+        </button>
+        <div
+          className={`grid overflow-hidden px-6 transition-[grid-template-rows,padding] duration-300 ease-out ${
+            open ? "grid-rows-[1fr] pb-5" : "grid-rows-[0fr]"
+          }`}
+        >
+          <div className="min-h-0 text-sm leading-relaxed text-muted-foreground sm:text-base">
+            {f.a}
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <section id="faq" className="border-t border-border py-24 lg:py-32">
@@ -591,46 +618,36 @@ function FAQSection() {
 
           <Reveal delay={80}>
             <div className="glass-card divide-y divide-white/10 rounded-2xl">
-              {all.map((f, i) => {
-                const open = openIdx === i;
-                return (
-                  <div key={f.q}>
-                    <button
-                      type="button"
-                      onClick={() => setOpenIdx(open ? null : i)}
-                      aria-expanded={open}
-                      className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left text-base font-medium text-foreground transition-colors hover:text-primary-glow sm:text-lg"
-                    >
-                      <span>{f.q}</span>
-                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/15 text-primary-glow">
-                        {open ? <Minus className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
-                      </span>
-                    </button>
-                    <div
-                      className={`grid overflow-hidden px-6 transition-[grid-template-rows,padding] duration-300 ease-out ${
-                        open ? "grid-rows-[1fr] pb-5" : "grid-rows-[0fr]"
-                      }`}
-                    >
-                      <div className="min-h-0 text-sm leading-relaxed text-muted-foreground sm:text-base">
-                        {f.a}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            {!expanded && (
-              <div className="mt-5 text-center lg:text-left">
-                <button
-                  type="button"
-                  onClick={() => setExpanded(true)}
-                  className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  Mostra altre domande →
-                </button>
+              {primary.map((f, i) => renderItem(f, i))}
+              <div
+                id="faq-extra"
+                aria-hidden={!expanded}
+                className={`grid overflow-hidden transition-[grid-template-rows,opacity] duration-500 ease-out motion-reduce:transition-none ${
+                  expanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                }`}
+              >
+                <div className="min-h-0 divide-y divide-white/10">
+                  {secondary.map((f, i) => renderItem(f, primary.length + i))}
+                </div>
               </div>
-            )}
+            </div>
+            <div className="mt-5 text-center lg:text-left">
+              <button
+                type="button"
+                onClick={() => setExpanded((v) => !v)}
+                aria-expanded={expanded}
+                aria-controls="faq-extra"
+                className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+              >
+                {expanded ? "Nascondi domande ↑" : "Mostra altre domande →"}
+              </button>
+            </div>
           </Reveal>
+        </div>
+      </div>
+    </section>
+  );
+}
         </div>
       </div>
     </section>
