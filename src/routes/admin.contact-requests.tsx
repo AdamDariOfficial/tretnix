@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { Mail, Phone, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Mail, Phone, Search, Trash2 } from "lucide-react";
 import {
   adminListContactRequests,
   adminUpdateStatus,
@@ -24,6 +24,7 @@ const STATUS_LABEL: Record<ContactStatus, string> = {
 function ContactRequestsPage() {
   const [items, setItems] = useState<ContactRequest[]>([]);
   const [filter, setFilter] = useState<ContactStatus | "all">("all");
+  const [q, setQ] = useState("");
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<ContactRequest | null>(null);
 
@@ -39,7 +40,20 @@ function ContactRequestsPage() {
     void reload();
   }, []);
 
-  const filtered = filter === "all" ? items : items.filter((i) => i.status === filter);
+  const newCount = items.filter((i) => i.status === "new").length;
+  const filtered = useMemo(() => {
+    const lower = q.trim().toLowerCase();
+    return items.filter((i) => {
+      if (filter !== "all" && i.status !== filter) return false;
+      if (!lower) return true;
+      return (
+        i.full_name.toLowerCase().includes(lower) ||
+        i.email.toLowerCase().includes(lower) ||
+        (i.business_name ?? "").toLowerCase().includes(lower) ||
+        i.message.toLowerCase().includes(lower)
+      );
+    });
+  }, [items, filter, q]);
 
   async function setStatus(id: string, status: ContactStatus) {
     await adminUpdateStatus(id, status);
