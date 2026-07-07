@@ -358,15 +358,17 @@ function MetodoSection() {
   );
 }
 
-/* ============ AI Automation Demo ============ */
+/* ============ AI Automation Demo — WhatsApp-inspired ============ */
 function AIAutomationSection() {
-  const [step, setStep] = useState(0);
-  const messages = [
-    { from: "customer", text: "Buonasera! Siete aperti domani? Mi servirebbe anche un preventivo per un intervento." },
-    { from: "ai", text: "Buonasera! Domani siamo aperti dalle 8:00 alle 17:00. Per preparare il preventivo, mi lascia nome, telefono e una breve descrizione della richiesta?" },
-    { from: "customer", text: "Marco Bianchi, 340 123 4567. Dovrei sistemare un impianto che perde." },
-    { from: "ai", text: "Perfetto, ho raccolto la richiesta. Il team riceverà un riepilogo con contatto, problema e priorità." },
+  type Msg = { from: "customer" | "ai"; text: string; time: string };
+  const messages: Msg[] = [
+    { from: "customer", text: "Buonasera! Siete aperti domani? Mi servirebbe anche un preventivo per un intervento.", time: "18:24" },
+    { from: "ai", text: "Buonasera! Domani siamo aperti dalle 8:00 alle 17:00. Per preparare il preventivo, mi lascia nome, telefono e una breve descrizione della richiesta?", time: "18:24" },
+    { from: "customer", text: "Marco Bianchi, 340 123 4567. Dovrei sistemare un impianto che perde.", time: "18:25" },
+    { from: "ai", text: "Perfetto, ho raccolto la richiesta. Il team riceverà un riepilogo con contatto, problema e priorità.", time: "18:25" },
   ];
+  const [step, setStep] = useState(0);
+  const [typing, setTyping] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -374,10 +376,30 @@ function AIAutomationSection() {
       setStep(messages.length);
       return;
     }
-    const t = setInterval(() => {
-      setStep((s) => (s < messages.length ? s + 1 : s));
-    }, 900);
-    return () => clearInterval(t);
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout>;
+    const advance = (i: number) => {
+      if (cancelled || i > messages.length) return;
+      const next = messages[i];
+      if (!next) return;
+      if (next.from === "ai") {
+        setTyping(true);
+        timer = setTimeout(() => {
+          if (cancelled) return;
+          setTyping(false);
+          setStep(i + 1);
+          timer = setTimeout(() => advance(i + 1), 1400);
+        }, 900);
+      } else {
+        setStep(i + 1);
+        timer = setTimeout(() => advance(i + 1), 1100);
+      }
+    };
+    timer = setTimeout(() => advance(0), 700);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -441,53 +463,69 @@ function AIAutomationSection() {
           </Reveal>
 
           <Reveal delay={100}>
-            <div className="glass-panel relative overflow-hidden rounded-3xl p-5 sm:p-6">
-              <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(11,99,255,0.25),transparent_70%)] blur-2xl" />
-
-              <div className="relative flex items-center gap-3 border-b border-white/10 pb-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full border border-primary/40 bg-primary/10 text-primary-glow">
-                  <Bot className="h-4.5 w-4.5" />
+            <div className="glass-panel relative overflow-hidden rounded-[28px] p-0 shadow-[0_40px_100px_-30px_rgba(11,99,255,0.35)]">
+              {/* Chat header (WhatsApp-inspired) */}
+              <div className="flex items-center gap-3 border-b border-white/10 bg-white/[0.03] px-4 py-3">
+                <div className="relative flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-primary/40 to-primary/10 text-primary-glow ring-1 ring-primary/40">
+                  <Bot className="h-4 w-4" />
+                  <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-background bg-emerald-400" />
                 </div>
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <div className="text-sm font-medium text-foreground">Assistente della tua attività</div>
-                  <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-subtle">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
-                    online · risponde in pochi secondi
-                  </div>
+                  <div className="mt-0.5 text-[11px] text-subtle">online · risponde in pochi secondi</div>
                 </div>
               </div>
 
-              <div className="relative mt-4 max-h-[360px] space-y-3 overflow-hidden">
-                {messages.slice(0, step).map((m, i) => (
-                  <div
-                    key={i}
-                    className={`animate-fade-up flex ${m.from === "customer" ? "justify-end" : "justify-start"}`}
-                  >
+              {/* Chat body */}
+              <div
+                className="relative min-h-[360px] max-h-[440px] space-y-2 overflow-hidden bg-[#0a1220]/60 px-4 py-5"
+                style={{
+                  backgroundImage:
+                    "radial-gradient(circle at 20% 10%, rgba(11,99,255,0.10), transparent 55%), radial-gradient(circle at 80% 90%, rgba(52,211,153,0.06), transparent 60%)",
+                }}
+              >
+                {messages.slice(0, step).map((m, i) => {
+                  const mine = m.from === "customer";
+                  return (
                     <div
-                      className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
-                        m.from === "customer"
-                          ? "bg-white/[0.06] text-foreground border border-white/10"
-                          : "bg-primary/15 text-foreground border border-primary/30"
-                      }`}
+                      key={i}
+                      className={`animate-fade-up flex ${mine ? "justify-end" : "justify-start"}`}
                     >
-                      {m.text}
+                      <div
+                        className={`relative max-w-[82%] rounded-2xl px-3 py-2 text-sm leading-snug shadow-sm ${
+                          mine
+                            ? "bg-white/[0.07] text-foreground rounded-br-md border border-white/10"
+                            : "bg-[#0b3d2e]/70 text-foreground rounded-bl-md border border-emerald-400/20"
+                        }`}
+                      >
+                        <p>{m.text}</p>
+                        <div className="mt-1 flex items-center justify-end gap-1 text-[10px] text-subtle">
+                          <span>{m.time}</span>
+                          {mine && (
+                            <svg viewBox="0 0 16 11" className="h-3 w-3 text-primary-glow" fill="none">
+                              <path d="M1 5.5l3 3L10 2M6 8.5l3 3L15 5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                ))}
-                {step < messages.length && (
+                  );
+                })}
+                {typing && step < messages.length && (
                   <div className="flex justify-start">
-                    <div className="rounded-2xl border border-primary/30 bg-primary/10 px-3.5 py-2.5">
+                    <div className="rounded-2xl rounded-bl-md border border-emerald-400/20 bg-[#0b3d2e]/70 px-3 py-2">
                       <span className="inline-flex gap-1">
-                        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary-glow" />
-                        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary-glow [animation-delay:150ms]" />
-                        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary-glow [animation-delay:300ms]" />
+                        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-300" />
+                        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-300 [animation-delay:150ms]" />
+                        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-300 [animation-delay:300ms]" />
                       </span>
                     </div>
                   </div>
                 )}
               </div>
 
-              <div className="mt-5 grid grid-cols-2 gap-2 border-t border-white/10 pt-4">
+              {/* Automation status cards */}
+              <div className="grid grid-cols-2 gap-2 border-t border-white/10 bg-white/[0.02] px-4 py-4">
                 {statuses.map(({ Icon, t }, i) => {
                   const done = step > i;
                   return (
