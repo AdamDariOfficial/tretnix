@@ -192,37 +192,10 @@ function CaseStudyPage() {
           {media.length > 0 && (
             <section className="mt-16">
               <h2 className="text-2xl font-medium sm:text-3xl">Galleria</h2>
-              <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                {media.map((m) => (
-                  <figure
-                    key={m.id}
-                    className="overflow-hidden rounded-2xl border border-border bg-white/[0.02] transition-all duration-200 ease-out hover:-translate-y-1 hover:border-primary-glow/50 hover:shadow-[0_20px_60px_-20px_rgba(11,99,255,0.35)] motion-reduce:transition-none motion-reduce:hover:translate-y-0"
-                  >
-                    {m.type === "video" ? (
-                      <StorageVideo
-                        src={m.url}
-                        controls
-                        className="aspect-video w-full object-cover"
-                        aria-label={m.alt_text ?? m.caption ?? "Video del progetto"}
-                      />
-                    ) : (
-                      <StorageImage
-                        src={m.url}
-                        alt={m.alt_text ?? m.caption ?? p.title}
-                        className="aspect-video w-full object-cover"
-                        loading="lazy"
-                      />
-                    )}
-                    {m.caption && (
-                      <figcaption className="border-t border-border px-4 py-2.5 text-xs text-subtle">
-                        {m.caption}
-                      </figcaption>
-                    )}
-                  </figure>
-                ))}
-              </div>
+              <ProjectGallery items={media} projectTitle={p.title} />
             </section>
           )}
+
 
           {/* Final CTA */}
           <section className="mt-20">
