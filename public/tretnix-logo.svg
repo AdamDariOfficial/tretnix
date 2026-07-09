@@ -1,0 +1,26 @@
+<svg version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1290 220" width="1290" height="220">
+	<style>
+		tspan { white-space:pre } 
+		.s0 { fill: #f5f7fa } 
+		.s1 { fill: #0b63ff } 
+	</style>
+	<g id="Icon">
+		<path id="Forma 1" class="s0" d="m120 220l40-40v-140l-40 40z"/>
+		<path id="Forma 2" class="s1" d="m120 40l40-40h-160l40 40z"/>
+		<path id="Forma 3" class="s0" d="m200 0l-40 40h120l-40-40z"/>
+		<path id="Forma 5" class="s1" d="m180 160v-100h20v80z"/>
+	</g>
+	<g id="Layer 1">
+		<g id="&lt;Group&gt;">
+			<path id="Tretnix copy 4" class="s0" d="m465 179h-30v-110h-55l10-30h130l-10 30h-45z"/>
+			<path id="Tretnix copy 4" class="s0" d="m585 179h-30v-82.5c0-5.09 1.13-11.56 3.71-15.78q3.88-6.4 10.28-10.27c4.29-2.59 10.87-3.95 16.01-3.95h60l-10 30h-50z"/>
+			<path id="Tretnix copy 4" fill-rule="evenodd" class="s0" d="m710 179c-5.09 0-12.03-1.3-16.38-3.88q-6.2-3.88-10.08-10.08c-2.58-4.35-3.54-10.95-3.54-16.04v-52.5c0-5.09 0.96-11.56 3.54-15.78q3.88-6.4 10.08-10.27c4.35-2.59 11.29-3.95 16.38-3.95h55c5.22 0 10.47 1.36 14.68 3.95q6.35 3.83 10.08 10.27c2.59 4.27 2.74 10.74 2.74 15.78v40h-82.5v15h82.5l-10 27.5zm0-67.5h55v-15h-55z"/>
+			<path id="Tretnix copy 4" class="s0" d="m862.5 179c-5.23 0-9.1-1.3-13.43-3.88q-6.2-3.88-10.08-10.08c-2.58-4.35-3.99-10.95-3.99-16.04v-115h30v32.5h42.5l-10 30h-32.5v52.5h42.5l-10 30z"/>
+			<path id="Tretnix copy 4" class="s0" d="m975 179h-30v-112.5l85.69 0.07q7.71 0 13.96 3.88 6.59 3.87 10.27 10.27 3.88 6.32 3.88 13.96v84.31l-28.8 0.01v-82.5h-55z"/>
+			<path id="Tretnix copy 4" class="s0" d="m1130.13 66.57v112.42h-29.66v-112.42z"/>
+			<path id="Tretnix copy 4" class="s0" d="m1130.13 29.74v29.85h-29.66v-29.85z"/>
+			<path id="Tretnix copy 4" class="s0" d="m1199.52 178.99h-30.43v-9.69l38.77-47.49-38.77-45.55v-9.69h30.43l27.52 32.56 19.19 22.68 38.77 47.49v9.69h-30.43l-27.53-33.72z"/>
+		</g>
+		<path id="Tretnix copy 2" class="s1" d="m1250.8 116.39l34.2-40.13v-9.69h-30.62l-22.77 27.14"/>
+	</g>
+</svg>
