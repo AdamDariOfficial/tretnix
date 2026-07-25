@@ -766,6 +766,46 @@ function FAQCollapse({ open, children }: { open: boolean; children: React.ReactN
 }
 
 /* ============ Contact — step by step ============ */
+const CONTACT_IDS = {
+  form: "contact-form",
+  honeypot: "contact-website",
+  step1Heading: "contact-step-1-heading",
+  step1Hint: "contact-step-1-hint",
+  step2Heading: "contact-step-2-heading",
+  step2Hint: "contact-step-2-hint",
+  step3Heading: "contact-step-3-heading",
+  step3Hint: "contact-step-3-hint",
+  fullName: "contact-full-name",
+  fullNameError: "contact-full-name-error",
+  email: "contact-email",
+  emailError: "contact-email-error",
+  phone: "contact-phone",
+  businessName: "contact-business-name",
+  needsLabel: "contact-needs-label",
+  startingPoint: "contact-starting-point",
+  message: "contact-message",
+  messageError: "contact-message-error",
+  privacy: "contact-privacy",
+  privacyError: "contact-privacy-error",
+  rootError: "contact-form-error",
+  successHeading: "contact-success-heading",
+} as const;
+
+const CONTACT_ERROR_FOCUS_ORDER = [
+  "full_name",
+  "email",
+  "message",
+  "privacy_accepted",
+] as const;
+
+type ContactInvalidFocusTarget = (typeof CONTACT_ERROR_FOCUS_ORDER)[number];
+type ContactFocusTarget = ContactInvalidFocusTarget | "step-heading" | "success-heading";
+
+function ariaDescribedBy(...ids: Array<string | false | undefined>) {
+  const value = ids.filter((id): id is string => Boolean(id)).join(" ");
+  return value || undefined;
+}
+
 function ContactSection() {
   const [form, setForm] = useState<Omit<ContactRequestInput, "privacy_accepted">>({
     full_name: "",
@@ -781,8 +821,40 @@ function ContactSection() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [pendingFocus, setPendingFocus] = useState<ContactFocusTarget | null>(null);
   const honeypotRef = useRef<HTMLInputElement>(null);
-  const firstFieldRef = useRef<HTMLInputElement>(null);
+  const stepHeadingRef = useRef<HTMLHeadingElement>(null);
+  const fullNameRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const messageRef = useRef<HTMLTextAreaElement>(null);
+  const privacyRef = useRef<HTMLInputElement>(null);
+  const successHeadingRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    if (!pendingFocus) return;
+
+    const target =
+      pendingFocus === "step-heading"
+        ? stepHeadingRef.current
+        : pendingFocus === "success-heading"
+          ? successHeadingRef.current
+          : pendingFocus === "full_name"
+            ? fullNameRef.current
+            : pendingFocus === "email"
+              ? emailRef.current
+              : pendingFocus === "message"
+                ? messageRef.current
+                : privacyRef.current;
+
+    if (!target) return;
+
+    if (pendingFocus === "step-heading" || pendingFocus === "success-heading") {
+      target.focus({ preventScroll: true });
+    } else {
+      target.focus();
+    }
+    setPendingFocus(null);
+  }, [done, pendingFocus, step]);
 
   useEffect(() => {
     function onOpen(e: Event) {
@@ -799,10 +871,8 @@ function ContactSection() {
             : { ...f, needs: [...f.needs, detail.preselectNeed!] },
         );
       }
-      // Skip focus when opened via the CTA (scroll has just finished) —
-      // focusing an offscreen input causes a visible page snap.
       if (!detail?.skipFocus) {
-        setTimeout(() => firstFieldRef.current?.focus(), 250);
+        setPendingFocus("step-heading");
       }
     }
     window.addEventListener("tretnix:openContact", onOpen);
@@ -819,11 +889,22 @@ function ContactSection() {
     }));
   }
 
+  function focusFirstInvalid(errs: Record<string, string>, navigateToStep = false) {
+    const firstInvalid = CONTACT_ERROR_FOCUS_ORDER.find((key) => Boolean(errs[key]));
+    if (!firstInvalid) return;
+
+    if (navigateToStep) {
+      setStep(firstInvalid === "full_name" || firstInvalid === "email" ? 0 : 2);
+    }
+    setPendingFocus(firstInvalid);
+  }
+
   function validateStep1() {
     const errs: Record<string, string> = {};
     if (form.full_name.trim().length < 2) errs.full_name = "Inserisci nome e cognome";
     if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) errs.email = "Email non valida";
     setErrors(errs);
+    focusFirstInvalid(errs);
     return Object.keys(errs).length === 0;
   }
   function validateStep3() {
@@ -831,6 +912,7 @@ function ContactSection() {
     if (form.message.trim().length < 10) errs.message = "Scrivi almeno 10 caratteri";
     if (!privacy) errs.privacy_accepted = "Devi accettare la privacy";
     setErrors(errs);
+    focusFirstInvalid(errs);
     return Object.keys(errs).length === 0;
   }
 
@@ -846,6 +928,7 @@ function ContactSection() {
         if (k && !errs[k]) errs[k] = issue.message;
       }
       setErrors(errs);
+      focusFirstInvalid(errs, true);
       return;
     }
     setSubmitting(true);
@@ -857,6 +940,7 @@ function ContactSection() {
       );
       trackEvent("contact_form_submit");
       setDone(true);
+      setPendingFocus("success-heading");
     } catch (err) {
       console.error(err);
       setErrors({ _root: "Qualcosa è andato storto. Riprova o scrivici via email." });
@@ -909,13 +993,26 @@ function ContactSection() {
                     <div className="flex h-12 w-12 items-center justify-center rounded-full border border-primary/40 bg-primary/15 text-primary-glow">
                       <Check className="h-5 w-5" strokeWidth={2.5} />
                     </div>
-                    <h3 className="mt-5 font-serif text-2xl">Richiesta inviata</h3>
+                    <h3
+                      ref={successHeadingRef}
+                      id={CONTACT_IDS.successHeading}
+                      tabIndex={-1}
+                      className="mt-5 font-serif text-2xl"
+                    >
+                      Richiesta inviata
+                    </h3>
                     <p className="mt-3 max-w-sm text-sm text-muted-foreground">
                       Ti risponderemo entro 24 ore con una prima direzione concreta.
                     </p>
                   </div>
                 ) : (
-                  <form onSubmit={onSubmit} noValidate className="space-y-6">
+                  <form
+                    id={CONTACT_IDS.form}
+                    onSubmit={onSubmit}
+                    noValidate
+                    aria-busy={submitting}
+                    className="space-y-6"
+                  >
                     {/* Progress */}
                     <div className="flex items-center justify-between">
                       <span className="text-[11px] uppercase tracking-[0.2em] text-subtle">
@@ -935,10 +1032,11 @@ function ContactSection() {
 
                     {/* Honeypot — hidden from users */}
                     <div className="hidden" aria-hidden="true">
-                      <label>
+                      <label htmlFor={CONTACT_IDS.honeypot}>
                         Website
                         <input
                           ref={honeypotRef}
+                          id={CONTACT_IDS.honeypot}
                           type="text"
                           name="website"
                           tabIndex={-1}
@@ -948,35 +1046,70 @@ function ContactSection() {
                     </div>
 
                     {step === 0 && (
-                      <div className="space-y-5">
+                      <div
+                        role="group"
+                        aria-labelledby={CONTACT_IDS.step1Heading}
+                        aria-describedby={CONTACT_IDS.step1Hint}
+                        className="space-y-5"
+                      >
                         <div>
-                          <h3 className="text-xl font-medium text-foreground">Partiamo dai tuoi contatti</h3>
-                          <p className="mt-1 text-xs text-subtle">Ci servono solo per risponderti.</p>
+                          <h3
+                            ref={stepHeadingRef}
+                            id={CONTACT_IDS.step1Heading}
+                            tabIndex={-1}
+                            className="text-xl font-medium text-foreground"
+                          >
+                            <span className="sr-only">Passaggio 1 di 3: </span>
+                            Partiamo dai tuoi contatti
+                          </h3>
+                          <p id={CONTACT_IDS.step1Hint} className="mt-1 text-xs text-subtle">
+                            Ci servono solo per risponderti.
+                          </p>
                         </div>
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                          <Field label="Nome e cognome" error={errors.full_name}>
+                          <Field
+                            controlId={CONTACT_IDS.fullName}
+                            label="Nome e cognome"
+                            error={errors.full_name}
+                            errorId={CONTACT_IDS.fullNameError}
+                          >
                             <input
-                              ref={firstFieldRef}
+                              ref={fullNameRef}
+                              id={CONTACT_IDS.fullName}
                               type="text"
                               maxLength={120}
                               className="admin-input"
                               value={form.full_name}
                               onChange={(e) => update("full_name", e.target.value)}
                               autoComplete="name"
+                              aria-invalid={errors.full_name ? true : undefined}
+                              aria-describedby={
+                                errors.full_name ? CONTACT_IDS.fullNameError : undefined
+                              }
                             />
                           </Field>
-                          <Field label="Email" error={errors.email}>
+                          <Field
+                            controlId={CONTACT_IDS.email}
+                            label="Email"
+                            error={errors.email}
+                            errorId={CONTACT_IDS.emailError}
+                          >
                             <input
+                              ref={emailRef}
+                              id={CONTACT_IDS.email}
                               type="email"
                               maxLength={180}
                               className="admin-input"
                               value={form.email}
                               onChange={(e) => update("email", e.target.value)}
                               autoComplete="email"
+                              aria-invalid={errors.email ? true : undefined}
+                              aria-describedby={errors.email ? CONTACT_IDS.emailError : undefined}
                             />
                           </Field>
-                          <Field label="Telefono (opzionale)">
+                          <Field controlId={CONTACT_IDS.phone} label="Telefono (opzionale)">
                             <input
+                              id={CONTACT_IDS.phone}
                               type="tel"
                               maxLength={40}
                               className="admin-input"
@@ -985,8 +1118,12 @@ function ContactSection() {
                               autoComplete="tel"
                             />
                           </Field>
-                          <Field label="Nome attività (opzionale)">
+                          <Field
+                            controlId={CONTACT_IDS.businessName}
+                            label="Nome attività (opzionale)"
+                          >
                             <input
+                              id={CONTACT_IDS.businessName}
                               type="text"
                               maxLength={160}
                               className="admin-input"
@@ -999,7 +1136,12 @@ function ContactSection() {
                         <div className="flex justify-end pt-2">
                           <button
                             type="button"
-                            onClick={() => { if (validateStep1()) setStep(1); }}
+                            onClick={() => {
+                              if (validateStep1()) {
+                                setStep(1);
+                                setPendingFocus("step-heading");
+                              }
+                            }}
                             className="btn-primary group"
                           >
                             Continua <ArrowIcon />
@@ -1009,13 +1151,34 @@ function ContactSection() {
                     )}
 
                     {step === 1 && (
-                      <div className="space-y-5">
+                      <div
+                        role="group"
+                        aria-labelledby={CONTACT_IDS.step2Heading}
+                        aria-describedby={CONTACT_IDS.step2Hint}
+                        className="space-y-5"
+                      >
                         <div>
-                          <h3 className="text-xl font-medium text-foreground">Cosa vuoi semplificare?</h3>
-                          <p className="mt-1 text-xs text-subtle">Seleziona quello che ti interessa (facoltativo).</p>
+                          <h3
+                            ref={stepHeadingRef}
+                            id={CONTACT_IDS.step2Heading}
+                            tabIndex={-1}
+                            className="text-xl font-medium text-foreground"
+                          >
+                            <span className="sr-only">Passaggio 2 di 3: </span>
+                            Cosa vuoi semplificare?
+                          </h3>
+                          <p id={CONTACT_IDS.step2Hint} className="mt-1 text-xs text-subtle">
+                            Seleziona quello che ti interessa (facoltativo).
+                          </p>
                         </div>
-                        <div>
-                          <div className="admin-label">Di cosa hai bisogno</div>
+                        <div
+                          role="group"
+                          aria-labelledby={CONTACT_IDS.needsLabel}
+                          aria-describedby={CONTACT_IDS.step2Hint}
+                        >
+                          <div id={CONTACT_IDS.needsLabel} className="admin-label">
+                            Di cosa hai bisogno
+                          </div>
                           <div className="flex flex-wrap gap-2">
                             {NEEDS_OPTIONS.map((n) => {
                               const active = form.needs.includes(n);
@@ -1037,8 +1200,12 @@ function ContactSection() {
                             })}
                           </div>
                         </div>
-                        <Field label="Punto di partenza">
+                        <Field
+                          controlId={CONTACT_IDS.startingPoint}
+                          label="Punto di partenza"
+                        >
                           <select
+                            id={CONTACT_IDS.startingPoint}
                             className="admin-input"
                             value={form.starting_point ?? ""}
                             onChange={(e) => update("starting_point", e.target.value)}
@@ -1052,14 +1219,20 @@ function ContactSection() {
                         <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-between">
                           <button
                             type="button"
-                            onClick={() => setStep(0)}
+                            onClick={() => {
+                              setStep(0);
+                              setPendingFocus("step-heading");
+                            }}
                             className="btn-ghost"
                           >
                             <ArrowLeft className="h-4 w-4" /> Indietro
                           </button>
                           <button
                             type="button"
-                            onClick={() => setStep(2)}
+                            onClick={() => {
+                              setStep(2);
+                              setPendingFocus("step-heading");
+                            }}
                             className="btn-primary group"
                           >
                             Continua <ArrowIcon />
@@ -1069,27 +1242,63 @@ function ContactSection() {
                     )}
 
                     {step === 2 && (
-                      <div className="space-y-5">
+                      <div
+                        role="group"
+                        aria-labelledby={CONTACT_IDS.step3Heading}
+                        aria-describedby={CONTACT_IDS.step3Hint}
+                        className="space-y-5"
+                      >
                         <div>
-                          <h3 className="text-xl font-medium text-foreground">Raccontaci il problema</h3>
-                          <p className="mt-1 text-xs text-subtle">Poche righe bastano: ti richiamiamo noi.</p>
+                          <h3
+                            ref={stepHeadingRef}
+                            id={CONTACT_IDS.step3Heading}
+                            tabIndex={-1}
+                            className="text-xl font-medium text-foreground"
+                          >
+                            <span className="sr-only">Passaggio 3 di 3: </span>
+                            Raccontaci il problema
+                          </h3>
+                          <p id={CONTACT_IDS.step3Hint} className="mt-1 text-xs text-subtle">
+                            Poche righe bastano: ti richiamiamo noi.
+                          </p>
                         </div>
-                        <Field label="Messaggio" error={errors.message}>
+                        <Field
+                          controlId={CONTACT_IDS.message}
+                          label="Messaggio"
+                          error={errors.message}
+                          errorId={CONTACT_IDS.messageError}
+                        >
                           <textarea
+                            ref={messageRef}
+                            id={CONTACT_IDS.message}
                             rows={5}
                             maxLength={3000}
                             className="admin-input resize-none"
                             value={form.message}
                             onChange={(e) => update("message", e.target.value)}
                             placeholder="Descrivi brevemente cosa vorresti risolvere o migliorare."
+                            aria-invalid={errors.message ? true : undefined}
+                            aria-describedby={ariaDescribedBy(
+                              CONTACT_IDS.step3Hint,
+                              errors.message && CONTACT_IDS.messageError,
+                            )}
                           />
                         </Field>
-                        <label className="flex items-start gap-3 text-sm text-muted-foreground">
+                        <label
+                          htmlFor={CONTACT_IDS.privacy}
+                          className="flex items-start gap-3 text-sm text-muted-foreground"
+                        >
                           <input
+                            ref={privacyRef}
+                            id={CONTACT_IDS.privacy}
                             type="checkbox"
                             className="mt-1 h-4 w-4 rounded border-border bg-transparent text-primary focus:ring-primary"
                             checked={privacy}
                             onChange={(e) => setPrivacy(e.target.checked)}
+                            aria-invalid={errors.privacy_accepted ? true : undefined}
+                            aria-describedby={
+                              errors.privacy_accepted ? CONTACT_IDS.privacyError : undefined
+                            }
                           />
                           <span>
                             Ho letto la{" "}
@@ -1100,13 +1309,26 @@ function ContactSection() {
                           </span>
                         </label>
                         {errors.privacy_accepted && (
-                          <p className="text-xs text-red-300">{errors.privacy_accepted}</p>
+                          <p id={CONTACT_IDS.privacyError} className="text-xs text-red-300">
+                            {errors.privacy_accepted}
+                          </p>
                         )}
-                        {errors._root && <p className="text-xs text-red-300">{errors._root}</p>}
+                        {errors._root && (
+                          <p
+                            id={CONTACT_IDS.rootError}
+                            role="alert"
+                            className="text-xs text-red-300"
+                          >
+                            {errors._root}
+                          </p>
+                        )}
                         <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-between">
                           <button
                             type="button"
-                            onClick={() => setStep(1)}
+                            onClick={() => {
+                              setStep(1);
+                              setPendingFocus("step-heading");
+                            }}
                             className="btn-ghost"
                           >
                             <ArrowLeft className="h-4 w-4" /> Indietro
@@ -1137,19 +1359,29 @@ function ContactSection() {
 }
 
 function Field({
+  controlId,
   label,
   error,
+  errorId,
   children,
 }: {
+  controlId: string;
   label: string;
   error?: string;
+  errorId?: string;
   children: React.ReactNode;
 }) {
   return (
     <div>
-      <label className="admin-label">{label}</label>
+      <label htmlFor={controlId} className="admin-label">
+        {label}
+      </label>
       {children}
-      {error && <p className="mt-1 text-xs text-red-300">{error}</p>}
+      {error && (
+        <p id={errorId} className="mt-1 text-xs text-red-300">
+          {error}
+        </p>
+      )}
     </div>
   );
 }
