@@ -95,11 +95,11 @@ export function openContactForm(preselectNeed?: string) {
   // Scroll first — same helper the navbar uses — so no layout jump can interrupt it.
   scrollToId("contatti");
   // Reset/open the form only after the smooth scroll has settled.
-  // Focus inside the event handler is skipped (see ContactSection) to avoid page snap.
+  // ContactSection then orients focus without triggering a second page jump.
   window.setTimeout(() => {
     window.dispatchEvent(
       new CustomEvent("tretnix:openContact", {
-        detail: { preselectNeed, skipFocus: true },
+        detail: { preselectNeed },
       }),
     );
   }, 650);
