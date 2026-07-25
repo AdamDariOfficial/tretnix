@@ -1,0 +1,551 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-25T15:32:49.2007970+02:00",
+  "title": "Design System: Tretnix",
+  "extensions": {
+    "evidence": {
+      "scope": "The public Tretnix Brand surface is primary. Administrative Product surfaces are documented separately as current implementation evidence and approved operating guidance.",
+      "officialBrandPaletteSource": "Approved external Tretnix master logo asset — logo-master.pdf. The master asset is not currently versioned in this repository.",
+      "implementationSources": [
+        "Confirmed implementation evidence — src/styles.css",
+        "Confirmed implementation evidence — src/components/TretnixLogo.tsx",
+        "Confirmed implementation evidence — src/components/TretnixChrome.tsx",
+        "Confirmed implementation evidence — src/components/TretnixLanding.tsx",
+        "Confirmed implementation evidence — src/components/HeroMockup.tsx",
+        "Confirmed implementation evidence — src/components/ProjectGallery.tsx",
+        "Confirmed implementation evidence — src/routes/case-studies.index.tsx",
+        "Confirmed implementation evidence — src/routes/case-studies.$slug.tsx",
+        "Confirmed implementation evidence — src/routes/admin*.tsx"
+      ],
+      "tonalRampStatus": "Workflow-derived visualization only. Tonal ramp entries are not approved Tretnix tokens and do not replace canonical frontmatter values.",
+      "knownGaps": [
+        "Known gap — text-subtle is approximately 4.29:1 against surface-canvas and requires contextual contrast verification for normal small text.",
+        "Known gap — prefers-reduced-motion coverage is partial; global smooth scrolling and some continuous animations are not fully covered.",
+        "Known gap — btn-ghost has no dedicated focus-visible treatment in its current custom utility.",
+        "To verify — the versioned repository SVG embeds current application-adjacent colors that differ from the official palette sourced from the approved external logo-master.pdf.",
+        "To verify — hero mockups are served as WebP while asset metadata preserves PNG origin and MIME information."
+      ]
+    },
+    "colorMeta": {
+      "brand-blue": {
+        "role": "primary",
+        "displayName": "Blu Tretnix",
+        "canonical": "#054BFF",
+        "provenance": "Approved external brand asset — logo-master.pdf",
+        "tonalRamp": [
+          "oklch(15% 0.270 263.6)",
+          "oklch(25% 0.270 263.6)",
+          "oklch(35% 0.270 263.6)",
+          "oklch(45% 0.270 263.6)",
+          "oklch(55% 0.270 263.6)",
+          "oklch(65% 0.270 263.6)",
+          "oklch(80% 0.270 263.6)",
+          "oklch(95% 0.270 263.6)"
+        ]
+      },
+      "brand-navy": {
+        "role": "neutral",
+        "displayName": "Navy Tretnix",
+        "canonical": "#000F28",
+        "provenance": "Approved external brand asset — logo-master.pdf",
+        "tonalRamp": [
+          "oklch(15% 0.058 255.5)",
+          "oklch(25% 0.058 255.5)",
+          "oklch(35% 0.058 255.5)",
+          "oklch(45% 0.058 255.5)",
+          "oklch(55% 0.058 255.5)",
+          "oklch(65% 0.058 255.5)",
+          "oklch(80% 0.058 255.5)",
+          "oklch(95% 0.058 255.5)"
+        ]
+      },
+      "brand-near-black": {
+        "role": "neutral",
+        "displayName": "Nero tecnico Tretnix",
+        "canonical": "#0A0F19",
+        "provenance": "Approved external brand asset — logo-master.pdf",
+        "tonalRamp": [
+          "oklch(15% 0.023 263.7)",
+          "oklch(25% 0.023 263.7)",
+          "oklch(35% 0.023 263.7)",
+          "oklch(45% 0.023 263.7)",
+          "oklch(55% 0.023 263.7)",
+          "oklch(65% 0.023 263.7)",
+          "oklch(80% 0.023 263.7)",
+          "oklch(95% 0.023 263.7)"
+        ]
+      },
+      "brand-off-white": {
+        "role": "neutral",
+        "displayName": "Bianco Tretnix",
+        "canonical": "#F5F7F9",
+        "provenance": "Approved external brand asset — logo-master.pdf",
+        "tonalRamp": [
+          "oklch(15% 0.003 247.9)",
+          "oklch(25% 0.003 247.9)",
+          "oklch(35% 0.003 247.9)",
+          "oklch(45% 0.003 247.9)",
+          "oklch(55% 0.003 247.9)",
+          "oklch(65% 0.003 247.9)",
+          "oklch(80% 0.003 247.9)",
+          "oklch(95% 0.003 247.9)"
+        ]
+      },
+      "surface-canvas": {
+        "role": "surface",
+        "displayName": "Fondale principale",
+        "canonical": "#020814",
+        "provenance": "Confirmed implementation evidence",
+        "tonalRamp": [
+          "oklch(15% 0.031 255.4)",
+          "oklch(25% 0.031 255.4)",
+          "oklch(35% 0.031 255.4)",
+          "oklch(45% 0.031 255.4)",
+          "oklch(55% 0.031 255.4)",
+          "oklch(65% 0.031 255.4)",
+          "oklch(80% 0.031 255.4)",
+          "oklch(95% 0.031 255.4)"
+        ]
+      },
+      "surface-structural": {
+        "role": "surface",
+        "displayName": "Superficie strutturale",
+        "canonical": "#061326",
+        "provenance": "Confirmed implementation evidence",
+        "tonalRamp": [
+          "oklch(15% 0.043 257.1)",
+          "oklch(25% 0.043 257.1)",
+          "oklch(35% 0.043 257.1)",
+          "oklch(45% 0.043 257.1)",
+          "oklch(55% 0.043 257.1)",
+          "oklch(65% 0.043 257.1)",
+          "oklch(80% 0.043 257.1)",
+          "oklch(95% 0.043 257.1)"
+        ]
+      },
+      "surface-deep": {
+        "role": "surface",
+        "displayName": "Fondale profondo",
+        "canonical": "#030B1A",
+        "provenance": "Confirmed implementation evidence",
+        "tonalRamp": [
+          "oklch(15% 0.036 257.6)",
+          "oklch(25% 0.036 257.6)",
+          "oklch(35% 0.036 257.6)",
+          "oklch(45% 0.036 257.6)",
+          "oklch(55% 0.036 257.6)",
+          "oklch(65% 0.036 257.6)",
+          "oklch(80% 0.036 257.6)",
+          "oklch(95% 0.036 257.6)"
+        ]
+      },
+      "interactive-primary": {
+        "role": "primary",
+        "displayName": "Blu interfaccia primario",
+        "canonical": "#0B63FF",
+        "provenance": "Confirmed implementation evidence",
+        "tonalRamp": [
+          "oklch(15% 0.243 261.7)",
+          "oklch(25% 0.243 261.7)",
+          "oklch(35% 0.243 261.7)",
+          "oklch(45% 0.243 261.7)",
+          "oklch(55% 0.243 261.7)",
+          "oklch(65% 0.243 261.7)",
+          "oklch(80% 0.243 261.7)",
+          "oklch(95% 0.243 261.7)"
+        ]
+      },
+      "interactive-highlight": {
+        "role": "tertiary",
+        "displayName": "Blu interazione",
+        "canonical": "#1E7BFF",
+        "provenance": "Confirmed implementation evidence",
+        "tonalRamp": [
+          "oklch(15% 0.214 258.8)",
+          "oklch(25% 0.214 258.8)",
+          "oklch(35% 0.214 258.8)",
+          "oklch(45% 0.214 258.8)",
+          "oklch(55% 0.214 258.8)",
+          "oklch(65% 0.214 258.8)",
+          "oklch(80% 0.214 258.8)",
+          "oklch(95% 0.214 258.8)"
+        ]
+      },
+      "text-primary": {
+        "role": "neutral",
+        "displayName": "Testo principale",
+        "canonical": "#F5F7FA",
+        "provenance": "Confirmed implementation evidence",
+        "tonalRamp": [
+          "oklch(15% 0.005 258.3)",
+          "oklch(25% 0.005 258.3)",
+          "oklch(35% 0.005 258.3)",
+          "oklch(45% 0.005 258.3)",
+          "oklch(55% 0.005 258.3)",
+          "oklch(65% 0.005 258.3)",
+          "oklch(80% 0.005 258.3)",
+          "oklch(95% 0.005 258.3)"
+        ]
+      },
+      "text-muted": {
+        "role": "neutral",
+        "displayName": "Testo secondario",
+        "canonical": "#9AA7B8",
+        "provenance": "Confirmed implementation evidence",
+        "tonalRamp": [
+          "oklch(15% 0.029 255.1)",
+          "oklch(25% 0.029 255.1)",
+          "oklch(35% 0.029 255.1)",
+          "oklch(45% 0.029 255.1)",
+          "oklch(55% 0.029 255.1)",
+          "oklch(65% 0.029 255.1)",
+          "oklch(80% 0.029 255.1)",
+          "oklch(95% 0.029 255.1)"
+        ]
+      },
+      "text-subtle": {
+        "role": "neutral",
+        "displayName": "Testo attenuato",
+        "canonical": "#687589",
+        "provenance": "Confirmed implementation evidence",
+        "tonalRamp": [
+          "oklch(15% 0.035 258.9)",
+          "oklch(25% 0.035 258.9)",
+          "oklch(35% 0.035 258.9)",
+          "oklch(45% 0.035 258.9)",
+          "oklch(55% 0.035 258.9)",
+          "oklch(65% 0.035 258.9)",
+          "oklch(80% 0.035 258.9)",
+          "oklch(95% 0.035 258.9)"
+        ]
+      },
+      "surface-glass": {
+        "role": "surface",
+        "displayName": "Vetro Navy",
+        "canonical": "rgba(8, 16, 34, 0.56)",
+        "provenance": "Confirmed implementation evidence",
+        "tonalRampNote": "Derived from the underlying RGB channels only; alpha remains context-dependent in the implementation.",
+        "tonalRamp": [
+          "oklch(15% 0.039 264.4)",
+          "oklch(25% 0.039 264.4)",
+          "oklch(35% 0.039 264.4)",
+          "oklch(45% 0.039 264.4)",
+          "oklch(55% 0.039 264.4)",
+          "oklch(65% 0.039 264.4)",
+          "oklch(80% 0.039 264.4)",
+          "oklch(95% 0.039 264.4)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display-desktop": {
+        "displayName": "Display desktop",
+        "purpose": "Public hero headlines at the lg breakpoint.",
+        "provenance": "Confirmed implementation evidence"
+      },
+      "section-heading-desktop": {
+        "displayName": "Section heading desktop",
+        "purpose": "Primary public section headings at the lg breakpoint.",
+        "provenance": "Confirmed implementation evidence"
+      },
+      "title": {
+        "displayName": "Operational title",
+        "purpose": "Sans-serif titles where clarity is more important than editorial emphasis.",
+        "provenance": "Confirmed implementation evidence"
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Default reading and interface copy.",
+        "provenance": "Confirmed implementation evidence"
+      },
+      "body-large": {
+        "displayName": "Body large",
+        "purpose": "Introductions and high-priority explanatory copy.",
+        "provenance": "Confirmed implementation evidence"
+      },
+      "control": {
+        "displayName": "Control",
+        "purpose": "Buttons and operational fields.",
+        "provenance": "Confirmed implementation evidence"
+      },
+      "section-label": {
+        "displayName": "Section label",
+        "purpose": "Uppercase editorial orientation label with wide tracking.",
+        "provenance": "Confirmed implementation evidence"
+      }
+    },
+    "shadows": [
+      {
+        "name": "glass-panel",
+        "value": "0 10px 40px -18px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.07)",
+        "purpose": "Separation for layered panels and the compact mobile navigation control.",
+        "provenance": "Confirmed implementation evidence"
+      },
+      {
+        "name": "glass-navbar",
+        "value": "0 10px 40px -20px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.08)",
+        "purpose": "Persistent public navigation depth.",
+        "provenance": "Confirmed implementation evidence"
+      },
+      {
+        "name": "glass-menu",
+        "value": "0 20px 60px -20px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.07)",
+        "purpose": "Lift for the mobile navigation overlay.",
+        "provenance": "Confirmed implementation evidence"
+      },
+      {
+        "name": "glass-card",
+        "value": "0 20px 60px -30px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05)",
+        "purpose": "Measured depth for recurring Brand cards.",
+        "provenance": "Confirmed implementation evidence"
+      },
+      {
+        "name": "soft-glow",
+        "value": "0 0 60px -10px rgba(11, 99, 255, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.06)",
+        "purpose": "Selective emphasis on scrolled navigation, callouts and markers.",
+        "provenance": "Confirmed implementation evidence"
+      },
+      {
+        "name": "button-primary",
+        "value": "0 8px 30px -8px rgba(11, 99, 255, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.2)",
+        "purpose": "Default primary action emphasis.",
+        "provenance": "Confirmed implementation evidence"
+      },
+      {
+        "name": "button-primary-hover",
+        "value": "0 12px 40px -6px rgba(30, 123, 255, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.25)",
+        "purpose": "Hover feedback for primary actions.",
+        "provenance": "Confirmed implementation evidence"
+      },
+      {
+        "name": "project-card-hover",
+        "value": "0 30px 80px -20px rgba(11, 99, 255, 0.35)",
+        "purpose": "Hover lift for public project cards.",
+        "provenance": "Confirmed implementation evidence"
+      }
+    ],
+    "motion": [
+      {
+        "name": "state-standard",
+        "value": "250ms ease",
+        "purpose": "Primary and ghost button state transitions.",
+        "provenance": "Confirmed implementation evidence"
+      },
+      {
+        "name": "card-lift",
+        "value": "200ms ease-out",
+        "purpose": "Project card border, shadow and transform feedback.",
+        "provenance": "Confirmed implementation evidence"
+      },
+      {
+        "name": "content-reveal",
+        "value": "700ms ease-out",
+        "purpose": "One-time fade and 16px upward reveal after viewport entry.",
+        "provenance": "Confirmed implementation evidence"
+      },
+      {
+        "name": "menu-in",
+        "value": "220ms cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "Mobile navigation panel entry.",
+        "provenance": "Confirmed implementation evidence"
+      },
+      {
+        "name": "menu-item-in",
+        "value": "240ms cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "Staggered mobile navigation item entry.",
+        "provenance": "Confirmed implementation evidence"
+      },
+      {
+        "name": "faq-collapse",
+        "value": "400–500ms cubic-bezier(0.22, 0.61, 0.36, 1)",
+        "purpose": "FAQ and additional-question collapse transitions.",
+        "provenance": "Confirmed implementation evidence"
+      },
+      {
+        "name": "device-float",
+        "value": "6s ease-in-out infinite",
+        "purpose": "Slow floating movement for the hero phone mockup.",
+        "provenance": "Confirmed implementation evidence; reduced-motion coverage is a known gap"
+      },
+      {
+        "name": "glow-pulse",
+        "value": "4s ease-in-out infinite",
+        "purpose": "Ambient hero device glow.",
+        "provenance": "Confirmed implementation evidence; reduced-motion coverage is a known gap"
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px",
+        "provenance": "Inferred recurring pattern — Tailwind default with no project override found"
+      },
+      {
+        "name": "md",
+        "value": "768px",
+        "provenance": "Inferred recurring pattern — Tailwind default with no project override found"
+      },
+      {
+        "name": "lg",
+        "value": "1024px",
+        "provenance": "Inferred recurring pattern — Tailwind default with no project override found"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Canonical public primary action reconstructed from the existing btn-primary utility.",
+      "provenance": "Confirmed implementation evidence",
+      "html": "<button class=\"ds-btn-primary\">Parliamo del tuo progetto <svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M5 12h14M13 6l6 6-6 6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.85rem 1.5rem; border: 1px solid rgba(255,255,255,0.15); border-radius: 999px; background: linear-gradient(180deg, var(--primary-glow, #1E7BFF) 0%, var(--primary, #0B63FF) 100%); color: #fff; font: 500 0.9rem/1.5 'Inter', ui-sans-serif, system-ui, sans-serif; box-shadow: 0 8px 30px -8px rgba(11,99,255,0.55), inset 0 1px 0 rgba(255,255,255,0.2); cursor: pointer; transition: box-shadow 0.25s ease, transform 0.25s ease; } .ds-btn-primary svg { width: 16px; height: 16px; transition: transform 0.2s ease-out; } .ds-btn-primary:hover { box-shadow: 0 12px 40px -6px rgba(30,123,255,0.75), inset 0 1px 0 rgba(255,255,255,0.25); transform: translateY(-1px); } .ds-btn-primary:hover svg { transform: translateX(4px); } .ds-btn-primary:focus-visible { outline: 2px solid var(--primary-glow, #1E7BFF); outline-offset: 3px; } .ds-btn-primary:active { transform: translateY(0); }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Canonical secondary public action reconstructed from the existing btn-ghost utility.",
+      "provenance": "Confirmed implementation evidence",
+      "html": "<button class=\"ds-btn-ghost\">Cosa possiamo costruire</button>",
+      "css": ".ds-btn-ghost { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.85rem 1.5rem; border: 1px solid rgba(255,255,255,0.22); border-radius: 999px; background: transparent; color: var(--foreground, #F5F7FA); font: 500 0.9rem/1.5 'Inter', ui-sans-serif, system-ui, sans-serif; cursor: pointer; transition: background-color 0.25s ease, border-color 0.25s ease; } .ds-btn-ghost:hover { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.32); }"
+    },
+    {
+      "name": "Section Label",
+      "kind": "custom",
+      "refersTo": "section-label",
+      "description": "Editorial orientation marker used before public section headings.",
+      "provenance": "Confirmed implementation evidence",
+      "html": "<div class=\"ds-section-label\"><span aria-hidden=\"true\"></span>Soluzioni</div>",
+      "css": ".ds-section-label { display: flex; align-items: center; gap: 12px; color: var(--primary-glow, #1E7BFF); font: 500 0.72rem/1.5 'Inter', ui-sans-serif, system-ui, sans-serif; letter-spacing: 0.22em; text-transform: uppercase; } .ds-section-label span { width: 32px; height: 1px; background: rgba(30,123,255,0.6); }"
+    },
+    {
+      "name": "Glass Card",
+      "kind": "card",
+      "refersTo": "glass-card",
+      "description": "Recurring measured-depth Brand card with tonal navy layering.",
+      "provenance": "Confirmed implementation evidence",
+      "html": "<article class=\"ds-glass-card\"><div class=\"ds-card-index\">01</div><h3>Gestione operativa</h3><p>Informazioni e attività riunite in un sistema chiaro.</p></article>",
+      "css": ".ds-glass-card { width: min(100%, 340px); padding: 28px; border: 1px solid rgba(255,255,255,0.14); border-radius: 20px; background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0) 55%), rgba(8,16,34,0.42); color: var(--foreground, #F5F7FA); box-shadow: 0 20px 60px -30px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05); backdrop-filter: blur(28px) saturate(150%); font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; } .ds-card-index { color: var(--primary-glow, #1E7BFF); font-size: 0.72rem; font-weight: 500; letter-spacing: 0.22em; } .ds-glass-card h3 { margin: 16px 0 0; font-size: 20px; line-height: 1.25; font-weight: 500; } .ds-glass-card p { margin: 12px 0 0; color: var(--muted-foreground, #9AA7B8); font-size: 14px; line-height: 1.625; }"
+    },
+    {
+      "name": "Glass Navigation",
+      "kind": "nav",
+      "refersTo": "glass-navigation",
+      "description": "Compact public navigation reconstructed from the existing fixed glass navbar.",
+      "provenance": "Confirmed implementation evidence",
+      "html": "<nav class=\"ds-glass-nav\" aria-label=\"Navigazione principale\"><a class=\"ds-nav-brand\" href=\"#\" aria-label=\"Vai alla homepage Tretnix\"><svg viewBox=\"0 0 1290 220\" role=\"img\" aria-label=\"Tretnix Software Studio\"><path fill=\"#F5F7FA\" d=\"m120 220 40-40V40l-40 40z\"/><path fill=\"#0B63FF\" d=\"m120 40 40-40H0l40 40z\"/><path fill=\"#F5F7FA\" d=\"m200 0-40 40h120L240 0z\"/><path fill=\"#0B63FF\" d=\"m180 160V60h20v80z\"/><path fill=\"#F5F7FA\" d=\"M465 179h-30V69h-55l10-30h130l-10 30h-45zM585 179h-30V96.5c0-5.09 1.13-11.56 3.71-15.78q3.88-6.4 10.28-10.27c4.29-2.59 10.87-3.95 16.01-3.95h60l-10 30h-50z\"/><path fill=\"#F5F7FA\" fill-rule=\"evenodd\" d=\"M710 179c-5.09 0-12.03-1.3-16.38-3.88q-6.2-3.88-10.08-10.08C680.96 160.69 680 154.09 680 149V96.5c0-5.09.96-11.56 3.54-15.78q3.88-6.4 10.08-10.27c4.35-2.59 11.29-3.95 16.38-3.95h55c5.22 0 10.47 1.36 14.68 3.95q6.35 3.83 10.08 10.27c2.59 4.27 2.74 10.74 2.74 15.78v40H710v15h82.5l-10 27.5zm0-67.5h55v-15h-55z\"/><path fill=\"#F5F7FA\" d=\"M862.5 179c-5.23 0-9.1-1.3-13.43-3.88q-6.2-3.88-10.08-10.08C836.41 160.69 835 154.09 835 149V34h30v32.5h42.5l-10 30H865V149h42.5l-10 30zM975 179h-30V66.5l85.69.07q7.71 0 13.96 3.88 6.59 3.87 10.27 10.27 3.88 6.32 3.88 13.96v84.31l-28.8.01V96.5h-55zM1130.13 66.57v112.42h-29.66V66.57zM1130.13 29.74v29.85h-29.66V29.74zM1199.52 178.99h-30.43v-9.69l38.77-47.49-38.77-45.55v-9.69h30.43l27.52 32.56 19.19 22.68 38.77 47.49v9.69h-30.43l-27.53-33.72z\"/><path fill=\"#0B63FF\" d=\"m1250.8 116.39 34.2-40.13v-9.69h-30.62l-22.77 27.14\"/></svg></a><div class=\"ds-nav-links\"><a href=\"#\">Soluzioni</a><a class=\"ds-nav-active\" href=\"#\">Metodo</a><a href=\"#\">Contatti</a></div><a class=\"ds-nav-cta\" href=\"#\">Parliamo</a></nav>",
+      "css": ".ds-glass-nav { display: flex; width: min(100%, 1024px); height: 62px; align-items: center; justify-content: space-between; gap: 16px; padding: 0 8px 0 20px; border: 1px solid rgba(255,255,255,0.20); border-radius: 999px; background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0) 50%), rgba(8,16,34,0.52); color: var(--foreground, #F5F7FA); box-shadow: 0 10px 40px -20px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.08); backdrop-filter: blur(34px) saturate(170%); font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; } .ds-nav-brand { display: flex; align-items: center; width: 150px; height: 34px; } .ds-nav-brand svg { width: 150px; height: 34px; } .ds-nav-links { display: flex; align-items: center; gap: 2px; } .ds-nav-links a { position: relative; padding: 8px 12px; border-radius: 999px; color: var(--muted-foreground, #9AA7B8); font-size: 13px; text-decoration: none; transition: color 0.2s ease; } .ds-nav-links a:hover, .ds-nav-links .ds-nav-active { color: var(--foreground, #F5F7FA); } .ds-nav-links .ds-nav-active::after { content: ''; position: absolute; left: 50%; bottom: 4px; width: 4px; height: 4px; border-radius: 50%; background: var(--primary-glow, #1E7BFF); transform: translateX(-50%); } .ds-nav-cta { padding: 8px 16px; border: 1px solid rgba(255,255,255,0.15); border-radius: 999px; background: linear-gradient(180deg, var(--primary-glow, #1E7BFF), var(--primary, #0B63FF)); color: #fff; font-size: 14px; font-weight: 500; text-decoration: none; } @media (max-width: 767px) { .ds-nav-links { display: none; } .ds-nav-brand, .ds-nav-brand svg { width: 130px; height: 30px; } .ds-glass-nav { width: 100%; } }"
+    },
+    {
+      "name": "Admin Input",
+      "kind": "input",
+      "refersTo": "admin-input",
+      "description": "Current operational field treatment shared by contact and administrative forms.",
+      "provenance": "Confirmed implementation evidence",
+      "html": "<label class=\"ds-field\"><span>Nome e cognome</span><input class=\"ds-admin-input\" type=\"text\" placeholder=\"Inserisci il nome\"></label>",
+      "css": ".ds-field { display: grid; gap: 6px; width: min(100%, 360px); font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; } .ds-field > span { color: var(--subtle, #687589); font-size: 0.72rem; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; } .ds-admin-input { width: 100%; padding: 0.65rem 0.85rem; border: 1px solid rgba(255,255,255,0.14); border-radius: 10px; background: rgba(8,16,34,0.5); color: var(--foreground, #F5F7FA); font: 400 0.9rem/1.5 'Inter', ui-sans-serif, system-ui, sans-serif; transition: border-color 0.15s ease, box-shadow 0.15s ease; } .ds-admin-input::placeholder { color: var(--subtle, #687589); } .ds-admin-input:focus { outline: none; border-color: rgba(30,123,255,0.7); box-shadow: 0 0 0 3px rgba(30,123,255,0.15); }"
+    },
+    {
+      "name": "Selection Chip",
+      "kind": "chip",
+      "refersTo": "selection-chip",
+      "description": "Active and inactive compact selection treatment used by filters and form choices.",
+      "provenance": "Confirmed implementation evidence",
+      "html": "<div class=\"ds-chip-group\"><button class=\"ds-chip ds-chip-active\" aria-pressed=\"true\">Dashboard</button><button class=\"ds-chip\" aria-pressed=\"false\">Automazioni</button></div>",
+      "css": ".ds-chip-group { display: flex; flex-wrap: wrap; gap: 8px; font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; } .ds-chip { padding: 6px 12px; border: 1px solid rgba(255,255,255,0.14); border-radius: 999px; background: transparent; color: var(--muted-foreground, #9AA7B8); font-size: 12px; line-height: 1.5; cursor: pointer; transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease; } .ds-chip:hover { border-color: rgba(255,255,255,0.22); color: var(--foreground, #F5F7FA); } .ds-chip-active { border-color: rgba(11,99,255,0.6); background: rgba(11,99,255,0.2); color: var(--foreground, #F5F7FA); }"
+    },
+    {
+      "name": "Project Card",
+      "kind": "card",
+      "refersTo": "glass-card",
+      "description": "Signature public case-study card reconstructed without inventing project imagery.",
+      "provenance": "Confirmed implementation evidence",
+      "html": "<a class=\"ds-project-card\" href=\"#\"><div class=\"ds-project-visual\"><span>Concept</span></div><div class=\"ds-project-copy\"><div class=\"ds-project-label\">Gestione operativa</div><h3>Sistema su misura</h3><p>Una struttura dimostrativa per il lavoro reale.</p><span class=\"ds-project-link\">Visualizza concept →</span></div></a>",
+      "css": ".ds-project-card { display: block; width: min(100%, 360px); overflow: hidden; border: 1px solid rgba(255,255,255,0.14); border-radius: 20px; background: rgba(8,16,34,0.42); color: var(--foreground, #F5F7FA); text-decoration: none; font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; transition: transform 0.2s ease-out, border-color 0.2s ease-out, box-shadow 0.2s ease-out; } .ds-project-card:hover { transform: translateY(-4px); border-color: rgba(30,123,255,0.6); box-shadow: 0 30px 80px -20px rgba(11,99,255,0.35); } .ds-project-visual { display: grid; min-height: 260px; place-items: end start; padding: 20px; background-image: linear-gradient(to top, var(--background, #020814), rgba(2,8,20,0.5), transparent), linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px), radial-gradient(circle at 60% 30%, rgba(11,99,255,0.35), transparent 55%); background-size: auto, 60px 60px, 60px 60px, auto; } .ds-project-visual span { padding: 3px 10px; border: 1px solid rgba(11,99,255,0.4); border-radius: 999px; background: rgba(11,99,255,0.1); color: var(--primary-glow, #1E7BFF); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; } .ds-project-copy { padding: 24px; } .ds-project-label { color: var(--primary-glow, #1E7BFF); font-size: 0.72rem; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; } .ds-project-copy h3 { margin: 6px 0 0; font: 400 30px/1.1 'Instrument Serif', Georgia, serif; } .ds-project-copy p { margin: 12px 0 0; color: var(--muted-foreground, #9AA7B8); font-size: 14px; line-height: 1.5; } .ds-project-link { display: inline-block; margin-top: 20px; font-size: 14px; } @media (prefers-reduced-motion: reduce) { .ds-project-card { transition: none; } .ds-project-card:hover { transform: none; } }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Studio di Precisione",
+    "overview": "Approved design decision. Tretnix deve apparire come uno studio software boutique in cui ogni decisione è intenzionale, controllata e costruita intorno al cliente. La precisione comunica competenza tecnica, controllo, affidabilità, cura sartoriale, qualità premium, chiarezza, essenzialità e responsabilità diretta. Approved design decision. La precisione non deve produrre un'interfaccia fredda, sterile o aziendale. Eleganza, profondità selettiva, chiarezza e personalità accompagnano il rigore tecnico. La voce visiva e verbale è elegante e misurata, con autorevolezza tecnica: precisa senza rigidità, premium senza ostentazione, editoriale solo quando rafforza gerarchia e carattere.",
+    "keyCharacteristics": [
+      "Approved design decision. Precisione misurata, non freddezza istituzionale.",
+      "Approved design decision. Identità boutique e responsabilità diretta, non standardizzazione SaaS.",
+      "Confirmed implementation evidence. Fondali navy profondi con un accento blu ad alta leggibilità.",
+      "Confirmed implementation evidence. Contrasto tra serif editoriale per momenti di enfasi e sans per chiarezza operativa.",
+      "Confirmed implementation evidence. Vetro, glow e movimento usati per gerarchia, separazione e interazione.",
+      "Approved design decision. Ogni effetto deve avere una funzione leggibile e non soltanto decorativa."
+    ],
+    "rules": [
+      {
+        "name": "The Brand–Interface Separation Rule",
+        "body": "Approved design decision. I colori ufficiali descrivono il marchio; i colori applicativi descrivono l'interfaccia corrente. Non presentarli come intercambiabili senza una decisione approvata.",
+        "section": "colors"
+      },
+      {
+        "name": "The Blue Function Rule",
+        "body": "Inferred recurring pattern. Il blu applicativo concentra azioni, focus, indicatori attivi e accenti editoriali; la sua efficacia dipende dalla rarità relativa sul fondale navy.",
+        "section": "colors"
+      },
+      {
+        "name": "The Subtle Text Review Rule",
+        "body": "Known gap. text-subtle produce un contrasto calcolato di circa 4.29:1 su surface-canvas. Può risultare appropriato per testo grande o elementi non testuali secondo il contesto, ma deve essere rivalutato per testo normale piccolo. Non costituisce prova di conformità WCAG.",
+        "section": "colors"
+      },
+      {
+        "name": "The Editorial Control Rule",
+        "body": "Approved design decision. Usa il serif per momenti di identità, enfasi e gerarchia; usa la sans per contenuto, navigazione, controlli e densità operativa.",
+        "section": "typography"
+      },
+      {
+        "name": "The No Generic Slogan Rule",
+        "body": "Approved design decision. La tipografia editoriale non giustifica copy vago: il contenuto resta concreto, preciso e verificabile.",
+        "section": "typography"
+      },
+      {
+        "name": "The Surface Density Rule",
+        "body": "Approved design decision. Le Brand surfaces privilegiano respiro e composizione; le Product surfaces possono essere più dense, purché mantengano gerarchia, leggibilità e riconoscibilità Tretnix.",
+        "section": "layout"
+      },
+      {
+        "name": "The Mobile Reading Order Rule",
+        "body": "Approved design decision. Nelle sezioni editoriali mobile, il testo precede l'immagine salvo hero, gallery o componenti esplicitamente visual-first.",
+        "section": "layout"
+      },
+      {
+        "name": "The Function Before Effect Rule",
+        "body": "Approved design decision. Ogni effetto di profondità deve chiarire separazione, stato o gerarchia; l'effetto puramente ornamentale non è una regola del sistema.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Selective Glass Rule",
+        "body": "Approved design decision. Riserva il vetro a navigazione, pannelli sovrapposti, callout e superfici che richiedono separazione percettiva.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Role-Shaped Radius Rule",
+        "body": "Approved design decision. La curvatura comunica funzione e scala; non applicare rounded-full indiscriminatamente a ogni contenitore.",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "Approved design decision. Do separare sempre palette ufficiale e palette applicativa corrente.",
+      "Approved design decision. Do usare serif, blu, vetro e glow solo quando rafforzano identità, gerarchia o interazione.",
+      "Approved design decision. Do mantenere il contrasto tra respiro delle Brand surfaces e densità efficiente delle Product surfaces.",
+      "Approved design decision. Do preservare i breakpoint, le dimensioni discrete e i pattern responsive realmente osservati.",
+      "Approved design decision. Do mantenere contenuti e azioni utilizzabili senza animazione.",
+      "Approved design decision. Do verificare contrasto, focus e motion prima di dichiarare conformità.",
+      "Approved design decision. Do mantenere logo e asset con proporzioni, integrità e alternative testuali appropriate."
+    ],
+    "donts": [
+      "Approved design decision. Don't normalizzare Tretnix in una landing SaaS, dashboard fintech, estetica crypto/trading o agenzia creativa sperimentale.",
+      "Approved design decision. Don't trasformare blur, glow, ombre e bordi luminosi in una combinazione predefinita per ogni componente.",
+      "Approved design decision. Don't trattare i colori applicativi correnti come sostituti automatici della palette ufficiale.",
+      "Approved design decision. Don't inventare scale di spacing, clamp(), token fluidi o varianti non presenti nel repository.",
+      "Approved design decision. Don't imporre alle Product surfaces la stessa composizione o intensità decorativa delle Brand surfaces.",
+      "Approved design decision. Don't presentare text-subtle o il supporto reduced motion corrente come verifiche già superate.",
+      "Approved design decision. Don't introdurre slogan generici, lusso artificioso o tecnologia fredda e impersonale."
+    ]
+  }
+}

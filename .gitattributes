@@ -1,3 +1,5 @@
 /.agents/** text eol=lf
 /.codex/** text eol=lf
 /.cursor/** text eol=lf
+/DESIGN.md text eol=lf
+/.impeccable/** text eol=lf
