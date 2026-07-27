@@ -7,7 +7,13 @@ import {
   Plus, Minus, ChevronDown,
   Phone, Video, MoreVertical, Smile, Paperclip, Mic, Send,
 } from "lucide-react";
-import { Navbar, Footer, BackToTopButton, openContactForm } from "./TretnixChrome";
+import {
+  Navbar,
+  Footer,
+  BackToTopButton,
+  openContactForm,
+  scrollToSection,
+} from "./TretnixChrome";
 import { StorageImage } from "./StorageMedia";
 import { HeroMockup } from "./HeroMockup";
 import { listFeaturedProjects, type Project } from "@/lib/projects";
@@ -115,7 +121,16 @@ function HeroSection() {
             >
               Parliamo del tuo progetto <ArrowIcon />
             </button>
-            <a href="#cosa-possiamo-costruire" className="btn-ghost">Cosa possiamo costruire</a>
+            <a
+              href="#cosa-possiamo-costruire"
+              className="btn-ghost"
+              onClick={(event) => {
+                event.preventDefault();
+                scrollToSection("cosa-possiamo-costruire", { history: "push" });
+              }}
+            >
+              Cosa possiamo costruire
+            </a>
           </div>
           <p className="mt-6 max-w-xl text-sm leading-relaxed text-subtle">
             Non sai ancora cosa ti serve? Partiamo dal tuo processo e troviamo insieme
@@ -271,8 +286,30 @@ function ProjectCard({ p }: { p: Project }) {
 
 function ProjectsSection() {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
+
   useEffect(() => {
-    void listFeaturedProjects(2).then(setProjects);
+    let cancelled = false;
+
+    void listFeaturedProjects(2)
+      .then((nextProjects) => {
+        if (cancelled) return;
+        setProjects(nextProjects);
+        setLoadFailed(false);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setProjects([]);
+        setLoadFailed(true);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return (
@@ -297,16 +334,31 @@ function ProjectsSection() {
             </Link>
           </Reveal>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            {projects.map((p, i) => (
-              <Reveal key={p.id} delay={i * 100}>
-                <ProjectCard p={p} />
-              </Reveal>
-            ))}
-            {projects.length === 0 && (
+            {loading && (
               <>
                 <div className="aspect-[4/5] rounded-2xl border border-border bg-white/[0.02]" />
                 <div className="aspect-[4/5] rounded-2xl border border-border bg-white/[0.02]" />
               </>
+            )}
+            {!loading && loadFailed && (
+              <div
+                role="status"
+                className="glass-card col-span-full flex min-h-56 items-center justify-center rounded-2xl p-8 text-center text-sm text-muted-foreground"
+              >
+                I case study non sono disponibili in questo momento. Riprova più tardi.
+              </div>
+            )}
+            {!loading &&
+              !loadFailed &&
+              projects.map((p, i) => (
+                <Reveal key={p.id} delay={i * 100}>
+                  <ProjectCard p={p} />
+                </Reveal>
+              ))}
+            {!loading && !loadFailed && projects.length === 0 && (
+              <div className="glass-card col-span-full flex min-h-56 items-center justify-center rounded-2xl p-8 text-center text-sm text-muted-foreground">
+                I case study saranno disponibili a breve.
+              </div>
             )}
           </div>
         </div>
@@ -1392,19 +1444,40 @@ export default function TretnixLanding() {
     trackEvent("page_view", { path: "/" });
   }, []);
 
-  // Support anchor navigation from other pages (/#faq etc.)
+  // Support direct hashes and keep Back/Forward aligned with the fixed navbar.
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (window.location.hash) {
-      const id = window.location.hash.slice(1);
-      const el = document.getElementById(id);
-      if (el) {
-        setTimeout(() => {
-          const top = el.getBoundingClientRect().top + window.scrollY - 80;
-          window.scrollTo({ top, behavior: "smooth" });
-        }, 60);
+
+    let frame = 0;
+
+    const scrollFromLocationHash = () => {
+      const rawHash = window.location.hash.slice(1);
+      if (!rawHash) return;
+
+      let id = rawHash;
+      try {
+        id = decodeURIComponent(rawHash);
+      } catch {
+        // Keep the raw id when an external URL contains malformed escaping.
       }
-    }
+
+      if (frame) window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        scrollToSection(id, { behavior: "auto" });
+      });
+    };
+
+    const initialTimer = window.setTimeout(scrollFromLocationHash, 60);
+    window.addEventListener("popstate", scrollFromLocationHash);
+    window.addEventListener("hashchange", scrollFromLocationHash);
+
+    return () => {
+      if (initialTimer) window.clearTimeout(initialTimer);
+      if (frame) window.cancelAnimationFrame(frame);
+      window.removeEventListener("popstate", scrollFromLocationHash);
+      window.removeEventListener("hashchange", scrollFromLocationHash);
+    };
   }, []);
 
   return (

@@ -8,9 +8,9 @@ export const Route = createFileRoute("/cookie-policy")({
       { name: "description", content: "Informazioni sull'uso di cookie e strumenti simili nel sito Tretnix." },
       { property: "og:title", content: "Cookie Policy — Tretnix" },
       { property: "og:description", content: "Informazioni sull'uso di cookie e strumenti simili nel sito Tretnix." },
-      { property: "og:url", content: "https://tretnix.lovable.app/cookie-policy" },
+      { property: "og:url", content: "https://tretnix.com/cookie-policy" },
     ],
-    links: [{ rel: "canonical", href: "https://tretnix.lovable.app/cookie-policy" }],
+    links: [{ rel: "canonical", href: "https://tretnix.com/cookie-policy" }],
   }),
   component: CookiePolicyPage,
 });

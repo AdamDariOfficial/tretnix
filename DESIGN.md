@@ -17,7 +17,7 @@ colors:
   interactive-highlight: "#1E7BFF"
   text-primary: "#F5F7FA"
   text-muted: "#9AA7B8"
-  text-subtle: "#687589"
+  text-subtle: "#74849C"
   surface-glass: "rgba(8, 16, 34, 0.56)"
 typography:
   display-desktop:
@@ -176,7 +176,7 @@ components:
 - **Blu interazione** (#1E7BFF): **Confirmed implementation evidence.** Focus, testi interattivi, indicatori attivi e glow; token `interactive-highlight`.
 - **Testo principale** (#F5F7FA): **Confirmed implementation evidence.** Testo ad alto contrasto sul canvas scuro; token `text-primary`.
 - **Testo secondario** (#9AA7B8): **Confirmed implementation evidence.** Descrizioni, contenuto di supporto e metadati; token `text-muted`.
-- **Testo attenuato** (#687589): **Confirmed implementation evidence.** Microcopy e label a bassa enfasi; token `text-subtle`.
+- **Testo attenuato** (#74849C): **Confirmed implementation evidence.** Microcopy e label a bassa enfasi; token `text-subtle` aggiornato per aumentare la leggibilità sul canvas scuro.
 - **Vetro Navy** (rgba(8, 16, 34, 0.56)): **Confirmed implementation evidence.** Token semitrasparente generico `surface-glass`; le utility reali variano opacità e composizione in base a navbar, menu, panel o card.
 
 ### Recorded Differences
@@ -193,7 +193,7 @@ components:
 
 **The Blue Function Rule.** **Inferred recurring pattern.** Il blu applicativo concentra azioni, focus, indicatori attivi e accenti editoriali; la sua efficacia dipende dalla rarità relativa sul fondale navy.
 
-**The Subtle Text Review Rule.** **Known gap.** `text-subtle` produce un contrasto calcolato di circa `4.29:1` su `surface-canvas`. Può risultare appropriato per testo grande o elementi non testuali secondo il contesto, ma deve essere rivalutato per testo normale piccolo. Non costituisce prova di conformità WCAG.
+**The Subtle Text Review Rule.** **Implementation update.** `text-subtle` è stato portato a `#74849C` per aumentare la leggibilità sul canvas scuro. La verifica contestuale su testi piccoli, stati e superfici resta obbligatoria prima di dichiarare conformità WCAG.
 
 ## Typography
 
@@ -310,7 +310,7 @@ components:
 - **Confirmed implementation evidence. Primary:** pill con gradiente verticale da `interactive-highlight` a `interactive-primary`, testo bianco, bordo traslucido, padding `0.85rem 1.5rem` e ombra blu.
 - **Confirmed implementation evidence. Primary hover:** traslazione verticale di `-1px` e glow più intenso; focus visibile con outline blu da `2px` e offset `3px`.
 - **Confirmed implementation evidence. Ghost:** pill trasparente, bordo forte traslucido e testo primario; l'hover aggiunge un riempimento bianco minimo e rafforza il bordo.
-- **Known gap.** `btn-ghost` non dichiara un trattamento `focus-visible` dedicato nella utility corrente.
+- **Implementation update.** `btn-ghost` dichiara ora un trattamento `focus-visible` dedicato coerente con la CTA primaria; la verifica browser da tastiera resta pendente.
 - **Approved design decision.** Le pill sono canoniche per CTA e azioni compatte osservate; non sono la forma automatica di ogni controllo.
 
 ### Navigation
@@ -318,7 +318,7 @@ components:
 - **Confirmed implementation evidence.** La navbar pubblica è fissa, centrata, alta `62px`, larga al massimo `1024px` e costruita come capsula in vetro.
 - **Confirmed implementation evidence.** I link desktop usano Inter a `13px`; lo stato attivo combina testo primario, text-shadow blu e un indicatore circolare.
 - **Confirmed implementation evidence.** Dopo `20px` di scroll viene aggiunto `soft-glow`.
-- **Confirmed implementation evidence.** Sotto `md`, link e CTA desktop sono sostituiti da un pulsante menu `44×44px` e da un pannello in vetro a tutta larghezza con entrata sfalsata.
+- **Confirmed implementation evidence.** Sotto `lg`, link e CTA desktop sono sostituiti da un pulsante menu `44×44px` e da un pannello in vetro a tutta larghezza con entrata sfalsata, evitando una navbar desktop compressa sui tablet.
 - **Confirmed implementation evidence.** Il menu espone `aria-expanded`, `aria-controls`, `aria-current` e chiusura con `Escape`.
 
 ### Footer
@@ -363,7 +363,7 @@ components:
 - **Confirmed implementation evidence.** FAQ e gruppi collassabili animano altezza, opacità e traslazione in `400–500ms`.
 - **Confirmed implementation evidence.** CTA e card usano micro-traslazioni brevi; il mockup smartphone fluttua in un ciclo di `6s` e il glow pulsa in `4s`.
 - **Confirmed implementation evidence.** Reveal, alcune frecce e card annullano trasformazioni o transizioni con `prefers-reduced-motion`.
-- **Known gap.** Lo smooth scroll globale, alcune animazioni continue e alcuni componenti non sono coperti in modo completo da `prefers-reduced-motion`.
+- **Implementation update.** È stata aggiunta una copertura globale `prefers-reduced-motion` e gli scroll controllati scelgono comportamento immediato quando la preferenza è attiva; la verifica runtime di tutti i componenti resta pendente.
 - **Approved design decision.** Tutti i contenuti e le azioni devono restare utilizzabili senza motion; non dichiarare la verifica superata senza un audit completo.
 
 ### Administrative Product Surfaces
@@ -378,7 +378,7 @@ components:
 
 - **Confirmed implementation evidence.** Il sistema include landmarks semantici, heading, label, alt text, stati ARIA, focus visibile in vari controlli e target mobili da `44px` o più.
 - **Confirmed implementation evidence.** Testo principale, testo secondario e blu di interazione hanno contrasto elevato sul canvas principale nei valori calcolati.
-- **Known gap.** `text-subtle`, focus non uniforme e reduced motion parziale richiedono verifica.
+- **Implementation update.** Contrasto del token attenuato, focus globale e reduced motion sono stati rafforzati; restano da verificare contestualmente in browser, da tastiera e con tecnologie assistive.
 - **Approved design decision.** Nessuna conformità WCAG 2.2 AA deve essere dichiarata senza test completi su route, stati, contenuti, tastiera, contrasto, tecnologie assistive e preferenze di motion.
 
 ## Do's and Don'ts

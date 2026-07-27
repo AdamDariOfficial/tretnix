@@ -66,7 +66,7 @@
 
   --muted: rgba(255, 255, 255, 0.04);
   --muted-foreground: #9AA7B8;
-  --subtle: #687589;
+  --subtle: #74849C;
 
   --accent: #0B63FF;
   --accent-foreground: #F5F7FA;
@@ -85,7 +85,7 @@
     border-color: var(--color-border);
   }
   html {
-    scroll-behavior: smooth;
+    scroll-behavior: auto;
   }
   body {
     background-color: var(--color-background);
@@ -93,6 +93,10 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     font-feature-settings: "ss01", "cv11";
+  }
+  :where(a, button, input, textarea, select, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
+    outline: 2px solid var(--primary-glow);
+    outline-offset: 3px;
   }
   /* Serif only when explicitly requested via .font-serif utility. */
   h1, h2, h3, h4, h5, h6 {
@@ -182,7 +186,7 @@
   font-weight: 500;
   border: 1px solid rgba(255,255,255,0.15);
   box-shadow: 0 8px 30px -8px rgba(11, 99, 255, 0.55), inset 0 1px 0 rgba(255,255,255,0.2);
-  transition: all 0.25s ease;
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
   &:hover {
     box-shadow: 0 12px 40px -6px rgba(30, 123, 255, 0.75), inset 0 1px 0 rgba(255,255,255,0.25);
     transform: translateY(-1px);
@@ -204,10 +208,14 @@
   font-size: 0.9rem;
   font-weight: 500;
   border: 1px solid var(--border-strong);
-  transition: all 0.25s ease;
+  transition: background-color 0.25s ease, border-color 0.25s ease;
   &:hover {
     background: rgba(255,255,255,0.04);
     border-color: rgba(255,255,255,0.32);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--primary-glow);
+    outline-offset: 3px;
   }
 }
 
@@ -264,6 +272,21 @@
 @utility animate-menu-in { animation: menu-in 220ms cubic-bezier(0.22, 1, 0.36, 1) both; }
 @utility animate-menu-item-in { animation: menu-item-in 240ms cubic-bezier(0.22, 1, 0.36, 1) both; }
 @utility animate-btt-in { animation: btt-in 260ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
 
 /* Legal prose */
 .prose-legal p { line-height: 1.75; color: var(--muted-foreground); }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { ArrowRight, ArrowUp, Menu, X } from "lucide-react";
 import { TretnixLogo } from "./TretnixLogo";
@@ -81,33 +81,64 @@ function useActiveSection(ids: string[]): string | null {
   return active;
 }
 
-/** Smoothly scroll to a section by id (used on-page). */
-function scrollToId(id: string) {
+const NAVBAR_SCROLL_OFFSET = 80;
+
+type SectionHistoryMode = "none" | "push" | "replace";
+
+export function prefersReducedMotion() {
+  return (
+    typeof window !== "undefined" &&
+    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true
+  );
+}
+
+/** Scroll to a homepage section while keeping URL, history and the fixed navbar aligned. */
+export function scrollToSection(
+  id: string,
+  options: { history?: SectionHistoryMode; behavior?: ScrollBehavior } = {},
+) {
+  if (typeof window === "undefined") return false;
+
   const el = document.getElementById(id);
-  if (!el) return;
-  const top = el.getBoundingClientRect().top + window.scrollY - 80;
-  window.scrollTo({ top, behavior: "smooth" });
+  if (!el) return false;
+
+  const hash = `#${encodeURIComponent(id)}`;
+  const historyMode = options.history ?? "none";
+  if (historyMode === "push" && window.location.hash !== hash) {
+    window.history.pushState(window.history.state, "", hash);
+  } else if (historyMode === "replace" && window.location.hash !== hash) {
+    window.history.replaceState(window.history.state, "", hash);
+  }
+
+  const top = el.getBoundingClientRect().top + window.scrollY - NAVBAR_SCROLL_OFFSET;
+  window.scrollTo({
+    top: Math.max(0, top),
+    behavior: options.behavior ?? (prefersReducedMotion() ? "auto" : "smooth"),
+  });
+  return true;
 }
 
 /** Trigger the contact form to reset to step 1 and focus. */
 export function openContactForm(preselectNeed?: string) {
   if (typeof window === "undefined") return;
-  // Scroll first — same helper the navbar uses — so no layout jump can interrupt it.
-  scrollToId("contatti");
-  // Reset/open the form only after the smooth scroll has settled.
-  // ContactSection then orients focus without triggering a second page jump.
+  // Keep the contact destination shareable and navigable with Back/Forward.
+  const didScroll = scrollToSection("contatti", { history: "push" });
+  // ContactSection orients focus after motion finishes, or immediately with reduced motion.
+  const focusDelay = didScroll && !prefersReducedMotion() ? 650 : 0;
   window.setTimeout(() => {
     window.dispatchEvent(
       new CustomEvent("tretnix:openContact", {
         detail: { preselectNeed },
       }),
     );
-  }, 650);
+  }, focusDelay);
 }
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const menuTriggerRef = useRef<HTMLButtonElement>(null);
+  const menuPanelRef = useRef<HTMLDivElement>(null);
 
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isHome = pathname === "/";
@@ -125,11 +156,32 @@ export function Navbar() {
 
   useEffect(() => {
     if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+
+    const closeAndRestoreFocus = () => {
+      setOpen(false);
+      window.requestAnimationFrame(() => menuTriggerRef.current?.focus());
     };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeAndRestoreFocus();
+    };
+    const onPointerDown = (e: PointerEvent) => {
+      const target = e.target as Node;
+      if (menuPanelRef.current?.contains(target) || menuTriggerRef.current?.contains(target)) return;
+      setOpen(false);
+    };
+    const desktopQuery = window.matchMedia("(min-width: 1024px)");
+    const onDesktopChange = (e: MediaQueryListEvent) => {
+      if (e.matches) setOpen(false);
+    };
+
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener("pointerdown", onPointerDown);
+    desktopQuery.addEventListener("change", onDesktopChange);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("pointerdown", onPointerDown);
+      desktopQuery.removeEventListener("change", onDesktopChange);
+    };
   }, [open]);
 
   useEffect(() => {
@@ -141,7 +193,7 @@ export function Navbar() {
   function onNavClick(e: React.MouseEvent<HTMLAnchorElement>, hash: string) {
     if (!isHome) return; // let browser navigate to /#hash
     e.preventDefault();
-    scrollToId(hash);
+    scrollToSection(hash, { history: "push" });
   }
 
   function onCtaClick(e: React.MouseEvent<HTMLAnchorElement>) {
@@ -169,7 +221,7 @@ export function Navbar() {
             />
           </Link>
 
-          <ul className="hidden items-center gap-0.5 md:flex">
+          <ul className="hidden items-center gap-0.5 lg:flex">
             {NAV.map((n) => {
               const isActive = activeHash === n.hash;
               return (
@@ -198,17 +250,19 @@ export function Navbar() {
             <a
               href={linkHref("contatti")}
               onClick={onCtaClick}
-              className="btn-primary group hidden md:inline-flex !py-2 !px-4 text-sm"
+              className="btn-primary group hidden lg:inline-flex !py-2 !px-4 text-sm"
             >
               Parliamo del tuo progetto
               <ArrowRight className="h-4 w-4 transition-transform duration-200 ease-out group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0" />
             </a>
             <button
+              ref={menuTriggerRef}
               type="button"
-              className="glass-panel flex h-11 w-11 items-center justify-center rounded-full md:hidden"
+              className="glass-panel flex h-11 w-11 items-center justify-center rounded-full lg:hidden"
               onClick={() => setOpen((v) => !v)}
               aria-label={open ? "Chiudi menu" : "Apri menu"}
               aria-expanded={open}
+              aria-haspopup="true"
               aria-controls="mobile-menu"
             >
               <span className="relative block h-5 w-5">
@@ -229,8 +283,9 @@ export function Navbar() {
 
         {open && (
           <div
+            ref={menuPanelRef}
             id="mobile-menu"
-            className="glass-menu animate-menu-in absolute left-0 right-0 top-[74px] rounded-3xl p-3 md:hidden"
+            className="glass-menu animate-menu-in absolute left-0 right-0 top-[74px] rounded-3xl p-3 lg:hidden"
           >
             <ul className="flex flex-col">
               {NAV.map((n, i) => {
@@ -413,7 +468,12 @@ export function BackToTopButton() {
   return (
     <button
       type="button"
-      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      onClick={() =>
+        window.scrollTo({
+          top: 0,
+          behavior: prefersReducedMotion() ? "auto" : "smooth",
+        })
+      }
       aria-label="Torna all'inizio"
       className="animate-btt-in glass-panel fixed bottom-5 right-5 z-40 flex h-12 w-12 items-center justify-center rounded-full text-foreground transition-colors hover:border-primary-glow/60 sm:bottom-6 sm:right-6"
     >

@@ -8,9 +8,9 @@ export const Route = createFileRoute("/privacy")({
       { name: "description", content: "Informativa sul trattamento dei dati personali del sito Tretnix." },
       { property: "og:title", content: "Privacy Policy — Tretnix" },
       { property: "og:description", content: "Informativa sul trattamento dei dati personali del sito Tretnix." },
-      { property: "og:url", content: "https://tretnix.lovable.app/privacy" },
+      { property: "og:url", content: "https://tretnix.com/privacy" },
     ],
-    links: [{ rel: "canonical", href: "https://tretnix.lovable.app/privacy" }],
+    links: [{ rel: "canonical", href: "https://tretnix.com/privacy" }],
   }),
   component: PrivacyPage,
 });
