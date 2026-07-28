@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { ArrowRight, ArrowUp, Menu, X } from "lucide-react";
 import { TretnixLogo } from "./TretnixLogo";
 import { trackEvent } from "@/lib/analytics";
@@ -15,6 +15,31 @@ const NAV = [
   { hash: "faq", label: "FAQ" },
   { hash: "contatti", label: "Contatti" },
 ];
+
+const FOCUSABLE_SELECTOR = [
+  "a[href]",
+  "button:not([disabled])",
+  "input:not([disabled])",
+  "select:not([disabled])",
+  "textarea:not([disabled])",
+  '[tabindex]:not([tabindex="-1"])',
+].join(",");
+
+function getFocusableElements(container: HTMLElement): HTMLElement[] {
+  return Array.from(
+    container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
+  ).filter((element) => {
+    if (!element.isConnected || element.closest("[inert]")) return false;
+    if (element.closest('[aria-hidden="true"]')) return false;
+
+    const style = window.getComputedStyle(element);
+    return (
+      style.display !== "none" &&
+      style.visibility !== "hidden" &&
+      element.getClientRects().length > 0
+    );
+  });
+}
 
 /** Scroll-spy: return the id of the section currently in view. Offset-based, stable, sequential. */
 function useActiveSection(ids: string[]): string | null {
@@ -137,8 +162,12 @@ export function openContactForm(preselectNeed?: string) {
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  const navShellRef = useRef<HTMLDivElement>(null);
   const menuTriggerRef = useRef<HTMLButtonElement>(null);
   const menuPanelRef = useRef<HTMLDivElement>(null);
+  const firstMenuLinkRef = useRef<HTMLAnchorElement>(null);
+  const restoreFocusRef = useRef(false);
 
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isHome = pathname === "/";
@@ -155,80 +184,233 @@ export function Navbar() {
   }, []);
 
   useEffect(() => {
+    if (open || !restoreFocusRef.current) return;
+
+    restoreFocusRef.current = false;
+    const frame = window.requestAnimationFrame(() => {
+      menuTriggerRef.current?.focus({ preventScroll: true });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [open]);
+
+  useEffect(() => {
     if (!open) return;
 
+    const shell = navShellRef.current;
+    const panel = menuPanelRef.current;
+    if (!shell || !panel) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
     const closeAndRestoreFocus = () => {
+      restoreFocusRef.current = true;
       setOpen(false);
-      window.requestAnimationFrame(() => menuTriggerRef.current?.focus());
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") closeAndRestoreFocus();
-    };
-    const onPointerDown = (e: PointerEvent) => {
-      const target = e.target as Node;
-      if (menuPanelRef.current?.contains(target) || menuTriggerRef.current?.contains(target)) return;
-      setOpen(false);
-    };
-    const desktopQuery = window.matchMedia("(min-width: 1024px)");
-    const onDesktopChange = (e: MediaQueryListEvent) => {
-      if (e.matches) setOpen(false);
     };
 
-    window.addEventListener("keydown", onKey);
-    window.addEventListener("pointerdown", onPointerDown);
+    const focusFrame = window.requestAnimationFrame(() => {
+      (firstMenuLinkRef.current ?? panel).focus({ preventScroll: true });
+    });
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeAndRestoreFocus();
+        return;
+      }
+
+      if (event.key !== "Tab") return;
+
+      const focusable = getFocusableElements(shell);
+      if (focusable.length === 0) {
+        event.preventDefault();
+        panel.focus({ preventScroll: true });
+        return;
+      }
+
+      const activeElement = document.activeElement;
+      const activeIndex =
+        activeElement instanceof HTMLElement ? focusable.indexOf(activeElement) : -1;
+
+      if (activeIndex === -1) {
+        event.preventDefault();
+        const target = event.shiftKey ? focusable.at(-1) : focusable[0];
+        target?.focus({ preventScroll: true });
+      } else if (event.shiftKey && activeIndex === 0) {
+        event.preventDefault();
+        focusable.at(-1)?.focus({ preventScroll: true });
+      } else if (!event.shiftKey && activeIndex === focusable.length - 1) {
+        event.preventDefault();
+        focusable[0]?.focus({ preventScroll: true });
+      }
+    };
+
+    const onFocusIn = (event: FocusEvent) => {
+      if (event.target instanceof Node && shell.contains(event.target)) return;
+      (firstMenuLinkRef.current ?? panel).focus({ preventScroll: true });
+    };
+
+    const onPointerDown = (event: PointerEvent) => {
+      if (event.target instanceof Node && shell.contains(event.target)) return;
+      closeAndRestoreFocus();
+    };
+
+    const desktopQuery = window.matchMedia("(min-width: 1280px)");
+    const onDesktopChange = (event: MediaQueryListEvent) => {
+      if (!event.matches) return;
+      restoreFocusRef.current = false;
+      setOpen(false);
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("focusin", onFocusIn);
+    document.addEventListener("pointerdown", onPointerDown);
     desktopQuery.addEventListener("change", onDesktopChange);
+
     return () => {
-      window.removeEventListener("keydown", onKey);
-      window.removeEventListener("pointerdown", onPointerDown);
+      window.cancelAnimationFrame(focusFrame);
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("focusin", onFocusIn);
+      document.removeEventListener("pointerdown", onPointerDown);
       desktopQuery.removeEventListener("change", onDesktopChange);
     };
   }, [open]);
 
   useEffect(() => {
+    restoreFocusRef.current = false;
     setOpen(false);
   }, [pathname]);
 
   const linkHref = (hash: string) => (isHome ? `#${hash}` : `/#${hash}`);
 
-  function onNavClick(e: React.MouseEvent<HTMLAnchorElement>, hash: string) {
-    if (!isHome) return; // let browser navigate to /#hash
-    e.preventDefault();
-    scrollToSection(hash, { history: "push" });
+  const closeMenu = (restoreFocus = false) => {
+    restoreFocusRef.current = restoreFocus;
+    setOpen(false);
+  };
+
+  function onNavClick(event: React.MouseEvent<HTMLAnchorElement>, hash: string) {
+    if (
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+    closeMenu(false);
+
+    if (isHome) {
+      scrollToSection(hash, { history: "push" });
+      return;
+    }
+
+    void navigate({
+      to: "/",
+      state: { scrollToSection: hash },
+      resetScroll: true,
+    });
   }
 
-  function onCtaClick(e: React.MouseEvent<HTMLAnchorElement>) {
+  function onCtaClick(event: React.MouseEvent<HTMLAnchorElement>) {
     trackEvent("cta_click", { path: pathname });
-    if (isHome) {
-      e.preventDefault();
-      openContactForm();
+
+    if (
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    ) {
+      return;
     }
-    // On other pages, the anchor href "/#contatti" navigates home then anchor logic scrolls.
+
+    event.preventDefault();
+    closeMenu(false);
+
+    if (isHome) {
+      openContactForm();
+      return;
+    }
+
+    void navigate({
+      to: "/",
+      state: { scrollToSection: "contatti" },
+      resetScroll: true,
+    });
+  }
+
+  function onLogoClick(event: React.MouseEvent<HTMLAnchorElement>) {
+    closeMenu(false);
+
+    if (
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+
+    if (!isHome) {
+      void navigate({ to: "/", resetScroll: true });
+      return;
+    }
+
+    if (window.location.hash) {
+      window.history.pushState(
+        window.history.state,
+        "",
+        `${window.location.pathname}${window.location.search}`,
+      );
+    }
+    window.scrollTo({
+      top: 0,
+      behavior: prefersReducedMotion() ? "auto" : "smooth",
+    });
   }
 
   return (
     <div className="fixed top-4 left-0 right-0 z-50 flex justify-center px-4">
-      <div className="relative w-full max-w-5xl">
+      <div
+        ref={navShellRef}
+        role={open ? "dialog" : undefined}
+        aria-modal={open ? true : undefined}
+        aria-label={open ? "Menu di navigazione" : undefined}
+        className="relative w-full max-w-7xl"
+      >
         <nav
           className={`glass-navbar flex h-[62px] items-center justify-between rounded-full pl-5 pr-2 transition-all duration-300 ${
             scrolled ? "soft-glow" : ""
           }`}
           aria-label="Navigazione principale"
         >
-          <Link to="/" className="flex items-center" aria-label="Vai alla homepage Tretnix">
+          <Link
+            to="/"
+            onClick={onLogoClick}
+            className="flex items-center"
+            aria-label="Vai alla homepage Tretnix"
+          >
             <TretnixLogo
               variant="horizontal"
               className="h-[30px] w-[130px] sm:h-[34px] sm:w-[150px]"
             />
           </Link>
 
-          <ul className="hidden items-center gap-0.5 lg:flex">
+          <ul className="hidden items-center gap-0.5 xl:flex">
             {NAV.map((n) => {
               const isActive = activeHash === n.hash;
               return (
                 <li key={n.hash}>
                   <a
                     href={linkHref(n.hash)}
-                    onClick={(e) => onNavClick(e, n.hash)}
+                    onClick={(event) => onNavClick(event, n.hash)}
                     aria-current={isActive ? "true" : undefined}
                     className={`group relative rounded-full px-3 py-2 text-[13px] transition-colors ${
                       isActive ? "nav-link-active" : "text-muted-foreground hover:text-foreground"
@@ -250,7 +432,7 @@ export function Navbar() {
             <a
               href={linkHref("contatti")}
               onClick={onCtaClick}
-              className="btn-primary group hidden lg:inline-flex !py-2 !px-4 text-sm"
+              className="btn-primary group hidden xl:inline-flex !py-2 !px-4 text-sm"
             >
               Parliamo del tuo progetto
               <ArrowRight className="h-4 w-4 transition-transform duration-200 ease-out group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0" />
@@ -258,20 +440,25 @@ export function Navbar() {
             <button
               ref={menuTriggerRef}
               type="button"
-              className="glass-panel flex h-11 w-11 items-center justify-center rounded-full lg:hidden"
-              onClick={() => setOpen((v) => !v)}
+              className="glass-panel flex h-11 w-11 items-center justify-center rounded-full xl:hidden"
+              onClick={() => {
+                restoreFocusRef.current = false;
+                setOpen((value) => !value);
+              }}
               aria-label={open ? "Chiudi menu" : "Apri menu"}
               aria-expanded={open}
-              aria-haspopup="true"
+              aria-haspopup="dialog"
               aria-controls="mobile-menu"
             >
               <span className="relative block h-5 w-5">
                 <Menu
+                  aria-hidden="true"
                   className={`absolute inset-0 h-5 w-5 transition-all duration-200 ${
                     open ? "rotate-45 opacity-0" : "rotate-0 opacity-100"
                   }`}
                 />
                 <X
+                  aria-hidden="true"
                   className={`absolute inset-0 h-5 w-5 transition-all duration-200 ${
                     open ? "rotate-0 opacity-100" : "-rotate-45 opacity-0"
                   }`}
@@ -285,7 +472,8 @@ export function Navbar() {
           <div
             ref={menuPanelRef}
             id="mobile-menu"
-            className="glass-menu animate-menu-in absolute left-0 right-0 top-[74px] rounded-3xl p-3 lg:hidden"
+            tabIndex={-1}
+            className="glass-menu animate-menu-in absolute left-0 right-0 top-[74px] rounded-3xl p-3 xl:hidden"
           >
             <ul className="flex flex-col">
               {NAV.map((n, i) => {
@@ -297,12 +485,10 @@ export function Navbar() {
                     style={{ animationDelay: `${60 + i * 40}ms` }}
                   >
                     <a
+                      ref={i === 0 ? firstMenuLinkRef : undefined}
                       href={linkHref(n.hash)}
                       aria-current={isActive ? "true" : undefined}
-                      onClick={(e) => {
-                        onNavClick(e, n.hash);
-                        setOpen(false);
-                      }}
+                      onClick={(event) => onNavClick(event, n.hash)}
                       className={`group flex items-center justify-between rounded-2xl px-4 py-3 text-base transition-colors ${
                         isActive
                           ? "bg-white/[0.05] text-foreground"
@@ -325,10 +511,7 @@ export function Navbar() {
             >
               <a
                 href={linkHref("contatti")}
-                onClick={(e) => {
-                  onCtaClick(e);
-                  setOpen(false);
-                }}
+                onClick={onCtaClick}
                 className="btn-primary group w-full justify-center"
               >
                 Parliamo del tuo progetto

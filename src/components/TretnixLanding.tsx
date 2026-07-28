@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import {
   ArrowRight, ArrowLeft, Check,
   ShieldAlert, Timer, Gauge,
@@ -12,6 +12,7 @@ import {
   Footer,
   BackToTopButton,
   openContactForm,
+  prefersReducedMotion,
   scrollToSection,
 } from "./TretnixChrome";
 import { StorageImage } from "./StorageMedia";
@@ -1440,11 +1441,60 @@ function Field({
 
 /* ============ Page ============ */
 export default function TretnixLanding() {
+  const router = useRouter();
+  const pendingSection = useRouterState({
+    select: (state) => state.location.state.scrollToSection,
+  });
+
   useEffect(() => {
     trackEvent("page_view", { path: "/" });
   }, []);
 
-  // Support direct hashes and keep Back/Forward aligned with the fixed navbar.
+  // Cross-route navigation deliberately starts at the top. The router state
+  // is cleared first; only after its scroll work has settled do we start one
+  // controlled smooth animation toward the requested homepage section.
+  useEffect(() => {
+    if (!pendingSection || typeof window === "undefined") return;
+
+    const id = pendingSection;
+    let cancelled = false;
+    let outerFrame = 0;
+    let innerFrame = 0;
+
+    window.scrollTo({ top: 0, behavior: "auto" });
+
+    void router
+      .navigate({
+        to: ".",
+        replace: true,
+        state: (previous) => {
+          const { scrollToSection: _drop, ...rest } = previous;
+          return rest;
+        },
+        resetScroll: false,
+      })
+      .then(() => {
+        if (cancelled) return;
+        outerFrame = window.requestAnimationFrame(() => {
+          innerFrame = window.requestAnimationFrame(() => {
+            if (cancelled) return;
+            scrollToSection(id, {
+              history: "replace",
+              behavior: prefersReducedMotion() ? "auto" : "smooth",
+            });
+          });
+        });
+      });
+
+    return () => {
+      cancelled = true;
+      if (outerFrame) window.cancelAnimationFrame(outerFrame);
+      if (innerFrame) window.cancelAnimationFrame(innerFrame);
+    };
+  }, [pendingSection, router]);
+
+  // Direct hashes, refresh and Back/Forward remain immediate and aligned with
+  // the fixed navbar. Cross-route navbar clicks use the state flow above.
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -1473,7 +1523,7 @@ export default function TretnixLanding() {
     window.addEventListener("hashchange", scrollFromLocationHash);
 
     return () => {
-      if (initialTimer) window.clearTimeout(initialTimer);
+      window.clearTimeout(initialTimer);
       if (frame) window.cancelAnimationFrame(frame);
       window.removeEventListener("popstate", scrollFromLocationHash);
       window.removeEventListener("hashchange", scrollFromLocationHash);
