@@ -28,32 +28,35 @@ export type Project = {
 const SELECT = "id,slug,title,category,short_description,overview,problem,solution,audience,features,impact_points,modules,workflow_steps,customizations,tech_stack,image_url,gradient,badge,is_concept,is_visible,is_featured,sort_order";
 
 export async function listVisibleProjects(): Promise<Project[]> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("projects")
     .select(SELECT)
     .eq("is_visible", true)
     .order("sort_order", { ascending: true });
+  if (error) throw error;
   return (data ?? []) as Project[];
 }
 
 export async function listFeaturedProjects(limit = 2): Promise<Project[]> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("projects")
     .select(SELECT)
     .eq("is_visible", true)
     .eq("is_featured", true)
     .order("sort_order", { ascending: true })
     .limit(limit);
+  if (error) throw error;
   return (data ?? []) as Project[];
 }
 
 export async function getProjectBySlug(slug: string): Promise<Project | null> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("projects")
     .select(SELECT)
     .eq("slug", slug)
     .eq("is_visible", true)
     .maybeSingle();
+  if (error) throw error;
   return (data as Project) ?? null;
 }
 
@@ -68,7 +71,12 @@ export async function adminListProjects(): Promise<Project[]> {
 }
 
 export async function adminGetProject(id: string): Promise<Project | null> {
-  const { data } = await supabase.from("projects").select(SELECT).eq("id", id).maybeSingle();
+  const { data, error } = await supabase
+    .from("projects")
+    .select(SELECT)
+    .eq("id", id)
+    .maybeSingle();
+  if (error) throw error;
   return (data as Project) ?? null;
 }
 

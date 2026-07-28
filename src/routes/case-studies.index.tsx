@@ -22,7 +22,15 @@ export const Route = createFileRoute("/case-studies/")({
           "Raccolta di concept e sistemi digitali progettati da Tretnix per mostrare software gestionali, dashboard e automazioni su misura.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://tretnix.com/case-studies" },
+      { name: "twitter:title", content: "Case study e concept — Tretnix" },
+      {
+        name: "twitter:description",
+        content:
+          "Raccolta di concept e sistemi digitali progettati da Tretnix per mostrare software gestionali, dashboard e automazioni su misura.",
+      },
     ],
+    links: [{ rel: "canonical", href: "https://tretnix.com/case-studies" }],
   }),
   component: CaseStudiesIndex,
 });
@@ -37,15 +45,32 @@ function categoryMatches(cat: string, filter: string): boolean {
 function CaseStudiesIndex() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [filter, setFilter] = useState("Tutti");
   const [q, setQ] = useState("");
 
   useEffect(() => {
+    let cancelled = false;
     trackEvent("page_view", { path: "/case-studies" });
-    void listVisibleProjects().then((p) => {
-      setProjects(p);
-      setLoading(false);
-    });
+
+    void listVisibleProjects()
+      .then((nextProjects) => {
+        if (cancelled) return;
+        setProjects(nextProjects);
+        setLoadFailed(false);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setProjects([]);
+        setLoadFailed(true);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const filtered = useMemo(() => {
@@ -94,6 +119,7 @@ function CaseStudiesIndex() {
                 return (
                   <button
                     key={f}
+                    type="button"
                     onClick={() => setFilter(f)}
                     aria-pressed={active}
                     className={`rounded-full border px-4 py-1.5 text-sm transition-colors ${
@@ -126,7 +152,16 @@ function CaseStudiesIndex() {
               Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="aspect-[4/5] rounded-2xl border border-border bg-white/[0.02]" />
               ))}
+            {!loading && loadFailed && (
+              <div
+                role="status"
+                className="glass-card col-span-full rounded-2xl p-10 text-center text-muted-foreground"
+              >
+                I case study non sono disponibili in questo momento. Riprova più tardi.
+              </div>
+            )}
             {!loading &&
+              !loadFailed &&
               filtered.map((p) => (
                 <Link
                   key={p.id}
@@ -159,7 +194,7 @@ function CaseStudiesIndex() {
                   </div>
                 </Link>
               ))}
-            {!loading && filtered.length === 0 && (
+            {!loading && !loadFailed && filtered.length === 0 && (
               <div className="col-span-full py-16 text-center text-muted-foreground">
                 Nessun concept trovato per questa selezione.
               </div>

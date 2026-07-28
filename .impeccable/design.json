@@ -19,9 +19,9 @@
       ],
       "tonalRampStatus": "Workflow-derived visualization only. Tonal ramp entries are not approved Tretnix tokens and do not replace canonical frontmatter values.",
       "knownGaps": [
-        "Known gap — text-subtle is approximately 4.29:1 against surface-canvas and requires contextual contrast verification for normal small text.",
-        "Known gap — prefers-reduced-motion coverage is partial; global smooth scrolling and some continuous animations are not fully covered.",
-        "Known gap — btn-ghost has no dedicated focus-visible treatment in its current custom utility.",
+        "Implementation update — text-subtle was raised to #74849C; contextual browser and contrast verification remains pending.",
+        "Implementation update — global prefers-reduced-motion coverage and motion-aware controlled scrolling were added; runtime verification remains pending.",
+        "Implementation update — btn-ghost now has a dedicated focus-visible treatment; keyboard verification remains pending.",
         "To verify — the versioned repository SVG embeds current application-adjacent colors that differ from the official palette sourced from the approved external logo-master.pdf.",
         "To verify — hero mockups are served as WebP while asset metadata preserves PNG origin and MIME information."
       ]
@@ -206,7 +206,7 @@
       "text-subtle": {
         "role": "neutral",
         "displayName": "Testo attenuato",
-        "canonical": "#687589",
+        "canonical": "#74849C",
         "provenance": "Confirmed implementation evidence",
         "tonalRamp": [
           "oklch(15% 0.035 258.9)",
@@ -365,13 +365,13 @@
         "name": "device-float",
         "value": "6s ease-in-out infinite",
         "purpose": "Slow floating movement for the hero phone mockup.",
-        "provenance": "Confirmed implementation evidence; reduced-motion coverage is a known gap"
+        "provenance": "Confirmed implementation evidence; global reduced-motion coverage added, runtime verification pending"
       },
       {
         "name": "glow-pulse",
         "value": "4s ease-in-out infinite",
         "purpose": "Ambient hero device glow.",
-        "provenance": "Confirmed implementation evidence; reduced-motion coverage is a known gap"
+        "provenance": "Confirmed implementation evidence; global reduced-motion coverage added, runtime verification pending"
       }
     ],
     "breakpoints": [
@@ -445,7 +445,7 @@
       "description": "Current operational field treatment shared by contact and administrative forms.",
       "provenance": "Confirmed implementation evidence",
       "html": "<label class=\"ds-field\"><span>Nome e cognome</span><input class=\"ds-admin-input\" type=\"text\" placeholder=\"Inserisci il nome\"></label>",
-      "css": ".ds-field { display: grid; gap: 6px; width: min(100%, 360px); font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; } .ds-field > span { color: var(--subtle, #687589); font-size: 0.72rem; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; } .ds-admin-input { width: 100%; padding: 0.65rem 0.85rem; border: 1px solid rgba(255,255,255,0.14); border-radius: 10px; background: rgba(8,16,34,0.5); color: var(--foreground, #F5F7FA); font: 400 0.9rem/1.5 'Inter', ui-sans-serif, system-ui, sans-serif; transition: border-color 0.15s ease, box-shadow 0.15s ease; } .ds-admin-input::placeholder { color: var(--subtle, #687589); } .ds-admin-input:focus { outline: none; border-color: rgba(30,123,255,0.7); box-shadow: 0 0 0 3px rgba(30,123,255,0.15); }"
+      "css": ".ds-field { display: grid; gap: 6px; width: min(100%, 360px); font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; } .ds-field > span { color: var(--subtle, #74849C); font-size: 0.72rem; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; } .ds-admin-input { width: 100%; padding: 0.65rem 0.85rem; border: 1px solid rgba(255,255,255,0.14); border-radius: 10px; background: rgba(8,16,34,0.5); color: var(--foreground, #F5F7FA); font: 400 0.9rem/1.5 'Inter', ui-sans-serif, system-ui, sans-serif; transition: border-color 0.15s ease, box-shadow 0.15s ease; } .ds-admin-input::placeholder { color: var(--subtle, #74849C); } .ds-admin-input:focus { outline: none; border-color: rgba(30,123,255,0.7); box-shadow: 0 0 0 3px rgba(30,123,255,0.15); }"
     },
     {
       "name": "Selection Chip",
@@ -490,7 +490,7 @@
       },
       {
         "name": "The Subtle Text Review Rule",
-        "body": "Known gap. text-subtle produce un contrasto calcolato di circa 4.29:1 su surface-canvas. Può risultare appropriato per testo grande o elementi non testuali secondo il contesto, ma deve essere rivalutato per testo normale piccolo. Non costituisce prova di conformità WCAG.",
+        "body": "Implementation update. text-subtle è stato portato a #74849C per aumentare la leggibilità sul canvas scuro. La verifica contestuale in browser resta necessaria prima di dichiarare conformità WCAG.",
         "section": "colors"
       },
       {

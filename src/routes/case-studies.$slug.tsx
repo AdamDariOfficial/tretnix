@@ -24,6 +24,7 @@ export const Route = createFileRoute("/case-studies/$slug")({
       };
     }
     const { project } = loaderData;
+    const canonicalUrl = `https://tretnix.com/case-studies/${encodeURIComponent(project.slug)}`;
     return {
       meta: [
         { title: `${project.title} Case Study — Tretnix` },
@@ -31,6 +32,9 @@ export const Route = createFileRoute("/case-studies/$slug")({
         { property: "og:title", content: `${project.title} Case Study — Tretnix` },
         { property: "og:description", content: project.short_description },
         { property: "og:type", content: "article" },
+        { property: "og:url", content: canonicalUrl },
+        { name: "twitter:title", content: `${project.title} Case Study — Tretnix` },
+        { name: "twitter:description", content: project.short_description },
         ...(project.image_url
           ? [
               { property: "og:image", content: project.image_url },
@@ -38,6 +42,7 @@ export const Route = createFileRoute("/case-studies/$slug")({
             ]
           : []),
       ],
+      links: [{ rel: "canonical", href: canonicalUrl }],
     };
   },
   notFoundComponent: () => (
@@ -61,7 +66,7 @@ export const Route = createFileRoute("/case-studies/$slug")({
       <main className="flex min-h-[70vh] items-center justify-center px-6 pt-40">
         <div className="text-center">
           <h1 className="text-3xl">Errore di caricamento</h1>
-          <button onClick={reset} className="btn-primary mt-8">Riprova</button>
+          <button type="button" onClick={reset} className="btn-primary mt-8">Riprova</button>
         </div>
       </main>
       <Footer />
@@ -80,12 +85,27 @@ function CaseStudyPage() {
   }, [p.slug]);
 
   useEffect(() => {
-    void getProjectBySlug(project.slug).then((fresh) => {
-      if (fresh) {
+    let cancelled = false;
+
+    void getProjectBySlug(project.slug)
+      .then((fresh) => {
+        if (cancelled || !fresh) return;
         setP(fresh);
-        void listProjectMedia(fresh.id).then(setMedia).catch(() => setMedia([]));
-      }
-    });
+        void listProjectMedia(fresh.id)
+          .then((nextMedia) => {
+            if (!cancelled) setMedia(nextMedia);
+          })
+          .catch(() => {
+            if (!cancelled) setMedia([]);
+          });
+      })
+      .catch(() => {
+        // Keep the server-rendered project when a background refresh fails.
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [project.slug]);
 
   const includes = [...new Set([...p.modules, ...p.features])].slice(0, 12);

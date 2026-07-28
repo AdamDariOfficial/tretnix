@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Tretnix</title>
+  <rect width="64" height="64" rx="16" fill="#000f28"/>
+  <g transform="translate(7 12) scale(.18)">
+    <path fill="#f5f7f9" d="m120 220 40-40V40l-40 40z"/>
+    <path fill="#054bff" d="m120 40 40-40H0l40 40z"/>
+    <path fill="#f5f7f9" d="m200 0-40 40h120l-40-40z"/>
+    <path fill="#054bff" d="M180 160V60h20v80z"/>
+  </g>
+</svg>

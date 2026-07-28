@@ -69,7 +69,6 @@ export async function submitContactRequest(
     message: input.message.trim(),
     privacy_accepted: input.privacy_accepted,
     source_path: source_path.slice(0, 200),
-    status: "new" as const,
   };
   const { error } = await supabase.from("contact_requests").insert(payload);
   if (error) throw error;

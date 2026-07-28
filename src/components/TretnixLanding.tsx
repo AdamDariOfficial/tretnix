@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import {
   ArrowRight, ArrowLeft, Check,
   ShieldAlert, Timer, Gauge,
@@ -7,7 +7,14 @@ import {
   Plus, Minus, ChevronDown,
   Phone, Video, MoreVertical, Smile, Paperclip, Mic, Send,
 } from "lucide-react";
-import { Navbar, Footer, BackToTopButton, openContactForm } from "./TretnixChrome";
+import {
+  Navbar,
+  Footer,
+  BackToTopButton,
+  openContactForm,
+  prefersReducedMotion,
+  scrollToSection,
+} from "./TretnixChrome";
 import { StorageImage } from "./StorageMedia";
 import { HeroMockup } from "./HeroMockup";
 import { listFeaturedProjects, type Project } from "@/lib/projects";
@@ -115,7 +122,16 @@ function HeroSection() {
             >
               Parliamo del tuo progetto <ArrowIcon />
             </button>
-            <a href="#cosa-possiamo-costruire" className="btn-ghost">Cosa possiamo costruire</a>
+            <a
+              href="#cosa-possiamo-costruire"
+              className="btn-ghost"
+              onClick={(event) => {
+                event.preventDefault();
+                scrollToSection("cosa-possiamo-costruire", { history: "push" });
+              }}
+            >
+              Cosa possiamo costruire
+            </a>
           </div>
           <p className="mt-6 max-w-xl text-sm leading-relaxed text-subtle">
             Non sai ancora cosa ti serve? Partiamo dal tuo processo e troviamo insieme
@@ -271,8 +287,30 @@ function ProjectCard({ p }: { p: Project }) {
 
 function ProjectsSection() {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
+
   useEffect(() => {
-    void listFeaturedProjects(2).then(setProjects);
+    let cancelled = false;
+
+    void listFeaturedProjects(2)
+      .then((nextProjects) => {
+        if (cancelled) return;
+        setProjects(nextProjects);
+        setLoadFailed(false);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setProjects([]);
+        setLoadFailed(true);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return (
@@ -297,16 +335,31 @@ function ProjectsSection() {
             </Link>
           </Reveal>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            {projects.map((p, i) => (
-              <Reveal key={p.id} delay={i * 100}>
-                <ProjectCard p={p} />
-              </Reveal>
-            ))}
-            {projects.length === 0 && (
+            {loading && (
               <>
                 <div className="aspect-[4/5] rounded-2xl border border-border bg-white/[0.02]" />
                 <div className="aspect-[4/5] rounded-2xl border border-border bg-white/[0.02]" />
               </>
+            )}
+            {!loading && loadFailed && (
+              <div
+                role="status"
+                className="glass-card col-span-full flex min-h-56 items-center justify-center rounded-2xl p-8 text-center text-sm text-muted-foreground"
+              >
+                I case study non sono disponibili in questo momento. Riprova più tardi.
+              </div>
+            )}
+            {!loading &&
+              !loadFailed &&
+              projects.map((p, i) => (
+                <Reveal key={p.id} delay={i * 100}>
+                  <ProjectCard p={p} />
+                </Reveal>
+              ))}
+            {!loading && !loadFailed && projects.length === 0 && (
+              <div className="glass-card col-span-full flex min-h-56 items-center justify-center rounded-2xl p-8 text-center text-sm text-muted-foreground">
+                I case study saranno disponibili a breve.
+              </div>
             )}
           </div>
         </div>
@@ -1388,23 +1441,93 @@ function Field({
 
 /* ============ Page ============ */
 export default function TretnixLanding() {
+  const router = useRouter();
+  const pendingSection = useRouterState({
+    select: (state) => state.location.state.scrollToSection,
+  });
+
   useEffect(() => {
     trackEvent("page_view", { path: "/" });
   }, []);
 
-  // Support anchor navigation from other pages (/#faq etc.)
+  // Cross-route navigation deliberately starts at the top. The router state
+  // is cleared first; only after its scroll work has settled do we start one
+  // controlled smooth animation toward the requested homepage section.
+  useEffect(() => {
+    if (!pendingSection || typeof window === "undefined") return;
+
+    const id = pendingSection;
+    let cancelled = false;
+    let outerFrame = 0;
+    let innerFrame = 0;
+
+    window.scrollTo({ top: 0, behavior: "auto" });
+
+    void router
+      .navigate({
+        to: ".",
+        replace: true,
+        state: (previous) => {
+          const { scrollToSection: _drop, ...rest } = previous;
+          return rest;
+        },
+        resetScroll: false,
+      })
+      .then(() => {
+        if (cancelled) return;
+        outerFrame = window.requestAnimationFrame(() => {
+          innerFrame = window.requestAnimationFrame(() => {
+            if (cancelled) return;
+            scrollToSection(id, {
+              history: "replace",
+              behavior: prefersReducedMotion() ? "auto" : "smooth",
+            });
+          });
+        });
+      });
+
+    return () => {
+      cancelled = true;
+      if (outerFrame) window.cancelAnimationFrame(outerFrame);
+      if (innerFrame) window.cancelAnimationFrame(innerFrame);
+    };
+  }, [pendingSection, router]);
+
+  // Direct hashes, refresh and Back/Forward remain immediate and aligned with
+  // the fixed navbar. Cross-route navbar clicks use the state flow above.
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (window.location.hash) {
-      const id = window.location.hash.slice(1);
-      const el = document.getElementById(id);
-      if (el) {
-        setTimeout(() => {
-          const top = el.getBoundingClientRect().top + window.scrollY - 80;
-          window.scrollTo({ top, behavior: "smooth" });
-        }, 60);
+
+    let frame = 0;
+
+    const scrollFromLocationHash = () => {
+      const rawHash = window.location.hash.slice(1);
+      if (!rawHash) return;
+
+      let id = rawHash;
+      try {
+        id = decodeURIComponent(rawHash);
+      } catch {
+        // Keep the raw id when an external URL contains malformed escaping.
       }
-    }
+
+      if (frame) window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        scrollToSection(id, { behavior: "auto" });
+      });
+    };
+
+    const initialTimer = window.setTimeout(scrollFromLocationHash, 60);
+    window.addEventListener("popstate", scrollFromLocationHash);
+    window.addEventListener("hashchange", scrollFromLocationHash);
+
+    return () => {
+      window.clearTimeout(initialTimer);
+      if (frame) window.cancelAnimationFrame(frame);
+      window.removeEventListener("popstate", scrollFromLocationHash);
+      window.removeEventListener("hashchange", scrollFromLocationHash);
+    };
   }, []);
 
   return (
