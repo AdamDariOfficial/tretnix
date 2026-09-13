@@ -3,7 +3,13 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Upload, ArrowUp, ArrowDown, Trash2, Plus, AlertCircle } from "lucide-react";
 import { adminGetProject, adminUpsertProject, type Project } from "@/lib/projects";
 import {
-  listProjectMedia,
+  adminListProjectVariants,
+  adminReplaceProjectVariants,
+  type ProjectPlan,
+  type ProjectVariantInput,
+} from "@/lib/project-variants";
+import {
+  adminListProjectMedia,
   adminAddMedia,
   adminUpdateMedia,
   adminDeleteMedia,
@@ -36,7 +42,7 @@ function emptyProject(): Partial<Project> {
     tech_stack: [],
     image_url: null,
     gradient: GRADIENTS[0].value,
-    badge: "Concept interno / Demo portfolio",
+    badge: "Concept Tretnix",
     is_concept: true,
     is_visible: true,
     is_featured: false,
@@ -70,9 +76,12 @@ export function ProjectForm({ mode, id }: { mode: "new" | "edit"; id?: string })
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
-  const [tab, setTab] = useState<"base" | "content" | "media" | "visibility">("base");
+  const [tab, setTab] = useState<"base" | "content" | "variants" | "media" | "visibility">("base");
   const [uploadingMain, setUploadingMain] = useState(false);
 
+  const [variants, setVariants] = useState<ProjectVariantInput[]>([]);
+  const [initialVariants, setInitialVariants] = useState<string>("");
+  const [variantsLoadFailed, setVariantsLoadFailed] = useState(false);
   const [media, setMedia] = useState<StagedMedia[]>([]);
   const [initialMedia, setInitialMedia] = useState<string>("");
 
@@ -84,7 +93,7 @@ export function ProjectForm({ mode, id }: { mode: "new" | "edit"; id?: string })
         setP(proj);
         setInitialP(JSON.stringify(proj));
         try {
-          const m = await listProjectMedia(id);
+          const m = await adminListProjectMedia(id);
           const staged: StagedMedia[] = m.map((row) => ({
             key: row.id,
             id: row.id,
@@ -100,18 +109,36 @@ export function ProjectForm({ mode, id }: { mode: "new" | "edit"; id?: string })
           setMedia([]);
           setInitialMedia("[]");
         }
+        try {
+          const rows = await adminListProjectVariants(id);
+          const editable = rows.map(toVariantInput);
+          setVariants(editable);
+          setInitialVariants(JSON.stringify(editable));
+          setVariantsLoadFailed(false);
+        } catch {
+          setVariants([]);
+          setInitialVariants("[]");
+          setVariantsLoadFailed(true);
+          setErr("Impossibile caricare le varianti. Il salvataggio è bloccato per evitare perdita di dati.");
+        }
         setLoading(false);
       })();
     } else {
       setInitialP(JSON.stringify(p));
+      setInitialVariants("[]");
+      setVariantsLoadFailed(false);
       setInitialMedia("[]");
     }
   }, [mode, id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const dirty = useMemo(() => {
     if (!p) return false;
-    return JSON.stringify(p) !== initialP || JSON.stringify(media) !== initialMedia;
-  }, [p, media, initialP, initialMedia]);
+    return (
+      JSON.stringify(p) !== initialP ||
+      JSON.stringify(variants) !== initialVariants ||
+      JSON.stringify(media) !== initialMedia
+    );
+  }, [p, variants, media, initialP, initialVariants, initialMedia]);
 
   // Warn on tab close / navigation away with unsaved changes
   useEffect(() => {
@@ -132,6 +159,10 @@ export function ProjectForm({ mode, id }: { mode: "new" | "edit"; id?: string })
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!p) return;
+    if (variantsLoadFailed) {
+      setErr("Salvataggio bloccato: ricarica il progetto dopo aver ripristinato l'accesso alle varianti.");
+      return;
+    }
     setSaving(true);
     setErr(null);
     setOk(null);
@@ -165,14 +196,17 @@ export function ProjectForm({ mode, id }: { mode: "new" | "edit"; id?: string })
         });
       }
 
+      await adminReplaceProjectVariants(saved.id, variants);
+
       // Reload media to normalize state
-      const fresh = await listProjectMedia(saved.id);
+      const fresh = await adminListProjectMedia(saved.id);
       const stagedFresh: StagedMedia[] = fresh.map((row) => ({
         key: row.id, id: row.id, type: row.type, url: row.url,
         caption: row.caption, alt_text: row.alt_text, sort_order: row.sort_order,
       }));
       setP(saved);
       setInitialP(JSON.stringify(saved));
+      setInitialVariants(JSON.stringify(variants));
       setMedia(stagedFresh);
       setInitialMedia(JSON.stringify(stagedFresh));
       setOk("Progetto salvato");
@@ -193,6 +227,7 @@ export function ProjectForm({ mode, id }: { mode: "new" | "edit"; id?: string })
     } else {
       // reset from initial snapshots
       setP(JSON.parse(initialP));
+      setVariants(JSON.parse(initialVariants));
       setMedia(JSON.parse(initialMedia));
       setErr(null);
       setOk(null);
@@ -224,6 +259,7 @@ export function ProjectForm({ mode, id }: { mode: "new" | "edit"; id?: string })
   const tabs: { id: typeof tab; label: string }[] = [
     { id: "base", label: "Base" },
     { id: "content", label: "Contenuto" },
+    { id: "variants", label: "Varianti" },
     { id: "media", label: "Media" },
     { id: "visibility", label: "Visibilità" },
   ];
@@ -334,6 +370,10 @@ export function ProjectForm({ mode, id }: { mode: "new" | "edit"; id?: string })
           </div>
         )}
 
+        {tab === "variants" && (
+          <VariantEditor variants={variants} setVariants={setVariants} />
+        )}
+
         {tab === "media" && (
           <div className="space-y-8">
             <F label="Immagine di copertina" full>
@@ -393,7 +433,7 @@ export function ProjectForm({ mode, id }: { mode: "new" | "edit"; id?: string })
         {ok && <div className="rounded-lg border border-emerald-400/40 bg-emerald-400/10 px-3 py-2 text-sm text-emerald-200">{ok}</div>}
 
         <div className="sticky bottom-0 flex flex-wrap items-center gap-3 border-t border-border bg-background/80 pt-4 backdrop-blur">
-          <button type="submit" disabled={saving || !dirty} className="btn-primary disabled:opacity-50">
+          <button type="submit" disabled={saving || !dirty || variantsLoadFailed} className="btn-primary disabled:opacity-50">
             {saving ? "Salvataggio…" : "Salva progetto"}
           </button>
           <button type="button" onClick={onCancel} className="btn-ghost">
@@ -579,6 +619,191 @@ function StagedMediaEditor({
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+function toVariantInput(row: {
+  plan: ProjectPlan;
+  label: string;
+  short_description: string;
+  goal: string;
+  features: string[];
+  demo_url: string | null;
+  publish_status: "draft" | "published";
+  sort_order: number;
+}): ProjectVariantInput {
+  return {
+    plan: row.plan,
+    label: row.label,
+    short_description: row.short_description,
+    goal: row.goal,
+    features: row.features,
+    demo_url: row.demo_url,
+    publish_status: row.publish_status,
+    sort_order: row.sort_order,
+  };
+}
+
+function VariantEditor({
+  variants,
+  setVariants,
+}: {
+  variants: ProjectVariantInput[];
+  setVariants: (variants: ProjectVariantInput[]) => void;
+}) {
+  const plans: ProjectPlan[] = ["START", "BUSINESS", "BUSINESS_PLUS"];
+
+  function addVariant() {
+    const plan = plans.find((candidate) => !variants.some((variant) => variant.plan === candidate));
+    if (!plan) return;
+    setVariants([
+      ...variants,
+      {
+        plan,
+        label: plan === "START" ? "Presenza digitale essenziale" : plan === "BUSINESS" ? "Esperienza multipagina" : "Sistema digitale completo",
+        short_description: "",
+        goal: "",
+        features: [],
+        demo_url: null,
+        publish_status: "draft",
+        sort_order: plan === "START" ? 10 : plan === "BUSINESS" ? 20 : 30,
+      },
+    ]);
+  }
+
+  function patchVariant(index: number, patch: Partial<ProjectVariantInput>) {
+    setVariants(variants.map((variant, current) => current === index ? { ...variant, ...patch } : variant));
+  }
+
+  function removeVariant(index: number) {
+    setVariants(variants.filter((_, current) => current !== index));
+  }
+
+  return (
+    <div className="space-y-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="font-serif text-2xl">Evoluzione del progetto</h2>
+          <p className="mt-1 max-w-2xl text-xs leading-relaxed text-subtle">
+            START, BUSINESS e BUSINESS PLUS appartengono allo stesso case study. In Portfolio V1 BUSINESS PLUS è bloccato in draft anche a livello database.
+          </p>
+        </div>
+        <button type="button" onClick={addVariant} disabled={variants.length >= 3} className="btn-ghost disabled:opacity-40">
+          <Plus className="h-4 w-4" /> Aggiungi variante
+        </button>
+      </div>
+
+      {variants.length === 0 && (
+        <div className="rounded-2xl border border-dashed border-border p-8 text-center text-muted-foreground">
+          Nessuna variante. I progetti legacy possono restare senza varianti.
+        </div>
+      )}
+
+      {variants.map((variant, index) => {
+        const plus = variant.plan === "BUSINESS_PLUS";
+        return (
+          <section key={`${variant.plan}-${index}`} className="glass-card rounded-2xl p-5 sm:p-6">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              <F label="Piano">
+                <select
+                  value={variant.plan}
+                  onChange={(event) => {
+                    const nextPlan = event.target.value as ProjectPlan;
+                    patchVariant(index, {
+                      plan: nextPlan,
+                      publish_status: nextPlan === "BUSINESS_PLUS" ? "draft" : variant.publish_status,
+                    });
+                  }}
+                  className="admin-input"
+                >
+                  {plans.map((plan) => (
+                    <option
+                      key={plan}
+                      value={plan}
+                      disabled={plan !== variant.plan && variants.some((item) => item.plan === plan)}
+                    >
+                      {plan === "BUSINESS_PLUS" ? "BUSINESS PLUS" : plan}
+                    </option>
+                  ))}
+                </select>
+              </F>
+              <F label="Titolo pubblico">
+                <input
+                  value={variant.label}
+                  onChange={(event) => patchVariant(index, { label: event.target.value })}
+                  className="admin-input"
+                />
+              </F>
+              <F label="Descrizione breve" full>
+                <textarea
+                  rows={2}
+                  value={variant.short_description}
+                  onChange={(event) => patchVariant(index, { short_description: event.target.value })}
+                  className="admin-input"
+                />
+              </F>
+              <F label="Obiettivo" full>
+                <textarea
+                  rows={2}
+                  value={variant.goal}
+                  onChange={(event) => patchVariant(index, { goal: event.target.value })}
+                  className="admin-input"
+                />
+              </F>
+              <F label="Funzionalità / scope (uno per riga)" full>
+                <textarea
+                  rows={5}
+                  value={variant.features.join("\n")}
+                  onChange={(event) => patchVariant(index, {
+                    features: event.target.value.split("\n").map((value) => value.trim()).filter(Boolean),
+                  })}
+                  className="admin-input"
+                />
+              </F>
+              <F label="Demo URL">
+                <input
+                  type="url"
+                  value={variant.demo_url ?? ""}
+                  onChange={(event) => patchVariant(index, { demo_url: event.target.value.trim() || null })}
+                  className="admin-input"
+                  placeholder="https://…"
+                />
+              </F>
+              <F label="Ordine">
+                <input
+                  type="number"
+                  value={variant.sort_order}
+                  onChange={(event) => patchVariant(index, { sort_order: parseInt(event.target.value) || 0 })}
+                  className="admin-input"
+                />
+              </F>
+            </div>
+
+            <div className="mt-5 flex flex-wrap items-center justify-between gap-4 border-t border-border pt-4">
+              <div>
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={variant.publish_status === "published"}
+                    disabled={plus}
+                    onChange={(event) => patchVariant(index, { publish_status: event.target.checked ? "published" : "draft" })}
+                  />
+                  Pubblicata nel case study
+                </label>
+                {plus && (
+                  <p className="mt-1 text-xs text-amber-200">
+                    BUSINESS PLUS resta draft in Portfolio V1. Il gate si sblocca solo con una migration successiva approvata.
+                  </p>
+                )}
+              </div>
+              <button type="button" onClick={() => removeVariant(index)} className="btn-ghost text-destructive">
+                <Trash2 className="h-4 w-4" /> Rimuovi variante
+              </button>
+            </div>
+          </section>
+        );
+      })}
     </div>
   );
 }

@@ -12,4 +12,12 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  vite: {
+    // The first TanStack SSR build runs before Nitro's Cloudflare preset gets a chance to
+    // externalize Workers runtime modules. Preserve the specifier for Nitro/workerd instead
+    // of asking Vite/Rolldown to resolve it as an installed package.
+    build: {
+      rolldownOptions: { external: ["cloudflare:workers"] },
+    },
+  },
 });

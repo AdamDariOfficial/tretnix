@@ -318,14 +318,14 @@ function ProjectsSection() {
       <div className="mx-auto max-w-7xl px-6 lg:px-10">
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-[0.9fr_1.4fr]">
           <Reveal>
-            <SectionLabel>Case study selezionati</SectionLabel>
+            <SectionLabel>Progetti selezionati</SectionLabel>
             <h2 className="font-serif mt-6 text-4xl leading-[1.05] sm:text-5xl lg:text-[56px]">
               Sistemi digitali<br />
               pensati per il <span className="text-accent italic">lavoro reale.</span>
             </h2>
             <p className="mt-6 max-w-md text-muted-foreground">
-              Esempi di sistemi digitali progettati per mostrare il tipo di soluzioni
-              che Tretnix può realizzare per aziende e team operativi.
+              Una selezione di progetti e concept che mostra come Tretnix può costruire
+              soluzioni diverse per identità, settore e livello di complessità.
             </p>
             <Link
               to="/case-studies"
@@ -346,7 +346,7 @@ function ProjectsSection() {
                 role="status"
                 className="glass-card col-span-full flex min-h-56 items-center justify-center rounded-2xl p-8 text-center text-sm text-muted-foreground"
               >
-                I case study non sono disponibili in questo momento. Riprova più tardi.
+                I progetti non sono disponibili in questo momento. Riprova più tardi.
               </div>
             )}
             {!loading &&
@@ -358,7 +358,7 @@ function ProjectsSection() {
               ))}
             {!loading && !loadFailed && projects.length === 0 && (
               <div className="glass-card col-span-full flex min-h-56 items-center justify-center rounded-2xl p-8 text-center text-sm text-muted-foreground">
-                I case study saranno disponibili a breve.
+                I progetti saranno disponibili a breve.
               </div>
             )}
           </div>

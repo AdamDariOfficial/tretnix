@@ -1,8 +1,10 @@
 import { createFileRoute, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { TretnixLogo } from "@/components/TretnixLogo";
 import { ArrowRight } from "lucide-react";
+
+import { TretnixLogo } from "@/components/TretnixLogo";
+import { getAdminSession, loginAdminSession } from "@/features/tretnix/live.functions";
+import { setAdminCsrfToken } from "@/lib/admin-session";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -14,43 +16,47 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
+function safeAdminNext(value: string | null) {
+  return value?.startsWith("/admin") && !value.startsWith("//") ? value : "/admin";
+}
+
 function AuthPage() {
   const navigate = useNavigate();
-  const next = useRouterState({ select: (s) => new URLSearchParams(s.location.searchStr).get("next") || "/admin" });
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const next = useRouterState({
+    select: (state) =>
+      safeAdminNext(new URLSearchParams(state.location.searchStr).get("next")),
+  });
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
-    void supabase.auth.getUser().then(({ data }) => {
-      if (data.user) navigate({ to: next });
-    });
+    let cancelled = false;
+    void getAdminSession()
+      .then((session) => {
+        if (cancelled || !session.authenticated) return;
+        setAdminCsrfToken(session.csrfToken);
+        navigate({ to: next });
+      })
+      .catch(() => {
+        // The login form remains available when no valid session exists.
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [navigate, next]);
 
-  async function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function onSubmit(event: React.FormEvent) {
+    event.preventDefault();
     setLoading(true);
     setErr(null);
-    setMsg(null);
     try {
-      if (mode === "signin") {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        navigate({ to: next });
-      } else {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { emailRedirectTo: `${window.location.origin}/auth` },
-        });
-        if (error) throw error;
-        setMsg("Account creato. Contatta l'amministratore per abilitare l'accesso admin.");
-      }
-    } catch (e: unknown) {
-      setErr(e instanceof Error ? e.message : "Errore di autenticazione");
+      const result = await loginAdminSession({ data: { email, password } });
+      setAdminCsrfToken(result.csrfToken);
+      navigate({ to: next });
+    } catch (error) {
+      setErr(error instanceof Error ? error.message : "Errore di autenticazione");
     } finally {
       setLoading(false);
     }
@@ -68,70 +74,52 @@ function AuthPage() {
           <TretnixLogo variant="horizontal" className="h-8 w-[150px]" />
         </Link>
         <div className="glass-panel rounded-3xl p-8">
-          <h1 className="font-serif text-3xl">
-            {mode === "signin" ? "Accesso admin" : "Crea account"}
-          </h1>
+          <h1 className="font-serif text-3xl">Accesso admin</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            {mode === "signin"
-              ? "Accedi per gestire progetti e impostazioni del sito."
-              : "L'account verrà creato ma l'accesso admin va abilitato manualmente."}
+            Accedi per gestire progetti, richieste e impostazioni Tretnix.
           </p>
 
           <form onSubmit={onSubmit} className="mt-6 space-y-4">
             <div>
-              <label className="admin-label" htmlFor="email">Email</label>
+              <label className="admin-label" htmlFor="email">
+                Email
+              </label>
               <input
                 id="email"
                 type="email"
                 required
                 autoComplete="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(event) => setEmail(event.target.value)}
                 className="admin-input"
               />
             </div>
             <div>
-              <label className="admin-label" htmlFor="password">Password</label>
+              <label className="admin-label" htmlFor="password">
+                Password
+              </label>
               <input
                 id="password"
                 type="password"
                 required
-                minLength={6}
-                autoComplete={mode === "signin" ? "current-password" : "new-password"}
+                autoComplete="current-password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(event) => setPassword(event.target.value)}
                 className="admin-input"
               />
             </div>
 
             {err && (
-              <div className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive-foreground">
+              <div className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm">
                 {err}
-              </div>
-            )}
-            {msg && (
-              <div className="rounded-lg border border-primary-glow/30 bg-primary/10 px-3 py-2 text-sm text-foreground">
-                {msg}
               </div>
             )}
 
             <button type="submit" disabled={loading} className="btn-primary w-full justify-center">
-              {loading ? "Attendere…" : mode === "signin" ? "Accedi" : "Crea account"}
+              {loading ? "Attendere…" : "Accedi"}
               <ArrowRight className="h-4 w-4" />
             </button>
           </form>
-
-          <button
-            type="button"
-            onClick={() => {
-              setMode((m) => (m === "signin" ? "signup" : "signin"));
-              setErr(null);
-              setMsg(null);
-            }}
-            className="mt-4 w-full text-center text-sm text-muted-foreground hover:text-foreground"
-          >
-            {mode === "signin" ? "Non hai un account? Registrati" : "Torna all'accesso"}
-          </button>
         </div>
       </div>
     </div>

@@ -1,44 +1,61 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { ArrowRight, Check } from "lucide-react";
 import { Navbar, Footer, BackToTopButton, Breadcrumb } from "@/components/TretnixChrome";
 import { StorageImage } from "@/components/StorageMedia";
 import { ProjectGallery } from "@/components/ProjectGallery";
-import { getProjectBySlug, type Project } from "@/lib/projects";
-import { listProjectMedia, type ProjectMedia } from "@/lib/project-media";
+import { ProjectPortfolioCover } from "@/components/ProjectPortfolioCover";
+import { ProjectVariantTimeline } from "@/components/ProjectVariantTimeline";
+import { getProjectBySlug } from "@/lib/projects";
+import { listProjectMedia } from "@/lib/project-media";
+import { listPublishedProjectVariants } from "@/lib/project-variants";
 import { trackEvent } from "@/lib/analytics";
 
 export const Route = createFileRoute("/case-studies/$slug")({
   loader: async ({ params }) => {
     const project = await getProjectBySlug(params.slug);
     if (!project) throw notFound();
-    return { project };
+
+    const [variants, media] = await Promise.all([
+      listPublishedProjectVariants(project.id),
+      listProjectMedia(project.id),
+    ]);
+
+    return { project, variants, media };
   },
   head: ({ loaderData }) => {
     if (!loaderData) {
       return {
         meta: [
-          { title: "Case study non trovato — Tretnix" },
+          { title: "Progetto non trovato — Tretnix" },
           { name: "robots", content: "noindex" },
         ],
       };
     }
+
     const { project } = loaderData;
     const canonicalUrl = `https://tretnix.com/case-studies/${encodeURIComponent(project.slug)}`;
+    const socialImage = project.image_url?.startsWith("media:")
+      ? `https://tretnix.com/api/tretnix/media/${encodeURIComponent(project.image_url.slice(6))}`
+      : project.image_url;
+    const pageTitle = project.is_concept
+      ? `${project.title} — Concept Tretnix`
+      : `${project.title} — Case study Tretnix`;
+
     return {
       meta: [
-        { title: `${project.title} Case Study — Tretnix` },
+        { title: pageTitle },
         { name: "description", content: project.short_description },
-        { property: "og:title", content: `${project.title} Case Study — Tretnix` },
+        { property: "og:title", content: pageTitle },
         { property: "og:description", content: project.short_description },
         { property: "og:type", content: "article" },
         { property: "og:url", content: canonicalUrl },
-        { name: "twitter:title", content: `${project.title} Case Study — Tretnix` },
+        { name: "twitter:title", content: pageTitle },
         { name: "twitter:description", content: project.short_description },
-        ...(project.image_url
+        ...(socialImage
           ? [
-              { property: "og:image", content: project.image_url },
-              { name: "twitter:image", content: project.image_url },
+              { property: "og:image", content: socialImage },
+              { name: "twitter:image", content: socialImage },
             ]
           : []),
       ],
@@ -50,11 +67,13 @@ export const Route = createFileRoute("/case-studies/$slug")({
       <Navbar />
       <main className="flex min-h-[70vh] items-center justify-center px-6 pt-40">
         <div className="text-center">
-          <h1 className="font-serif text-4xl">Case study non trovato</h1>
+          <h1 className="font-serif text-4xl">Progetto non trovato</h1>
           <p className="mt-3 text-muted-foreground">
-            Il concept richiesto non esiste o è stato spostato.
+            Il progetto richiesto non esiste o è stato spostato.
           </p>
-          <Link to="/case-studies" className="btn-primary mt-8">Vedi tutti i case study</Link>
+          <Link to="/case-studies" className="btn-primary mt-8">
+            Vedi tutti i progetti
+          </Link>
         </div>
       </main>
       <Footer />
@@ -66,7 +85,9 @@ export const Route = createFileRoute("/case-studies/$slug")({
       <main className="flex min-h-[70vh] items-center justify-center px-6 pt-40">
         <div className="text-center">
           <h1 className="text-3xl">Errore di caricamento</h1>
-          <button type="button" onClick={reset} className="btn-primary mt-8">Riprova</button>
+          <button type="button" onClick={reset} className="btn-primary mt-8">
+            Riprova
+          </button>
         </div>
       </main>
       <Footer />
@@ -76,47 +97,21 @@ export const Route = createFileRoute("/case-studies/$slug")({
 });
 
 function CaseStudyPage() {
-  const { project } = Route.useLoaderData();
-  const [p, setP] = useState<Project>(project);
-  const [media, setMedia] = useState<ProjectMedia[]>([]);
+  const { project, variants, media } = Route.useLoaderData();
 
   useEffect(() => {
-    trackEvent("case_study_view", { path: `/case-studies/${p.slug}`, project_slug: p.slug });
-  }, [p.slug]);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    void getProjectBySlug(project.slug)
-      .then((fresh) => {
-        if (cancelled || !fresh) return;
-        setP(fresh);
-        void listProjectMedia(fresh.id)
-          .then((nextMedia) => {
-            if (!cancelled) setMedia(nextMedia);
-          })
-          .catch(() => {
-            if (!cancelled) setMedia([]);
-          });
-      })
-      .catch(() => {
-        // Keep the server-rendered project when a background refresh fails.
-      });
-
-    return () => {
-      cancelled = true;
-    };
+    trackEvent("case_study_view", {
+      path: `/case-studies/${project.slug}`,
+      project_slug: project.slug,
+    });
   }, [project.slug]);
 
-  const includes = [...new Set([...p.modules, ...p.features])].slice(0, 12);
+  const includes = [...new Set([...project.modules, ...project.features])].slice(0, 12);
 
-  function goToContact(e: React.MouseEvent) {
-    e.preventDefault();
-    trackEvent("cta_click", { project_slug: p.slug });
-    // If on home already this scrolls; otherwise fall back to hash nav.
-    if (typeof window !== "undefined") {
-      window.location.href = "/#contatti";
-    }
+  function goToContact(event: React.MouseEvent<HTMLAnchorElement>) {
+    event.preventDefault();
+    trackEvent("cta_click", { project_slug: project.slug });
+    if (typeof window !== "undefined") window.location.href = "/#contatti";
   }
 
   return (
@@ -132,102 +127,122 @@ function CaseStudyPage() {
           <Breadcrumb
             items={[
               { label: "Home", to: "/" },
-              { label: "Case study", to: "/case-studies" },
-              { label: p.title },
+              { label: "Progetti", to: "/case-studies" },
+              { label: project.title },
             ]}
           />
 
-          {/* Compact hero */}
           <header className="mt-6">
-            {p.badge && (
-              <span className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-[0.7rem] uppercase tracking-[0.22em] text-primary-glow">
-                {p.badge}
+            {(project.badge || project.is_concept) && (
+              <span className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-[0.7rem] uppercase tracking-[0.2em] text-primary-glow">
+                {project.badge || "Concept Tretnix"}
               </span>
             )}
-            <div className="mt-4 section-label !text-primary-glow">{p.category}</div>
+            <div className="mt-4 section-label !text-primary-glow">{project.category}</div>
             <h1 className="font-serif mt-3 text-4xl leading-[1.05] tracking-tight sm:text-5xl lg:text-[64px]">
-              {p.title}
+              {project.title}
             </h1>
-            <p className="mt-5 max-w-2xl text-lg text-muted-foreground">{p.short_description}</p>
+            <p className="mt-5 max-w-2xl text-lg text-muted-foreground">
+              {project.short_description}
+            </p>
+            {project.is_concept && (
+              <p className="mt-5 max-w-2xl border-l border-primary/45 pl-4 text-sm leading-relaxed text-subtle">
+                Progetto dimostrativo progettato e sviluppato da Tretnix. Non rappresenta un cliente
+                o un&apos;attività reale e non attribuisce risultati commerciali non verificati.
+              </p>
+            )}
           </header>
 
-          {/* Main visual */}
-          <div className={`relative mt-10 aspect-[16/9] w-full overflow-hidden rounded-3xl border border-border ${p.gradient}`}>
-            {p.image_url ? (
-              <StorageImage src={p.image_url} alt={p.title} className="absolute inset-0 h-full w-full object-cover" />
+          <div className={`relative mt-10 aspect-[16/9] w-full overflow-hidden rounded-3xl border border-border ${project.gradient}`}>
+            {project.image_url ? (
+              <StorageImage
+                src={project.image_url}
+                alt={`Anteprima del progetto ${project.title}`}
+                className="absolute inset-0 h-full w-full object-cover"
+              />
             ) : (
-              <>
-                <div className="absolute inset-0 bg-grid opacity-30" />
-                <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
-                <div className="absolute bottom-6 left-6 right-6">
-                  <div className="section-label">{p.title}</div>
-                  <div className="mt-1 font-serif text-2xl text-foreground">Concept visivo</div>
-                </div>
-              </>
+              <ProjectPortfolioCover title={project.title} category={project.category} />
             )}
           </div>
 
-          {/* Problem / Solution */}
+          {project.overview && (
+            <section className="mt-16 max-w-3xl">
+              <div className="section-label">{project.is_concept ? "Il concept" : "Il progetto"}</div>
+              <h2 className="font-serif mt-4 text-3xl sm:text-4xl">
+                Una soluzione costruita intorno al <span className="text-accent italic">contesto.</span>
+              </h2>
+              <p className="mt-5 text-base leading-relaxed text-muted-foreground sm:text-lg">
+                {project.overview}
+              </p>
+            </section>
+          )}
+
           <div className="mt-16 grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-14">
-            {p.problem && <Block title="Il problema">{p.problem}</Block>}
-            {p.solution && <Block title="La soluzione">{p.solution}</Block>}
+            {project.problem && (
+              <Block title={project.is_concept ? "L'esigenza esplorata" : "Il problema"}>
+                {project.problem}
+              </Block>
+            )}
+            {project.solution && <Block title="La direzione">{project.solution}</Block>}
           </div>
 
-          {/* Cosa include */}
+          <ProjectVariantTimeline variants={variants} />
+
           {includes.length > 0 && (
-            <section className="mt-16">
-              <h2 className="text-2xl font-medium sm:text-3xl">Cosa include</h2>
-              <ul className="mt-6 flex flex-wrap gap-2">
-                {includes.map((f) => (
-                  <li
-                    key={f}
-                    className="inline-flex items-center gap-2 rounded-full border border-border bg-white/[0.03] px-3.5 py-1.5 text-sm text-foreground"
-                  >
-                    <Check className="h-3.5 w-3.5 text-primary-glow" strokeWidth={2.4} />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-
-          {/* Impatto */}
-          {p.impact_points.length > 0 && (
-            <section className="mt-16">
-              <h2 className="text-2xl font-medium sm:text-3xl">Impatto sul lavoro</h2>
+            <section className="mt-20">
+              <h2 className="text-2xl font-medium sm:text-3xl">
+                {project.is_concept ? "Cosa dimostra" : "Cosa include"}
+              </h2>
               <ul className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                {p.impact_points.map((i) => (
+                {includes.map((feature) => (
                   <li
-                    key={i}
-                    className="flex items-start gap-3 border-l border-primary-glow/60 bg-white/[0.02] px-5 py-4 text-foreground"
+                    key={feature}
+                    className="flex items-start gap-3 rounded-xl border border-border bg-white/[0.02] px-4 py-3 text-sm text-foreground"
                   >
-                    {i}
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary-glow" strokeWidth={2.4} />
+                    {feature}
                   </li>
                 ))}
               </ul>
             </section>
           )}
 
-          {/* Galleria */}
+          {project.impact_points.length > 0 && (
+            <section className="mt-16">
+              <h2 className="text-2xl font-medium sm:text-3xl">
+                {project.is_concept ? "Principi del progetto" : "Impatto sul lavoro"}
+              </h2>
+              <ul className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {project.impact_points.map((item) => (
+                  <li
+                    key={item}
+                    className="border-l border-primary-glow/60 bg-white/[0.02] px-5 py-4 text-foreground"
+                  >
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
           {media.length > 0 && (
             <section className="mt-16">
               <h2 className="text-2xl font-medium sm:text-3xl">Galleria</h2>
-              <ProjectGallery items={media} projectTitle={p.title} />
+              <ProjectGallery items={media} projectTitle={project.title} />
             </section>
           )}
 
-
-          {/* Final CTA */}
           <section className="mt-20">
             <div className="glass-card relative overflow-hidden rounded-3xl p-8 sm:p-10 lg:p-14 soft-glow">
               <div className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-[radial-gradient(circle,rgba(11,99,255,0.35),transparent_70%)] blur-2xl" />
               <div className="relative grid grid-cols-1 items-center gap-8 lg:grid-cols-[1.4fr_auto]">
                 <div>
                   <h2 className="font-serif text-3xl leading-[1.05] sm:text-4xl">
-                    Vuoi un sistema simile per la <span className="text-accent italic">tua azienda?</span>
+                    Hai un&apos;attività con esigenze <span className="text-accent italic">simili?</span>
                   </h2>
                   <p className="mt-5 max-w-2xl text-muted-foreground lg:text-lg">
-                    Raccontaci il tuo processo. Ti aiuteremo a capire quale prima versione può semplificarlo.
+                    Non replichiamo il concept: partiamo dalla tua identità, dai contenuti e dal modo
+                    in cui lavori per definire la soluzione adatta al tuo progetto.
                   </p>
                 </div>
                 <a href="/#contatti" onClick={goToContact} className="btn-primary shrink-0 group">
@@ -249,9 +264,7 @@ function Block({ title, children }: { title: string; children: React.ReactNode }
   return (
     <div>
       <h2 className="text-2xl font-medium sm:text-3xl">{title}</h2>
-      <p className="mt-5 text-base leading-relaxed text-muted-foreground sm:text-lg">
-        {children}
-      </p>
+      <p className="mt-5 text-base leading-relaxed text-muted-foreground sm:text-lg">{children}</p>
     </div>
   );
 }
