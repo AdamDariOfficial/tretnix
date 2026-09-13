@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, Search } from "lucide-react";
 import { Navbar, Footer, BackToTopButton, Breadcrumb } from "@/components/TretnixChrome";
-import { StorageImage } from "@/components/StorageMedia";
+import { ProjectVisual } from "@/components/ProjectVisual";
 import { listVisibleProjects, type Project } from "@/lib/projects";
 import { trackEvent } from "@/lib/analytics";
 
@@ -35,7 +35,17 @@ export const Route = createFileRoute("/case-studies/")({
   component: CaseStudiesIndex,
 });
 
-const FILTERS = ["Tutti", "Gestionale", "Dashboard", "Operations", "CRM", "Finance", "Fitness"];
+const FILTERS = [
+  "Tutti",
+  "Food & Hospitality",
+  "Beauty & Wellness",
+  "Gestionale",
+  "Dashboard",
+  "Operations",
+  "CRM",
+  "Finance",
+  "Fitness",
+];
 
 function categoryMatches(cat: string, filter: string): boolean {
   if (filter === "Tutti") return true;
@@ -106,8 +116,8 @@ function CaseStudiesIndex() {
               Case study e <span className="text-accent italic">concept.</span>
             </h1>
             <p className="mt-6 max-w-2xl text-lg text-muted-foreground">
-              Una raccolta di sistemi digitali progettati per mostrare come Tretnix può
-              trasformare processi reali in software su misura.
+              Una raccolta di sistemi digitali progettati per mostrare come Tretnix può trasformare
+              processi reali in software su misura.
             </p>
           </header>
 
@@ -150,7 +160,10 @@ function CaseStudiesIndex() {
           <div className="mt-14 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {loading &&
               Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="aspect-[4/5] rounded-2xl border border-border bg-white/[0.02]" />
+                <div
+                  key={i}
+                  className="aspect-[4/5] rounded-2xl border border-border bg-white/[0.02]"
+                />
               ))}
             {!loading && loadFailed && (
               <div
@@ -170,12 +183,9 @@ function CaseStudiesIndex() {
                   onClick={() => trackEvent("project_card_click", { project_slug: p.slug })}
                   className="group relative block overflow-hidden rounded-2xl border border-border transition-all duration-200 ease-out hover:-translate-y-1 hover:border-primary-glow/60 hover:shadow-[0_30px_80px_-20px_rgba(11,99,255,0.35)] motion-reduce:transition-none motion-reduce:hover:translate-y-0"
                 >
-                  <div className={`aspect-[4/5] w-full ${p.gradient}`}>
-                    {p.image_url && (
-                      <StorageImage src={p.image_url} alt={p.title} className="absolute inset-0 h-full w-full object-cover opacity-60" />
-                    )}
+                  <div className={`relative aspect-[4/5] w-full ${p.gradient}`}>
+                    <ProjectVisual project={p} className="opacity-80" />
                     <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
-                    <div className="absolute inset-0 opacity-30 bg-grid" />
                   </div>
                   <div className="absolute inset-x-0 bottom-0 p-6">
                     {p.badge && (
@@ -184,12 +194,15 @@ function CaseStudiesIndex() {
                       </span>
                     )}
                     <div className="section-label mt-3 !text-primary-glow">{p.category}</div>
-                    <h3 className="font-serif mt-1.5 text-2xl text-foreground sm:text-3xl">{p.title}</h3>
+                    <h3 className="font-serif mt-1.5 text-2xl text-foreground sm:text-3xl">
+                      {p.title}
+                    </h3>
                     <p className="mt-3 max-w-md text-sm text-muted-foreground line-clamp-3">
                       {p.short_description}
                     </p>
                     <span className="mt-5 inline-flex items-center gap-1.5 text-sm text-foreground">
-                      Visualizza concept <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                      {p.is_concept ? "Visualizza concept" : "Leggi il case study"}
+                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0" />
                     </span>
                   </div>
                 </Link>

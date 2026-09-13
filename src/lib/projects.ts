@@ -32,7 +32,8 @@ export async function listVisibleProjects(): Promise<Project[]> {
     .from("projects")
     .select(SELECT)
     .eq("is_visible", true)
-    .order("sort_order", { ascending: true });
+    .order("sort_order", { ascending: true })
+    .order("slug", { ascending: true });
   if (error) throw error;
   return (data ?? []) as Project[];
 }
@@ -44,6 +45,7 @@ export async function listFeaturedProjects(limit = 2): Promise<Project[]> {
     .eq("is_visible", true)
     .eq("is_featured", true)
     .order("sort_order", { ascending: true })
+    .order("slug", { ascending: true })
     .limit(limit);
   if (error) throw error;
   return (data ?? []) as Project[];
@@ -65,7 +67,8 @@ export async function adminListProjects(): Promise<Project[]> {
   const { data, error } = await supabase
     .from("projects")
     .select(SELECT)
-    .order("sort_order", { ascending: true });
+    .order("sort_order", { ascending: true })
+    .order("slug", { ascending: true });
   if (error) throw error;
   return (data ?? []) as Project[];
 }
