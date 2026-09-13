@@ -1,11 +1,13 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Check } from "lucide-react";
 import { Navbar, Footer, BackToTopButton, Breadcrumb } from "@/components/TretnixChrome";
 import { StorageImage } from "@/components/StorageMedia";
+import { ProjectVisual } from "@/components/ProjectVisual";
 import { ProjectGallery } from "@/components/ProjectGallery";
 import { getProjectBySlug, type Project } from "@/lib/projects";
 import { listProjectMedia, type ProjectMedia } from "@/lib/project-media";
+import { getProjectDemos } from "@/lib/project-demos";
 import { trackEvent } from "@/lib/analytics";
 
 export const Route = createFileRoute("/case-studies/$slug")({
@@ -25,15 +27,18 @@ export const Route = createFileRoute("/case-studies/$slug")({
     }
     const { project } = loaderData;
     const canonicalUrl = `https://tretnix.com/case-studies/${encodeURIComponent(project.slug)}`;
+    const pageTitle = project.is_concept
+      ? `${project.title} — Concept ${project.category} | Tretnix`
+      : `${project.title} — Case study | Tretnix`;
     return {
       meta: [
-        { title: `${project.title} Case Study — Tretnix` },
+        { title: pageTitle },
         { name: "description", content: project.short_description },
-        { property: "og:title", content: `${project.title} Case Study — Tretnix` },
+        { property: "og:title", content: pageTitle },
         { property: "og:description", content: project.short_description },
         { property: "og:type", content: "article" },
         { property: "og:url", content: canonicalUrl },
-        { name: "twitter:title", content: `${project.title} Case Study — Tretnix` },
+        { name: "twitter:title", content: pageTitle },
         { name: "twitter:description", content: project.short_description },
         ...(project.image_url
           ? [
@@ -52,9 +57,11 @@ export const Route = createFileRoute("/case-studies/$slug")({
         <div className="text-center">
           <h1 className="font-serif text-4xl">Case study non trovato</h1>
           <p className="mt-3 text-muted-foreground">
-            Il concept richiesto non esiste o è stato spostato.
+            Il progetto richiesto non esiste o è stato spostato.
           </p>
-          <Link to="/case-studies" className="btn-primary mt-8">Vedi tutti i case study</Link>
+          <Link to="/case-studies" className="btn-primary mt-8">
+            Vedi tutti i case study
+          </Link>
         </div>
       </main>
       <Footer />
@@ -66,7 +73,9 @@ export const Route = createFileRoute("/case-studies/$slug")({
       <main className="flex min-h-[70vh] items-center justify-center px-6 pt-40">
         <div className="text-center">
           <h1 className="text-3xl">Errore di caricamento</h1>
-          <button type="button" onClick={reset} className="btn-primary mt-8">Riprova</button>
+          <button type="button" onClick={reset} className="btn-primary mt-8">
+            Riprova
+          </button>
         </div>
       </main>
       <Footer />
@@ -77,6 +86,7 @@ export const Route = createFileRoute("/case-studies/$slug")({
 
 function CaseStudyPage() {
   const { project } = Route.useLoaderData();
+  const navigate = useNavigate();
   const [p, setP] = useState<Project>(project);
   const [media, setMedia] = useState<ProjectMedia[]>([]);
 
@@ -109,14 +119,21 @@ function CaseStudyPage() {
   }, [project.slug]);
 
   const includes = [...new Set([...p.modules, ...p.features])].slice(0, 12);
+  const demos = getProjectDemos(p.slug);
 
   function goToContact(e: React.MouseEvent) {
-    e.preventDefault();
     trackEvent("cta_click", { project_slug: p.slug });
-    // If on home already this scrolls; otherwise fall back to hash nav.
-    if (typeof window !== "undefined") {
-      window.location.href = "/#contatti";
+
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
+      return;
     }
+
+    e.preventDefault();
+    void navigate({
+      to: "/",
+      state: { scrollToSection: "contatti" },
+      resetScroll: true,
+    });
   }
 
   return (
@@ -149,23 +166,74 @@ function CaseStudyPage() {
               {p.title}
             </h1>
             <p className="mt-5 max-w-2xl text-lg text-muted-foreground">{p.short_description}</p>
+            {p.is_concept && (
+              <p className="mt-4 max-w-2xl text-sm leading-relaxed text-subtle">
+                Progetto dimostrativo ideato e sviluppato da Tretnix; non rappresenta un incarico
+                cliente.
+              </p>
+            )}
           </header>
 
           {/* Main visual */}
-          <div className={`relative mt-10 aspect-[16/9] w-full overflow-hidden rounded-3xl border border-border ${p.gradient}`}>
+          <div
+            className={`relative mt-10 aspect-[16/9] w-full overflow-hidden rounded-3xl border border-border ${p.gradient}`}
+          >
             {p.image_url ? (
-              <StorageImage src={p.image_url} alt={p.title} className="absolute inset-0 h-full w-full object-cover" />
+              <StorageImage
+                src={p.image_url}
+                alt={p.title}
+                className="absolute inset-0 h-full w-full object-cover"
+              />
             ) : (
-              <>
-                <div className="absolute inset-0 bg-grid opacity-30" />
-                <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
-                <div className="absolute bottom-6 left-6 right-6">
-                  <div className="section-label">{p.title}</div>
-                  <div className="mt-1 font-serif text-2xl text-foreground">Concept visivo</div>
-                </div>
-              </>
+              <ProjectVisual project={p} />
             )}
           </div>
+
+          {demos.length > 0 && (
+            <section className="mt-12 border-y border-border py-7">
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] sm:items-start">
+                <div>
+                  <h2 className="text-xl font-medium">Esplora il concept</h2>
+                  <p className="mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">
+                    Le demo START e BUSINESS mostrano due livelli della stessa direzione
+                    progettuale.
+                  </p>
+                </div>
+                <ul className="divide-y divide-border border-y border-border sm:border-b-0 sm:border-t-0">
+                  {demos.map((demo) => (
+                    <li key={demo.href}>
+                      <a
+                        href={demo.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group flex items-center justify-between gap-5 py-4 text-foreground transition-colors hover:text-primary-glow"
+                      >
+                        <span>
+                          <span className="block text-sm font-medium">
+                            {demo.label}
+                            <span className="sr-only"> (si apre in una nuova scheda)</span>
+                          </span>
+                          <span className="mt-1 block text-xs text-muted-foreground">
+                            {demo.description}
+                          </span>
+                        </span>
+                        <ArrowUpRight className="h-4 w-4 shrink-0 transition-transform duration-200 ease-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0 motion-reduce:group-hover:translate-y-0" />
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </section>
+          )}
+
+          {(p.overview || p.audience) && (
+            <section className="mt-16 grid grid-cols-1 gap-10 lg:grid-cols-[1.5fr_1fr] lg:gap-14">
+              {p.overview && (
+                <Block title={p.is_concept ? "Il concept" : "Il progetto"}>{p.overview}</Block>
+              )}
+              {p.audience && <Block title="Per chi è pensato">{p.audience}</Block>}
+            </section>
+          )}
 
           {/* Problem / Solution */}
           <div className="mt-16 grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-14">
@@ -191,10 +259,28 @@ function CaseStudyPage() {
             </section>
           )}
 
+          {p.workflow_steps.length > 0 && (
+            <section className="mt-16">
+              <h2 className="text-2xl font-medium sm:text-3xl">Percorso principale</h2>
+              <ol className="mt-6 divide-y divide-border border-y border-border">
+                {p.workflow_steps.map((step, index) => (
+                  <li key={step} className="grid grid-cols-[2.5rem_1fr] gap-4 py-4 text-foreground">
+                    <span className="font-serif text-primary-glow" aria-hidden="true">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <span>{step}</span>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          )}
+
           {/* Impatto */}
           {p.impact_points.length > 0 && (
             <section className="mt-16">
-              <h2 className="text-2xl font-medium sm:text-3xl">Impatto sul lavoro</h2>
+              <h2 className="text-2xl font-medium sm:text-3xl">
+                {p.is_concept ? "Valore progettuale" : "Impatto sul lavoro"}
+              </h2>
               <ul className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {p.impact_points.map((i) => (
                   <li
@@ -208,6 +294,39 @@ function CaseStudyPage() {
             </section>
           )}
 
+          {(p.customizations.length > 0 || p.tech_stack.length > 0) && (
+            <section className="mt-16 grid grid-cols-1 gap-10 border-t border-border pt-10 lg:grid-cols-2 lg:gap-14">
+              {p.customizations.length > 0 && (
+                <div>
+                  <h2 className="text-xl font-medium sm:text-2xl">Adattabile al progetto</h2>
+                  <ul className="mt-5 space-y-3 text-sm leading-relaxed text-muted-foreground">
+                    {p.customizations.map((item) => (
+                      <li key={item} className="flex items-start gap-3">
+                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary-glow" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {p.tech_stack.length > 0 && (
+                <div>
+                  <h2 className="text-xl font-medium sm:text-2xl">Tecnologie</h2>
+                  <ul className="mt-5 flex flex-wrap gap-2">
+                    {p.tech_stack.map((item) => (
+                      <li
+                        key={item}
+                        className="rounded-full border border-border px-3 py-1.5 text-xs text-muted-foreground"
+                      >
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </section>
+          )}
+
           {/* Galleria */}
           {media.length > 0 && (
             <section className="mt-16">
@@ -216,7 +335,6 @@ function CaseStudyPage() {
             </section>
           )}
 
-
           {/* Final CTA */}
           <section className="mt-20">
             <div className="glass-card relative overflow-hidden rounded-3xl p-8 sm:p-10 lg:p-14 soft-glow">
@@ -224,10 +342,12 @@ function CaseStudyPage() {
               <div className="relative grid grid-cols-1 items-center gap-8 lg:grid-cols-[1.4fr_auto]">
                 <div>
                   <h2 className="font-serif text-3xl leading-[1.05] sm:text-4xl">
-                    Vuoi un sistema simile per la <span className="text-accent italic">tua azienda?</span>
+                    Vuoi un sistema simile per la{" "}
+                    <span className="text-accent italic">tua azienda?</span>
                   </h2>
                   <p className="mt-5 max-w-2xl text-muted-foreground lg:text-lg">
-                    Raccontaci il tuo processo. Ti aiuteremo a capire quale prima versione può semplificarlo.
+                    Raccontaci il tuo processo. Ti aiuteremo a capire quale prima versione può
+                    semplificarlo.
                   </p>
                 </div>
                 <a href="/#contatti" onClick={goToContact} className="btn-primary shrink-0 group">
@@ -249,9 +369,7 @@ function Block({ title, children }: { title: string; children: React.ReactNode }
   return (
     <div>
       <h2 className="text-2xl font-medium sm:text-3xl">{title}</h2>
-      <p className="mt-5 text-base leading-relaxed text-muted-foreground sm:text-lg">
-        {children}
-      </p>
+      <p className="mt-5 text-base leading-relaxed text-muted-foreground sm:text-lg">{children}</p>
     </div>
   );
 }
