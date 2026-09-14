@@ -36,8 +36,8 @@ Jurisdiction is a resource-creation decision. Record resource names, IDs and jur
 Create isolated staging resources only after the provisioning gate is approved:
 
 ```powershell
-npx wrangler@latest d1 create tretnix-staging --jurisdiction=eu
-npx wrangler@latest r2 bucket create tretnix-media-staging --jurisdiction=eu
+npx wrangler@4.131.2 d1 create tretnix-staging --jurisdiction=eu
+npx wrangler@4.131.2 r2 bucket create tretnix-media-staging --jurisdiction=eu
 ```
 
 Record the D1 UUID returned by Wrangler. Choose three distinct positive integer Rate Limiting namespace IDs that are unique within the Cloudflare account:
@@ -78,7 +78,6 @@ node .\tools\cloudflare\prepare-environment-config.mjs `
   --database-name tretnix-staging `
   --database-id '<D1 UUID>' `
   --bucket-name tretnix-media-staging `
-  --hostname '<staging hostname>' `
   --login-rate-namespace-id '<unique integer>' `
   --contact-rate-namespace-id '<unique integer>' `
   --analytics-rate-namespace-id '<unique integer>'
@@ -92,9 +91,13 @@ The tool reads the stamped `.output/server/wrangler.json`, preserves the generat
 
 It refuses stale build stamps. It never provisions or deploys.
 
+Staging intentionally uses the existing `tretnix-staging.<account-subdomain>.workers.dev` surface with `workers_dev=true` and `preview_urls=true`. The generated staging config contains no custom-domain or zone route, and staging does not require `--hostname`. Production remains separate: it requires a validated hostname and retains the custom-domain configuration for `tretnix.com`.
+
 ## 6. Prepare staging secret material locally
 
-Generate `ADMIN_AUTH_PEPPER` and `ADMIN_AUTH_CSRF_SECRET` independently. Each must contain at least 32 high-entropy characters. Keep the staging values in an approved secret manager or in a temporary JSON/`.env` file at an absolute path **outside the repository**. Never write secret values to `wrangler.jsonc`, a generated config, source code, documentation or any Git-controlled path. Production uses independently generated values and separate private material.
+Generate `ADMIN_AUTH_PEPPER` and `ADMIN_AUTH_CSRF_SECRET` independently. Each must contain at least 32 high-entropy characters. Keep the staging values in an approved secret manager or in a temporary JSON/`.env` file under `$env:LOCALAPPDATA\Tretnix\private\`, which is outside the repository, or another explicitly approved absolute path outside Git. Restrict custody to the owner account and approved secret tooling. The secrets file contains actual secret values: never write it to `wrangler.jsonc`, a generated config, source code, documentation or any Git-controlled path. Delete temporary private material when it is no longer needed. Production uses independently generated values and separate private material.
+
+For the canonical staging candidate, do not attempt to recover the existing unreadable secret values. Generate new independent staging values for both required secrets. This rotation is safe for this cutover because the verified staging D1 state has zero native admins and zero sessions, while the currently active staging version remains unchanged until the later traffic gate. Native AdminAuth provisioning must use exactly the same new staging pepper supplied to the new Worker version. This is a staging-specific owner decision; it does not define automatic rotation behavior and production secrets remain entirely separate.
 
 This is local preparation only: do not run a Wrangler secret command here. In particular, `wrangler secret put` is prohibited in this phase because current Wrangler creates a Worker version and deploys it immediately. The `secrets.required` entries in the generated config declare and validate names; they do not provision values.
 
@@ -105,13 +108,13 @@ Secret provisioning is a remote mutation and requires explicit authorization. Pr
 Review migration state before applying:
 
 ```powershell
-npx wrangler@latest d1 migrations list tretnix-staging --remote --config '.output\server\wrangler.staging.json'
+npx wrangler@4.131.2 d1 migrations list tretnix-staging --remote --config '.output\server\wrangler.staging.json'
 ```
 
 Only after an explicit migration gate:
 
 ```powershell
-npx wrangler@latest d1 migrations apply tretnix-staging --remote --config '.output\server\wrangler.staging.json'
+npx wrangler@4.131.2 d1 migrations apply tretnix-staging --remote --config '.output\server\wrangler.staging.json'
 ```
 
 The initial migrations create the Tretnix application schema and Native AdminAuth tables. Portfolio V1 structurally prevents `BUSINESS_PLUS` from being published.
@@ -123,23 +126,29 @@ Native Tretnix AdminAuth does not migrate Supabase Auth password material.
 Generate an admin record privately:
 
 ```powershell
+$privateRoot = Join-Path $env:LOCALAPPDATA 'Tretnix\private'
+$adminSqlPath = Join-Path $privateRoot 'tretnix-staging-admin.sql'
+New-Item -ItemType Directory -Path $privateRoot -Force | Out-Null
 $env:TRETNIX_ADMIN_EMAIL='<admin email>'
 $env:TRETNIX_ADMIN_PASSWORD='<strong password>'
 $env:TRETNIX_ADMIN_AUTH_PEPPER='<same staging pepper>'
-bun .\tools\admin\generate-admin-user-sql.ts > '.private\tretnix-admin.sql'
+bun .\tools\admin\generate-admin-user-sql.ts > $adminSqlPath
 ```
 
-The SQL contains a salt/hash record, not the plaintext password or pepper. Review it and execute it against staging D1 only after the admin-provisioning gate. Delete private generated material when no longer needed.
+Create `$privateRoot` outside the repository with restrictive, owner-only custody before running the command. The SQL contains authentication hash/salt material, although not the plaintext password or pepper. Review it and execute it against staging D1 only after the admin-provisioning gate. Neither the SQL nor the secrets file may enter Git. Delete private generated material when no longer needed.
 
 ## 9. Staging version-upload gate
 
 Only after a separate remote-mutation authorization, upload code, bindings and the complete staging secret set as a new version that does **not** receive traffic:
 
 ```powershell
-npx wrangler@latest versions upload `
+$stagingSecretsPath = Join-Path $env:LOCALAPPDATA 'Tretnix\private\tretnix-staging-secrets.json'
+npx wrangler@4.131.2 versions upload `
   --config '.output\server\wrangler.staging.json' `
-  --secrets-file '<absolute path outside repository to staging secrets>' `
-  --experimental-auto-create=false
+  --secrets-file $stagingSecretsPath `
+  --experimental-provision=false `
+  --experimental-auto-create=false `
+  --strict
 ```
 
 Record the returned version ID and preview evidence. `versions upload` mutates the remote Worker by creating a version, but it does not create a deployment. Do not substitute `wrangler deploy` or `wrangler secret put`; both couple version creation to an immediate deployment. For a later rotation on an existing Worker, `wrangler versions secret put` likewise creates an undeployed version that must pass the separate deployment gate.
@@ -149,7 +158,7 @@ Record the returned version ID and preview evidence. `versions upload` mutates t
 Only after the exact uploaded version, bindings, secrets, migrations and admin provisioning have passed review, and after explicit deployment authorization, deploy that recorded version to 100% of staging traffic:
 
 ```powershell
-npx wrangler@latest versions deploy '<STAGING_VERSION_ID>@100%' --config '.output\server\wrangler.staging.json'
+npx wrangler@4.131.2 versions deploy '<STAGING_VERSION_ID>@100%' --config '.output\server\wrangler.staging.json'
 ```
 
 A successful version upload or deployment is not acceptance. Record both version and deployment evidence and perform the staging verification matrix below.

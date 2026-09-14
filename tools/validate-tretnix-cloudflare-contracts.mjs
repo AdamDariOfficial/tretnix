@@ -148,6 +148,15 @@ requireText("tools/cloudflare/build-environment.mjs", [
 requireText("tools/cloudflare/prepare-environment-config.mjs", [
   "wrangler.${environment}.json",
   'buildStamp?.profile !== "live"',
+  'environment === "staging"',
+  "config.workers_dev = true",
+  "config.preview_urls = true",
+  "delete config.route",
+  "delete config.routes",
+  "config.workers_dev = false",
+  "config.preview_urls = false",
+  'required(args, "hostname")',
+  "custom_domain: true",
   "secrets",
   "ratelimits",
 ]);

@@ -91,7 +91,11 @@ const environment = validateEnvironment(required(args, "environment"));
 const databaseName = validateDatabaseName(required(args, "database-name"));
 const databaseId = validateDatabaseId(required(args, "database-id"));
 const bucketName = validateBucketName(required(args, "bucket-name"));
-const hostname = validateHostname(required(args, "hostname"));
+if (environment === "staging" && args.has("hostname")) {
+  fail("--hostname is not supported for staging; use workers.dev and Preview URLs.");
+}
+const hostname =
+  environment === "production" ? validateHostname(required(args, "hostname")) : undefined;
 const loginRateNamespaceId = validateNamespaceId(
   required(args, "login-rate-namespace-id"),
   "login-rate-namespace-id",
@@ -163,9 +167,16 @@ for (const forbidden of ["supabase", "business_plus_db", "consultation_db", "rit
 
 const config = structuredClone(generated);
 config.name = workerName;
-config.workers_dev = false;
-config.preview_urls = false;
-config.routes = [{ pattern: hostname, custom_domain: true }];
+if (environment === "staging") {
+  config.workers_dev = true;
+  config.preview_urls = true;
+  delete config.route;
+  delete config.routes;
+} else {
+  config.workers_dev = false;
+  config.preview_urls = false;
+  config.routes = [{ pattern: hostname, custom_domain: true }];
+}
 config.vars = {
   ...(config.vars ?? {}),
   TRETNIX_ENV: environment,
@@ -213,7 +224,11 @@ console.log(`Environment: ${environment}`);
 console.log(`Input:       ${sourcePath}`);
 console.log(`Output:      ${outputPath}`);
 console.log(`Worker:      ${workerName}`);
-console.log(`Hostname:    https://${hostname}`);
+console.log(
+  environment === "staging"
+    ? "Exposure:    workers.dev and Preview URLs (no custom-domain route)"
+    : `Hostname:    https://${hostname}`,
+);
 console.log(`D1:          ${databaseName} (${databaseId})`);
 console.log(`R2:          ${bucketName} (EU jurisdiction binding)`);
 console.log(`Login rate namespace:     ${loginRateNamespaceId}`);
