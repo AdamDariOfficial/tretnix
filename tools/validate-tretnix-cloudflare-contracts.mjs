@@ -41,6 +41,22 @@ if (forbiddenPublishedPlus.test(variantSeedSection)) {
   fail("Core migration contains a BUSINESS_PLUS seed that appears to be published.");
 }
 
+requireText("migrations/0003_reconcile_portfolio_v1.sql", [
+  "category='Food & Hospitality'",
+  "WHERE slug='forno-lume'",
+  "sort_order=10",
+  "category='Beauty & Wellness'",
+  "WHERE slug='rito-studio'",
+  "sort_order=20",
+  "WHEN 'fitzone' THEN 100",
+  "WHEN 'supplyflow' THEN 110",
+  "WHEN 'wealthcore' THEN 120",
+  "WHERE slug NOT IN ('forno-lume','rito-studio') AND is_featured<>0",
+  "AND plan IN ('START','BUSINESS')",
+  "AND plan='BUSINESS_PLUS'",
+  "SET publish_status='draft'",
+]);
+
 requireText("migrations/0002_native_admin_auth.sql", [
   "CREATE TABLE IF NOT EXISTS admin_users",
   "CREATE TABLE IF NOT EXISTS admin_sessions",
@@ -109,6 +125,7 @@ requireText("src/features/tretnix/live/repository.server.ts", [
   "deleteMediaAssetIfUnreferenced",
   "assertMediaAssetExists",
   "TRETNIX_MEDIA",
+  "ORDER BY sort_order ASC, slug ASC",
 ]);
 
 const sourceWrangler = requireText("wrangler.jsonc", [
@@ -134,31 +151,21 @@ requireText("tools/cloudflare/prepare-environment-config.mjs", [
   "secrets",
   "ratelimits",
 ]);
-requireText("tools/migration/build-d1-import-sql.mjs", [
-  "PROTECTED_PORTFOLIO_SLUGS",
-  "sourceProjectSlugById",
-  "is_featured=0",
-]);
-requireText("tools/migration/build-media-migration-plan.mjs", [
-  "media-upload-plan.json",
-  "media-remap.sql",
-  "sha256",
-]);
 requireText("CLOUDFLARE_RUNBOOK.md", [
-  "Legacy Supabase data",
+  "Fresh D1 initialization",
+  "Do not export or import legacy rows",
   "Native admin provisioning",
   "Required evidence before declaring the migration complete",
 ]);
 
 const runtimeRoots = [path.join(root, "src")];
-const allowedLegacyRoot = path.normalize(path.join(root, "src", "integrations", "supabase"));
 const runtimeSupabaseHits = [];
+const runtimeLovableHits = [];
 
 function walk(directory) {
   for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
     const pathname = path.join(directory, entry.name);
     if (entry.isDirectory()) {
-      if (path.normalize(pathname) === allowedLegacyRoot) continue;
       walk(pathname);
       continue;
     }
@@ -167,6 +174,9 @@ function walk(directory) {
     if (/@\/integrations\/supabase|@supabase\/supabase-js/.test(content)) {
       runtimeSupabaseHits.push(path.relative(root, pathname).replaceAll(path.sep, "/"));
     }
+    if (/__lovableEvents|reportLovableError/.test(content)) {
+      runtimeLovableHits.push(path.relative(root, pathname).replaceAll(path.sep, "/"));
+    }
   }
 }
 
@@ -174,7 +184,14 @@ for (const runtimeRoot of runtimeRoots) walk(runtimeRoot);
 if (runtimeSupabaseHits.length) {
   fail(`Active runtime Supabase imports remain: ${runtimeSupabaseHits.join(", ")}`);
 }
+if (runtimeLovableHits.length) {
+  fail(`Active runtime Lovable hooks remain: ${runtimeLovableHits.join(", ")}`);
+}
 
+const packageManifest = JSON.parse(read("package.json"));
+if (packageManifest.dependencies?.["@supabase/supabase-js"]) {
+  fail("package.json still declares the Supabase runtime dependency.");
+}
 for (const relative of ["src/features/tretnix", "src/server/cloudflare"]) {
   const absolute = path.join(root, relative);
   const serialized = fs

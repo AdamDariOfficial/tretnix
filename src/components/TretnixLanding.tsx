@@ -15,10 +15,11 @@ import {
   prefersReducedMotion,
   scrollToSection,
 } from "./TretnixChrome";
-import { StorageImage } from "./StorageMedia";
 import { HeroMockup } from "./HeroMockup";
+import { ProjectVisual } from "./ProjectVisual";
 import { listFeaturedProjects, type Project } from "@/lib/projects";
 import { trackEvent } from "@/lib/analytics";
+import { focusContactForm } from "@/lib/contact-form-focus";
 import {
   contactRequestSchema,
   submitContactRequest,
@@ -266,19 +267,21 @@ function ProjectCard({ p }: { p: Project }) {
       onClick={() => trackEvent("project_card_click", { project_slug: p.slug })}
       className="group relative block overflow-hidden rounded-2xl border border-border transition-all duration-200 ease-out hover:-translate-y-1 hover:border-primary-glow/60 hover:shadow-[0_30px_80px_-20px_rgba(11,99,255,0.35)] motion-reduce:transition-none motion-reduce:hover:translate-y-0"
     >
-      <div className={`aspect-[4/5] w-full ${p.gradient}`}>
-        {p.image_url && (
-          <StorageImage src={p.image_url} alt={p.title} className="absolute inset-0 h-full w-full object-cover opacity-60" />
-        )}
+      <div className={`relative aspect-[4/5] w-full ${p.gradient}`}>
+        <ProjectVisual project={p} className="opacity-80" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
-        <div className="absolute inset-0 opacity-30 bg-grid" />
       </div>
       <div className="absolute inset-x-0 bottom-0 p-7">
-        <div className="section-label !text-primary-glow">{p.category}</div>
+        {p.badge && (
+          <span className="inline-flex items-center rounded-full border border-primary/40 bg-primary/10 px-2.5 py-0.5 text-[0.65rem] uppercase tracking-[0.2em] text-primary-glow">
+            {p.badge}
+          </span>
+        )}
+        <div className={`section-label !text-primary-glow ${p.badge ? "mt-3" : ""}`}>{p.category}</div>
         <h3 className="font-serif mt-2 text-3xl text-foreground sm:text-4xl">{p.title}</h3>
         <p className="mt-3 max-w-md text-sm text-muted-foreground line-clamp-3">{p.short_description}</p>
         <span className="mt-5 inline-flex items-center gap-1.5 text-sm text-foreground">
-          Visualizza concept <ArrowIcon />
+          {p.is_concept ? "Visualizza concept" : "Leggi il case study"} <ArrowIcon />
         </span>
       </div>
     </Link>
@@ -1463,28 +1466,32 @@ export default function TretnixLanding() {
 
     window.scrollTo({ top: 0, behavior: "auto" });
 
-    void router
-      .navigate({
-        to: ".",
-        replace: true,
-        state: (previous) => {
-          const { scrollToSection: _drop, ...rest } = previous;
-          return rest;
-        },
-        resetScroll: false,
-      })
-      .then(() => {
+    outerFrame = window.requestAnimationFrame(() => {
+      innerFrame = window.requestAnimationFrame(() => {
         if (cancelled) return;
-        outerFrame = window.requestAnimationFrame(() => {
-          innerFrame = window.requestAnimationFrame(() => {
-            if (cancelled) return;
-            scrollToSection(id, {
-              history: "replace",
-              behavior: prefersReducedMotion() ? "auto" : "smooth",
-            });
-          });
+
+        const reduceMotion = prefersReducedMotion();
+        scrollToSection(id, {
+          history: "replace",
+          behavior: reduceMotion ? "auto" : "smooth",
+        });
+
+        if (id === "contatti") {
+          focusContactForm(undefined, reduceMotion ? 0 : 650);
+        }
+
+        void router.navigate({
+          to: ".",
+          hash: id,
+          replace: true,
+          state: (previous) => {
+            const { scrollToSection: _drop, ...rest } = previous;
+            return rest;
+          },
+          resetScroll: false,
         });
       });
+    });
 
     return () => {
       cancelled = true;

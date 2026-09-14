@@ -1,10 +1,10 @@
 # Tretnix Portfolio V1 — Approved specification
 
-Approved by the project owner on 7 September 2026; Cloudflare persistence requirement added the same day.
+Approved by the project owner on 7 September 2026; reconciled with the Cloudflare-native owner decision on 14 September 2026.
 
 ## Public model
 
-- `/case-studies/forno-lume`: Hospitality concept family, START → BUSINESS.
+- `/case-studies/forno-lume`: Food & Hospitality concept family, START → BUSINESS.
 - `/case-studies/rito-studio`: Beauty & Wellness concept family, START → BUSINESS.
 - Homepage featured selection: Forno Lume + RITO Studio.
 - Concepts use `Concept Tretnix`; no invented clients, metrics, testimonials, awards or outcomes.
@@ -34,5 +34,6 @@ Source development defaults to a `local` backend profile with non-persistent in-
 - no Durable Objects or realtime sync in V1;
 - no BUSINESS PLUS publication;
 - no deployment/provisioning performed by the source package;
-- no automatic deletion of historical Supabase migrations/integration files;
-- no automatic assumption that live Supabase data is empty.
+- no Lovable or Supabase runtime dependency;
+- no legacy data export/import: the owner confirmed that no Lovable/Supabase data must be preserved;
+- historical Supabase migrations may remain only as inert Git history and must not be executed for the Cloudflare-native environment.

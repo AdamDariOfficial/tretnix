@@ -1,6 +1,6 @@
 # Tretnix Cloudflare provisioning and cutover runbook
 
-**Scope:** Tretnix website/admin persistence cutover from the current Supabase runtime to a dedicated Cloudflare Worker + D1 + R2 backend.
+**Scope:** Tretnix website/admin delivery on a dedicated Cloudflare Worker + D1 + R2 backend, with no Lovable/Supabase runtime dependency.
 
 This is a gate document. The Controlled Change Package does **not** create Cloudflare resources, set secrets, apply remote migrations, import live data, deploy, change DNS, stage, commit or push.
 
@@ -181,20 +181,11 @@ Verify at minimum:
 
 Do not certify staging until direct evidence exists for each applicable gate.
 
-## 12. Legacy Supabase data
+## 12. Fresh D1 initialization
 
-Production cutover must not assume the current Supabase project is empty. The connected Supabase account available during package preparation did not expose the Tretnix live project, so live row/media counts are unknown.
+The owner confirmed on 14 September 2026 that no Lovable/Supabase data must be preserved. Create a new, clean D1 database and apply only the versioned migrations in `migrations/`. Do not export or import legacy rows, media, Auth identities, or password material.
 
-Follow `tools/migration/README.md` before production switch. Private exports and PII-bearing generated SQL stay outside Git.
-
-Key invariants:
-
-- Forno Lume and RITO Studio portfolio family content remains version-controlled by Portfolio V1 and is not overwritten by a same-slug legacy export.
-- Legacy project records are reconciled by slug so old Supabase UUIDs cannot break D1 foreign keys.
-- Imported legacy projects remain non-featured so the homepage keeps exactly the Portfolio V1 featured families.
-- Supabase Auth password material is not migrated.
-- `sb://` bytes move to R2 before the corresponding D1 URL remap.
-- media byte hashes are checked before upload.
+The seed is authoritative for Portfolio V1: Forno Lume and RITO Studio are the only featured projects; FitZone, SupplyFlow, and WealthCore remain visible and non-featured. START and BUSINESS are published for the two featured concept families; BUSINESS PLUS remains unpublished by schema constraint.
 
 ## 13. Production resources
 
@@ -225,11 +216,7 @@ validated repository candidate
 → production D1/R2 provisioning
 → production generated Worker config
 → base D1 migrations
-→ private legacy structured-data import
-→ legacy media upload to R2
-→ verify R2 bytes
-→ D1 media remap
-→ reconcile row/media counts
+→ verify canonical clean-D1 seed and empty operational tables
 → provision native admin
 → staging-equivalent pre-deploy checks
 → explicit production version-upload gate with separate production secrets
@@ -246,10 +233,10 @@ Do not delete the old Supabase project immediately after cutover. Keep it unchan
 - D1/R2 names, IDs and EU jurisdiction recorded;
 - generated Worker config hash/stamp recorded;
 - migrations list and applied result recorded;
-- imported source counts vs D1 target counts reconciled;
-- R2 migration plan count vs uploaded/remapped count reconciled;
+- canonical clean-D1 project/variant postconditions verified;
+- operational tables and R2 start without imported legacy data;
 - native admin provisioned and authentication/security paths verified;
-- no active runtime Supabase import outside preserved historical integration files;
+- no active Supabase package/import and no Lovable browser-runtime hook; the Lovable Vite config remains only as the documented build-time adapter;
 - source contract validator passed;
 - build passed;
 - staging browser/admin/security QA passed;

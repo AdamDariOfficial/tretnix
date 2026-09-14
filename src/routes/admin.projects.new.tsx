@@ -380,7 +380,7 @@ export function ProjectForm({ mode, id }: { mode: "new" | "edit"; id?: string })
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                 <input
                   type="url"
-                  placeholder="URL esterno o marker sb://…"
+                  placeholder="URL esterno"
                   value={p.image_url ?? ""}
                   onChange={(e) => setP({ ...p, image_url: e.target.value })}
                   className="admin-input flex-1"
@@ -551,7 +551,7 @@ function StagedMediaEditor({
             <option value="video">Video</option>
           </select>
           <input
-            type="url" placeholder="URL o sb://…" value={url}
+            type="url" placeholder="URL esterno" value={url}
             onChange={(e) => setUrl(e.target.value)} className="admin-input"
           />
           <label className="btn-ghost cursor-pointer whitespace-nowrap">

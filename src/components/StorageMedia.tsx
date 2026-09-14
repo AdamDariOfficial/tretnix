@@ -18,7 +18,7 @@ function Placeholder({ className }: { className?: string }) {
   );
 }
 
-/** <img> that resolves Supabase storage URLs (private bucket → signed URL). */
+/** Image wrapper that resolves Tretnix R2 media references through the Worker. */
 export function StorageImage({ src, alt = "", className, ...rest }: ImgProps) {
   const resolved = useResolvedUrl(src);
   const [errored, setErrored] = useState(false);
@@ -34,7 +34,7 @@ export function StorageImage({ src, alt = "", className, ...rest }: ImgProps) {
   );
 }
 
-/** <video> that resolves Supabase storage URLs. */
+/** Video wrapper that resolves Tretnix R2 media references through the Worker. */
 export function StorageVideo({ src, className, ...rest }: VidProps) {
   const resolved = useResolvedUrl(src);
   const [errored, setErrored] = useState(false);

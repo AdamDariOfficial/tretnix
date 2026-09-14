@@ -223,7 +223,7 @@ export async function listProjects(options: { featured?: boolean; admin?: boolea
   if (!options.admin) where.push("is_visible = 1");
   if (options.featured) where.push("is_featured = 1");
   if (where.length) sql += ` WHERE ${where.join(" AND ")}`;
-  sql += " ORDER BY sort_order ASC";
+  sql += " ORDER BY sort_order ASC, slug ASC";
 
   const result = await db().prepare(sql).all<ProjectRow>();
   return (result.results ?? []).map(mapProject);
@@ -379,7 +379,7 @@ export async function listVariants(projectId: string, admin = false) {
   }
   const result = await db()
     .prepare(
-      `SELECT ${VARIANT_SELECT} FROM project_variants WHERE project_id = ? ${admin ? "" : "AND publish_status = 'published'"} ORDER BY sort_order ASC`,
+      `SELECT ${VARIANT_SELECT} FROM project_variants WHERE project_id = ? ${admin ? "" : "AND publish_status = 'published'"} ORDER BY sort_order ASC, plan ASC`,
     )
     .bind(projectId)
     .all<VariantRow>();
@@ -424,7 +424,7 @@ export async function replaceVariants(projectId: string, variants: ProjectVarian
 export async function listMedia(projectId: string) {
   const result = await db()
     .prepare(
-      "SELECT id,project_id,type,url,caption,alt_text,sort_order,created_at,updated_at FROM project_media WHERE project_id=? ORDER BY sort_order ASC",
+      "SELECT id,project_id,type,url,caption,alt_text,sort_order,created_at,updated_at FROM project_media WHERE project_id=? ORDER BY sort_order ASC, id ASC",
     )
     .bind(projectId)
     .all<ProjectMedia>();

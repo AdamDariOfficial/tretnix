@@ -2,12 +2,16 @@
 
 Prepared: 7 September 2026
 
+Reconciled: 14 September 2026
+
 ## Tretnix
 
 - repository: `AdamDariOfficial/tretnix`
 - approved package base: `ab6e29ee922bb4376fd9e7919b3afe74a4b7a7ea`
+- Cloudflare candidate before reconciliation: `748d6dafd91f18dee99a2b525cd8f6c1b600fc0d`
+- canonical UX/copy merge source (`origin/main`, PR #7): `7682f583530b376d5f002327f49e49ef31e90b97`
 - target branch: `feat/tretnix-portfolio-v1`
-- existing runtime before this package: Supabase-backed projects, media, admin auth/roles, contact requests, analytics and site settings.
+- legacy runtime before this package: Supabase-backed projects, media, admin auth/roles, contact requests, analytics and site settings.
 - existing build target: TanStack Start with Cloudflare as the default Nitro target through the Lovable config.
 
 ## Cloudflare reference pattern
@@ -41,6 +45,6 @@ The implementation reuses the verified architectural pattern from current Forno 
 - repository documentation retains a browser-QA discrepancy for the latest sync; Portfolio V1 does not rewrite that evidence.
 - demo: `https://rito-studio-business.tretnix.com/`
 
-## Missing evidence / cutover constraint
+## Legacy-data decision
 
-The connected Supabase account available during preparation exposed a different project, not the Tretnix live backend. Live Supabase rows and storage objects are therefore unknown. Production cutover requires a private export/import and media migration gate; no live-data preservation claim is made before that evidence exists.
+On 14 September 2026 the project owner confirmed that the legacy Lovable/Supabase database contains no data that must be preserved. The Cloudflare-native target therefore starts from a new, clean D1 database seeded by the versioned D1 migrations. No Supabase export, structured-data import, media import, or Auth credential migration is part of the cutover.

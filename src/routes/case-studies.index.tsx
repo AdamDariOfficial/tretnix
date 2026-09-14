@@ -2,8 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, Search } from "lucide-react";
 import { Navbar, Footer, BackToTopButton, Breadcrumb } from "@/components/TretnixChrome";
-import { StorageImage } from "@/components/StorageMedia";
-import { ProjectPortfolioCover } from "@/components/ProjectPortfolioCover";
+import { ProjectVisual } from "@/components/ProjectVisual";
 import { listVisibleProjects, type Project } from "@/lib/projects";
 import { trackEvent } from "@/lib/analytics";
 
@@ -179,19 +178,7 @@ function CaseStudiesIndex() {
                   className="group relative block overflow-hidden rounded-2xl border border-border transition-all duration-200 ease-out hover:-translate-y-1 hover:border-primary-glow/60 hover:shadow-[0_30px_80px_-20px_rgba(11,99,255,0.35)] motion-reduce:transition-none motion-reduce:hover:translate-y-0"
                 >
                   <div className={`relative aspect-[4/5] w-full ${project.gradient}`}>
-                    {project.image_url ? (
-                      <StorageImage
-                        src={project.image_url}
-                        alt=""
-                        className="absolute inset-0 h-full w-full object-cover opacity-70"
-                      />
-                    ) : (
-                      <ProjectPortfolioCover
-                        title={project.title}
-                        category={project.category}
-                        compact
-                      />
-                    )}
+                    <ProjectVisual project={project} className="opacity-80" />
                     <div className="absolute inset-0 bg-gradient-to-t from-background via-background/45 to-transparent" />
                   </div>
 
@@ -210,7 +197,7 @@ function CaseStudiesIndex() {
                     </p>
                     <span className="mt-5 inline-flex items-center gap-1.5 text-sm text-foreground">
                       {project.is_concept ? "Esplora il concept" : "Leggi il case study"}
-                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1 motion-reduce:transition-none" />
+                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0" />
                     </span>
                   </div>
                 </Link>

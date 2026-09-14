@@ -1,13 +1,14 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Check } from "lucide-react";
 import { Navbar, Footer, BackToTopButton, Breadcrumb } from "@/components/TretnixChrome";
 import { StorageImage } from "@/components/StorageMedia";
+import { ProjectVisual } from "@/components/ProjectVisual";
 import { ProjectGallery } from "@/components/ProjectGallery";
-import { ProjectPortfolioCover } from "@/components/ProjectPortfolioCover";
 import { ProjectVariantTimeline } from "@/components/ProjectVariantTimeline";
 import { getProjectBySlug } from "@/lib/projects";
 import { listProjectMedia } from "@/lib/project-media";
+import { getProjectDemos } from "@/lib/project-demos";
 import { listPublishedProjectVariants } from "@/lib/project-variants";
 import { trackEvent } from "@/lib/analytics";
 
@@ -39,8 +40,8 @@ export const Route = createFileRoute("/case-studies/$slug")({
       ? `https://tretnix.com/api/tretnix/media/${encodeURIComponent(project.image_url.slice(6))}`
       : project.image_url;
     const pageTitle = project.is_concept
-      ? `${project.title} — Concept Tretnix`
-      : `${project.title} — Case study Tretnix`;
+      ? `${project.title} — Concept ${project.category} | Tretnix`
+      : `${project.title} — Case study | Tretnix`;
 
     return {
       meta: [
@@ -98,6 +99,7 @@ export const Route = createFileRoute("/case-studies/$slug")({
 
 function CaseStudyPage() {
   const { project, variants, media } = Route.useLoaderData();
+  const navigate = useNavigate();
 
   useEffect(() => {
     trackEvent("case_study_view", {
@@ -107,11 +109,27 @@ function CaseStudyPage() {
   }, [project.slug]);
 
   const includes = [...new Set([...project.modules, ...project.features])].slice(0, 12);
+  const demos = getProjectDemos(project.slug);
 
   function goToContact(event: React.MouseEvent<HTMLAnchorElement>) {
-    event.preventDefault();
     trackEvent("cta_click", { project_slug: project.slug });
-    if (typeof window !== "undefined") window.location.href = "/#contatti";
+
+    if (
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+    void navigate({
+      to: "/",
+      state: { scrollToSection: "contatti" },
+      resetScroll: true,
+    });
   }
 
   return (
@@ -153,7 +171,9 @@ function CaseStudyPage() {
             )}
           </header>
 
-          <div className={`relative mt-10 aspect-[16/9] w-full overflow-hidden rounded-3xl border border-border ${project.gradient}`}>
+          <div
+            className={`relative mt-10 aspect-[16/9] w-full overflow-hidden rounded-3xl border border-border ${project.gradient}`}
+          >
             {project.image_url ? (
               <StorageImage
                 src={project.image_url}
@@ -161,19 +181,54 @@ function CaseStudyPage() {
                 className="absolute inset-0 h-full w-full object-cover"
               />
             ) : (
-              <ProjectPortfolioCover title={project.title} category={project.category} />
+              <ProjectVisual project={project} />
             )}
           </div>
 
-          {project.overview && (
-            <section className="mt-16 max-w-3xl">
-              <div className="section-label">{project.is_concept ? "Il concept" : "Il progetto"}</div>
-              <h2 className="font-serif mt-4 text-3xl sm:text-4xl">
-                Una soluzione costruita intorno al <span className="text-accent italic">contesto.</span>
-              </h2>
-              <p className="mt-5 text-base leading-relaxed text-muted-foreground sm:text-lg">
-                {project.overview}
-              </p>
+          {demos.length > 0 && (
+            <section className="mt-12 border-y border-border py-7">
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] sm:items-start">
+                <div>
+                  <h2 className="text-xl font-medium">Esplora il concept</h2>
+                  <p className="mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">
+                    Le demo START e BUSINESS mostrano due livelli della stessa direzione progettuale.
+                  </p>
+                </div>
+                <ul className="divide-y divide-border border-y border-border sm:border-b-0 sm:border-t-0">
+                  {demos.map((demo) => (
+                    <li key={demo.href}>
+                      <a
+                        href={demo.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group flex items-center justify-between gap-5 py-4 text-foreground transition-colors hover:text-primary-glow"
+                      >
+                        <span>
+                          <span className="block text-sm font-medium">
+                            {demo.label}
+                            <span className="sr-only"> (si apre in una nuova scheda)</span>
+                          </span>
+                          <span className="mt-1 block text-xs text-muted-foreground">
+                            {demo.description}
+                          </span>
+                        </span>
+                        <ArrowUpRight className="h-4 w-4 shrink-0 transition-transform duration-200 ease-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0 motion-reduce:group-hover:translate-y-0" />
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </section>
+          )}
+
+          {(project.overview || project.audience) && (
+            <section className="mt-16 grid grid-cols-1 gap-10 lg:grid-cols-[1.5fr_1fr] lg:gap-14">
+              {project.overview && (
+                <Block title={project.is_concept ? "Il concept" : "Il progetto"}>
+                  {project.overview}
+                </Block>
+              )}
+              {project.audience && <Block title="Per chi è pensato">{project.audience}</Block>}
             </section>
           )}
 
@@ -207,6 +262,22 @@ function CaseStudyPage() {
             </section>
           )}
 
+          {project.workflow_steps.length > 0 && (
+            <section className="mt-16">
+              <h2 className="text-2xl font-medium sm:text-3xl">Percorso principale</h2>
+              <ol className="mt-6 divide-y divide-border border-y border-border">
+                {project.workflow_steps.map((step, index) => (
+                  <li key={step} className="grid grid-cols-[2.5rem_1fr] gap-4 py-4 text-foreground">
+                    <span className="font-serif text-primary-glow" aria-hidden="true">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <span>{step}</span>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          )}
+
           {project.impact_points.length > 0 && (
             <section className="mt-16">
               <h2 className="text-2xl font-medium sm:text-3xl">
@@ -222,6 +293,39 @@ function CaseStudyPage() {
                   </li>
                 ))}
               </ul>
+            </section>
+          )}
+
+          {(project.customizations.length > 0 || project.tech_stack.length > 0) && (
+            <section className="mt-16 grid grid-cols-1 gap-10 border-t border-border pt-10 lg:grid-cols-2 lg:gap-14">
+              {project.customizations.length > 0 && (
+                <div>
+                  <h2 className="text-xl font-medium sm:text-2xl">Adattabile al progetto</h2>
+                  <ul className="mt-5 space-y-3 text-sm leading-relaxed text-muted-foreground">
+                    {project.customizations.map((item) => (
+                      <li key={item} className="flex items-start gap-3">
+                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary-glow" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {project.tech_stack.length > 0 && (
+                <div>
+                  <h2 className="text-xl font-medium sm:text-2xl">Tecnologie</h2>
+                  <ul className="mt-5 flex flex-wrap gap-2">
+                    {project.tech_stack.map((item) => (
+                      <li
+                        key={item}
+                        className="rounded-full border border-border px-3 py-1.5 text-xs text-muted-foreground"
+                      >
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </section>
           )}
 

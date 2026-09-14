@@ -97,15 +97,18 @@ let projects: Project[] = [
     id: "portfolio-forno-lume",
     slug: "forno-lume",
     title: "Forno Lume",
-    category: "Hospitality",
-    short_description: "Concept Tretnix per una presenza digitale hospitality calda e riconoscibile, evoluta da una base essenziale a un’esperienza multipagina.",
-    overview: "Forno Lume è un concept dimostrativo Tretnix dedicato al settore Hospitality. Esplora come identità, contenuti, contatto e navigazione possano crescere in modo coerente da una prima presenza digitale completa a una struttura pubblica più articolata.",
-    problem: "Una realtà hospitality deve comunicare atmosfera, proposta e informazioni pratiche senza trasformare il sito in un catalogo impersonale o in un flusso difficile da usare su mobile.",
-    solution: "Tretnix costruisce una direzione editoriale calda e mobile-first, con contenuti essenziali, contatti diretti e una progressione che mantiene la stessa identità mentre aumenta la profondità informativa.",
-    audience: "Ristoranti, bistrot, pizzerie e piccole realtà hospitality che vogliono una presenza digitale riconoscibile e costruita intorno alla propria esperienza.",
-    features: ["Identità visiva hospitality distinta e coerente", "Esperienza mobile-first senza overflow intenzionale", "Contatti e prenotazione attraverso canali esterni chiari", "Contenuti editoriali e informazioni pratiche organizzati per priorità", "Evoluzione START → BUSINESS senza cambio di personalità"],
-    impact_points: ["Una stessa identità può sostenere scope differenti senza sembrare un template riutilizzato", "La struttura può crescere da one-page a multipage senza perdere chiarezza", "Le demo restano trasparenti: niente recensioni o prove commerciali inventate"],
-    customizations: ["Palette, tipografia, fotografia e tono adattabili alla reale identità del cliente", "Canali di contatto e contenuti configurabili senza imporre un processo standard"],
+    category: "Food & Hospitality",
+    short_description: "Concept Hospitality Tretnix che evolve da un’esperienza single-page calda e editoriale a un sito multipagina per menu, storia, galleria e contatti.",
+    overview: "Forno Lume mostra l’evoluzione coerente di una presenza digitale Hospitality: START concentra proposta, atmosfera e contatto in una home mobile-first; BUSINESS aggiunge profondità informativa e route dedicate preservando identità, motion e qualità di interazione.",
+    problem: "Rendere menu, atmosfera e canali di prenotazione immediatamente accessibili senza ridurre l’identità a un template generico o disperdere i contenuti nella variante multipagina.",
+    solution: "Un sistema editoriale warm-premium con contenuti centralizzati, percorsi di contatto espliciti, gallery progressiva e architettura START → BUSINESS coerente.",
+    audience: "Ristoranti, pizzerie, bistrot ed enoteche indipendenti che vogliono presentare proposta, atmosfera e informazioni pratiche con un’esperienza mobile curata.",
+    features: ["Esperienza START single-page mobile-first", "Architettura BUSINESS multipagina", "Menu preview e menu categorizzato", "Gallery rail e galleria con filtri/lightbox", "Scelta dei canali di prenotazione e contatto", "Mappa caricata solo dopo consenso esplicito", "Routing, history, focus e reduced motion", "Demo SEO e structured data non commerciale"],
+    impact_points: ["Riduce i passaggi necessari per trovare menu e canale di prenotazione", "Mantiene riconoscibile la stessa identità nel passaggio da START a BUSINESS", "Separa la consultazione rapida dalla profondità informativa delle route dedicate", "Permette di esplorare spazi e proposta senza interrompere il percorso di contatto"],
+    modules: ["Hero e posizionamento", "Menu e categorie", "Racconto del locale", "Review surface demo/authentic", "Gallery rail e gallery explorer", "FAQ e informazioni pratiche", "Mappa privacy-aware", "Booking/contact choice", "Privacy, Cookie e 404"],
+    workflow_steps: ["Comprendere proposta e atmosfera", "Esplorare menu e contenuti", "Valutare galleria e informazioni pratiche", "Scegliere il canale di prenotazione o contatto"],
+    customizations: ["Identità, copy e fotografia", "Menu, categorie e contenuti", "Canali di prenotazione e contatto", "Orari, area e mappa", "Gallery e recensioni autentiche verificate", "Metadata e structured data cliente"],
+    tech_stack: ["React 19", "TypeScript", "TanStack Start e TanStack Router", "Vite", "Tailwind CSS 4", "Radix UI", "Nitro / Cloudflare Workers", "Cloudflare D1", "Cloudflare R2"],
     gradient: "bg-[radial-gradient(ellipse_at_top_left,#3a2117,#17100c_68%),linear-gradient(135deg,#24160f,#17100c)]",
     is_featured: true,
     sort_order: 10,
@@ -116,14 +119,17 @@ let projects: Project[] = [
     slug: "rito-studio",
     title: "RITO Studio",
     category: "Beauty & Wellness",
-    short_description: "Concept Tretnix per Beauty & Wellness: un’identità editoriale premium che cresce da un’esperienza essenziale a un percorso multipagina di scoperta dei trattamenti.",
-    overview: "RITO Studio è un concept dimostrativo Tretnix per attività Beauty & Wellness su appuntamento. La famiglia preserva un linguaggio visivo intimo e preciso mentre BUSINESS approfondisce catalogo, studio, galleria, FAQ e contatto.",
-    problem: "Un’attività Beauty & Wellness deve trasmettere fiducia, metodo e sensibilità visiva, rendendo i trattamenti facili da esplorare senza assumere l’aspetto di un marketplace, di una clinica o di un template beauty generico.",
-    solution: "Tretnix usa una composizione editoriale, una gerarchia tattile e interazioni misurate. START concentra il racconto in una one-page; BUSINESS estende la stessa famiglia con superfici dedicate e dettaglio query-driven.",
-    audience: "Beauty centre, hair salon, barber shop, nail studio, spa, massage e piccole attività wellness che lavorano principalmente su appuntamento.",
-    features: ["Sistema visivo Beauty & Wellness riconoscibile e non generico", "Navigazione e interazioni accessibili con comportamento mobile-first", "Contatto e booking esterni senza fingere disponibilità o persistenza dati", "Catalogo trattamenti e contenuti editoriali più profondi nella variante BUSINESS", "Evoluzione START → BUSINESS preservando la stessa famiglia"],
-    impact_points: ["Un concept può essere premium senza usare prove sociali o credenziali inventate", "L’architettura multipagina aggiunge informazione, non rumore decorativo", "Dettaglio, gallery e filtri possono mantenere Back, Forward, refresh e direct URL"],
-    customizations: ["Palette, tipografia, fotografia e catalogo trattamenti sostituibili con quelli della reale attività", "Canali di booking e contatto adattabili al processo effettivo del cliente"],
+    short_description: "Concept Beauty & Wellness Tretnix che evolve da una one-page editoriale a un percorso multipagina per trattamenti, studio, galleria, FAQ e contatti.",
+    overview: "RITO Studio presenta la cura personale con un’identità tattile e contemporanea. START concentra il racconto in una home mobile-first; BUSINESS amplia la scoperta dei trattamenti con route dedicate e dettagli query-driven, preservando palette, tipografia, motion e demo integrity.",
+    problem: "Organizzare un’offerta Beauty articolata senza ricorrere a cliché visuali, card ripetitive o un booking nativo non disponibile, mantenendo il percorso chiaro su mobile.",
+    solution: "Un sistema editoriale porcellana, inchiostro e borgogna con catalogo trattamento query-driven, gallery progressiva e canali di prenotazione/contatto centralizzati.",
+    audience: "Hair salon, barber shop, beauty e nail studio, spa e professionisti wellness che desiderano presentare servizi, metodo e ambiente con una presenza digitale curata.",
+    features: ["Esperienza START one-page mobile-first", "BUSINESS multipagina per trattamenti, studio, galleria, FAQ e contatti", "Catalogo e dettaglio trattamento query-driven", "Gallery rail e galleria con filtri/lightbox", "Booking via WhatsApp e telefono", "Contatto via email e telefono", "Route focus, history e interazioni da tastiera", "Demo noindex e structured data non commerciale"],
+    impact_points: ["Riduce i passaggi tra scoperta del trattamento e scelta del canale di prenotazione", "Mantiene il contesto del catalogo durante l’apertura dei dettagli", "Separa approfondimento, studio e FAQ senza perdere l’identità dello START", "Permette di adattare categorie e contenuti alle specializzazioni effettive"],
+    modules: ["Hero e posizionamento", "Categorie e catalogo trattamenti", "Dettaglio query-driven", "Rituale e metodo", "Studio e informazioni pre-visita", "Review surface demo/authentic", "Gallery rail e gallery explorer", "FAQ e contatti", "Privacy, Cookie e 404"],
+    workflow_steps: ["Comprendere identità e proposta", "Filtrare e scegliere un trattamento", "Consultare il dettaglio mantenendo il contesto", "Esplorare studio, galleria e FAQ", "Scegliere booking o contatto esterno"],
+    customizations: ["Categorie e catalogo pertinenti al cliente", "Brand, copy, palette e fotografia", "Prezzi, durate e contenuti trattamento", "Booking e contact channels", "Studio, location e informazioni pratiche", "Metadata, analytics e structured data cliente"],
+    tech_stack: ["React 19", "TypeScript", "TanStack Start e TanStack Router", "Vite", "Tailwind CSS 4", "Radix UI", "Nitro / Cloudflare Workers", "Cloudflare D1", "Cloudflare R2"],
     gradient: "bg-[radial-gradient(ellipse_at_top_left,#f5f1e9,#ded4c8_72%),linear-gradient(135deg,#ede8df,#d9cec2)]",
     is_featured: true,
     sort_order: 20,
@@ -148,7 +154,7 @@ let projects: Project[] = [
     customizations: [],
     gradient: "bg-[radial-gradient(ellipse_at_top,#0B2A4A,#020814_70%),linear-gradient(135deg,#061326,#020814)]",
     is_featured: false,
-    sort_order: 110 + index * 10,
+    sort_order: 100 + index * 10,
   } satisfies Project)),
 ];
 
@@ -178,7 +184,7 @@ export async function listProjects(options: { featured?: boolean; admin?: boolea
     projects
       .filter((project) => (options.admin ? true : project.is_visible))
       .filter((project) => (options.featured ? project.is_featured : true))
-      .sort((a, b) => a.sort_order - b.sort_order),
+      .sort((a, b) => a.sort_order - b.sort_order || a.slug.localeCompare(b.slug)),
   );
 }
 
@@ -242,7 +248,7 @@ export async function listVariants(projectId: string, admin = false) {
   return clone(
     variants
       .filter((row) => row.project_id === projectId && (admin || row.publish_status === "published"))
-      .sort((a, b) => a.sort_order - b.sort_order),
+      .sort((a, b) => a.sort_order - b.sort_order || a.plan.localeCompare(b.plan)),
   );
 }
 
@@ -260,7 +266,11 @@ export async function replaceVariants(projectId: string, nextVariants: ProjectVa
 }
 
 export async function listMedia(projectId: string) {
-  return clone(media.filter((row) => row.project_id === projectId).sort((a, b) => a.sort_order - b.sort_order));
+  return clone(
+    media
+      .filter((row) => row.project_id === projectId)
+      .sort((a, b) => a.sort_order - b.sort_order || a.id.localeCompare(b.id)),
+  );
 }
 
 export async function addMedia(input: Omit<ProjectMedia, "id" | "created_at" | "updated_at">) {

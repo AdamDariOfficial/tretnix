@@ -3,6 +3,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { ArrowRight, ArrowUp, Menu, X } from "lucide-react";
 import { TretnixLogo } from "./TretnixLogo";
 import { trackEvent } from "@/lib/analytics";
+import { focusContactForm } from "@/lib/contact-form-focus";
 import { useSiteSettings } from "@/lib/site-settings";
 
 /* Nav sections shown on the homepage. */
@@ -150,13 +151,7 @@ export function openContactForm(preselectNeed?: string) {
   const didScroll = scrollToSection("contatti", { history: "push" });
   // ContactSection orients focus after motion finishes, or immediately with reduced motion.
   const focusDelay = didScroll && !prefersReducedMotion() ? 650 : 0;
-  window.setTimeout(() => {
-    window.dispatchEvent(
-      new CustomEvent("tretnix:openContact", {
-        detail: { preselectNeed },
-      }),
-    );
-  }, focusDelay);
+  focusContactForm(preselectNeed, focusDelay);
 }
 
 export function Navbar() {
