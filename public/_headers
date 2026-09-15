@@ -1,0 +1,8 @@
+# Cloudflare Assets bypasses src/server.ts. Keep its base security contract aligned.
+# CSP belongs to SSR HTML and is applied at the server response boundary instead.
+/*
+  Strict-Transport-Security: max-age=31536000
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
