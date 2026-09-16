@@ -1,5 +1,6 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { BarChart3, Folders, Inbox, LayoutDashboard, LogOut, Settings } from "lucide-react";
+import { useState } from "react";
 
 import { TretnixLogo } from "@/components/TretnixLogo";
 import { logoutAdminSession } from "@/features/tretnix/live.functions";
@@ -28,14 +29,23 @@ function AdminLayout() {
   const session = useAdminSession();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const [logoutPending, setLogoutPending] = useState(false);
+  const [logoutError, setLogoutError] = useState<string | null>(null);
 
   async function signOut() {
+    if (logoutPending) return;
+    setLogoutPending(true);
+    setLogoutError(null);
     try {
       await logoutAdminSession({ data: { csrfToken: await requireAdminCsrfToken() } });
+    } catch {
+      setLogoutError("Disconnessione non confermata. Riprova.");
+      return;
     } finally {
-      setAdminCsrfToken(null);
-      navigate({ to: "/auth" });
+      setLogoutPending(false);
     }
+    setAdminCsrfToken(null);
+    navigate({ to: "/auth" });
   }
 
   if (session.status === "loading") {
@@ -100,11 +110,13 @@ function AdminLayout() {
             <button
               type="button"
               onClick={signOut}
+              disabled={logoutPending}
               className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-white/[0.04] hover:text-foreground"
             >
               <LogOut className="h-4 w-4" />
-              Esci
+              {logoutPending ? "Uscita…" : "Esci"}
             </button>
+            {logoutError && <p role="alert" className="mt-2 px-3 text-sm text-destructive">{logoutError}</p>}
           </div>
         </aside>
 
@@ -113,10 +125,11 @@ function AdminLayout() {
             <Link to="/" className="inline-flex items-center">
               <TretnixLogo variant="horizontal" className="h-6 w-[120px]" />
             </Link>
-            <button type="button" onClick={signOut} className="text-sm text-muted-foreground">
-              Esci
+            <button type="button" onClick={signOut} disabled={logoutPending} className="text-sm text-muted-foreground">
+              {logoutPending ? "Uscita…" : "Esci"}
             </button>
           </header>
+          {logoutError && <p role="alert" className="px-6 pt-3 text-sm text-destructive md:hidden">{logoutError}</p>}
 
           <nav className="flex gap-1 overflow-x-auto border-b border-border px-4 py-3 md:hidden">
             {NAV.map((item) => {
