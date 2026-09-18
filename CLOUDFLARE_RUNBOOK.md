@@ -91,7 +91,7 @@ The tool reads the stamped `.output/server/wrangler.json`, preserves the generat
 
 It refuses stale build stamps. It never provisions or deploys.
 
-Staging intentionally uses the existing `tretnix-staging.<account-subdomain>.workers.dev` surface with `workers_dev=true` and `preview_urls=true`. The generated staging config contains no custom-domain or zone route, and staging does not require `--hostname`. Production remains separate: it requires a validated hostname and retains the custom-domain configuration for `tretnix.com`.
+Staging intentionally uses the existing `tretnix-staging.<account-subdomain>.workers.dev` surface with `workers_dev=true` and `preview_urls=true`. The generated staging config contains no custom-domain or zone route, and staging does not require `--hostname`. Production requires an explicit `--production-routing` mode; the initial bootstrap uses `none`, without a hostname or public endpoint. `custom-domain` requires `--hostname` and is reserved for a separately approved future change.
 
 ## 6. Prepare staging secret material locally
 
@@ -198,43 +198,57 @@ The seed is authoritative for Portfolio V1: Forno Lume and RITO Studio are the o
 
 ## 13. Production resources
 
-Production uses completely separate resources and rate-limit namespaces:
-
-```powershell
-npx wrangler@latest d1 create tretnix-production --jurisdiction=eu
-npx wrangler@latest r2 bucket create tretnix-media-production --jurisdiction=eu
-```
-
-Repeat the stamped build/config procedure with:
+P1 provisioned these separate EU resources; do not recreate, import legacy data into, or bind staging resources in their place:
 
 ```text
---environment production
---hostname tretnix.com
+D1: tretnix-production / 9900eecc-88e7-4d6a-8fc5-4732ab25724d (EU, EEUR; migrations pending)
+R2: tretnix-media-production (EU, EEUR; initially 0 objects)
 ```
 
-Generate and retain production secrets separately from staging, again only in an approved secret manager or a private file outside the repository. Never point staging at production D1/R2 bindings and never reuse staging secret values in production.
+After a stamped local Cloudflare build, generate the **route-free** production config locally:
 
-Under a dedicated production version-upload authorization, run `wrangler versions upload` with the generated production config, the separate production `--secrets-file`, and `--experimental-auto-create=false`. Record the returned production version ID. This creates an undeployed remote version. Only under a later, explicit production deploy gate may that exact ID be passed to `wrangler versions deploy '<PRODUCTION_VERSION_ID>@100%'`.
+```powershell
+node .\tools\cloudflare\prepare-environment-config.mjs `
+  --environment production `
+  --production-routing none `
+  --database-name tretnix-production `
+  --database-id 9900eecc-88e7-4d6a-8fc5-4732ab25724d `
+  --bucket-name tretnix-media-production `
+  --login-rate-namespace-id 784311301 `
+  --contact-rate-namespace-id 784311302 `
+  --analytics-rate-namespace-id 784311303
+```
+
+The resulting `.output/server/wrangler.production.json` must name `tretnix`, set `workers_dev=false` and `preview_urls=false`, and have **neither `route` nor `routes`**. It contains D1/R2/rate-limit bindings and required secret *names*, not secret values. The owner-approved production namespace IDs `784311301/302/303` were checked against the current account Worker bindings and are distinct from staging `784311201/202/203`. Generate and retain production secrets separately from staging, only in an approved secret manager or a private file outside the repository. Never reuse staging bindings or secret values.
+
+The Worker `tretnix` does not yet exist. `wrangler versions upload --experimental-auto-create=false` **cannot** create it: Cloudflare requires an initial `wrangler deploy` (or C3) before version uploads. A separately authorized bootstrap must use the reviewed route-free config and disable automatic resource provisioning. Bootstrap creates an initial Worker version/deployment, but with no route, Custom Domain, workers.dev or Preview URL it must expose no public endpoint; verify those postconditions immediately. Do not bootstrap from a config with `--production-routing custom-domain` or attach `tretnix.com` in this step.
+
+Only after bootstrap, a separate version-upload gate may upload a production candidate with the production secrets file and `--experimental-auto-create=false`, record its exact version ID, and leave it undeployed. A further gate may deploy that exact ID inside the Worker. Neither `versions upload` nor `versions deploy` creates the apex Route or constitutes the public routing cutover. No secret value belongs in Git or command output.
 
 ## 14. Production cutover order
 
-The intended production sequence is:
+The first production cutover uses a **Worker Route**, not a Worker Custom Domain. The steps below are future owner-gated operations, not commands authorized by this runbook or by local config generation:
 
 ```text
-validated repository candidate
-→ production D1/R2 provisioning
-→ production generated Worker config
-→ base D1 migrations
-→ verify canonical clean-D1 seed and empty operational tables
-→ provision native admin
-→ staging-equivalent pre-deploy checks
-→ explicit production version-upload gate with separate production secrets
-→ explicit production deploy gate
-→ production smoke/browser/admin verification
-→ runtime cutover accepted
+A. Production D1/R2 provisioning (P1 complete; resources above)
+B. Local stamped production build and source validation
+C. Route-free production config generation and review
+D. Apply versioned D1 migrations; verify canonical seed and empty operational tables
+E. Create separate production secrets privately; provision native admin with the same production pepper
+F. Bootstrap Worker tretnix using only the route-free config; verify zero public endpoints
+G. Upload and record the exact production candidate version without deploying it
+H. Deploy the reviewed version inside the Worker while it still has zero public endpoints
+I. Separately authorize and add Worker Route tretnix.com/* -> tretnix; capture its exact Route ID
+J. Immediate public smoke, browser/admin/security QA and observability review
+K. Explicit acceptance or rollback decision
+L. Later, separately authorized legacy Pages/Lovable/Supabase decommission
 ```
 
-Do not delete the old Supabase project immediately after cutover. Keep it unchanged as rollback/evidence material until production acceptance is complete. Decommissioning Supabase is a later explicit infrastructure gate; the Tretnix production runtime must no longer depend on it after cutover.
+Before step I, remote HTTP validation of the production Worker requires a separately approved protected QA endpoint; a route-free Worker has no public preview URL. Local workerd and staging evidence do not substitute for that test if the production gate requires it. Worker Routes and Custom Domains are trigger configuration separate from Worker versions; apply trigger changes only under the routing gate. In particular, do not run `wrangler triggers deploy` or a subsequent `wrangler deploy` with a stale route-free config after cutover without reviewing its effect on the live Route.
+
+The current apex is a proxied CNAME to `tretnix.pages.dev`, associated with Pages project `tretnix`; its known-good production deployment is `19f3dcda-e9dc-4474-84b8-7786896335fd`. Preserve the CNAME, Pages custom-domain association and existing `www.tretnix.com` 301 redirect through the first cutover. **CUTOVER:** add exactly `tretnix.com/* -> tretnix` as a Worker Route and record the resulting Route ID. **ROLLBACK:** delete exactly that newly created Route ID, then verify the preserved Pages origin and `www` redirect. Do not use a Custom Domain as an implicit bootstrap or cutover action: it conflicts with the current apex CNAME and requires a separate future owner decision, DNS/Pages plan and rollback gate.
+
+Do not delete the old Pages or Supabase project immediately after cutover. Keep them unchanged as rollback/evidence material until production acceptance is complete. Decommissioning is a later explicit infrastructure gate; the Tretnix Worker runtime must not depend on Supabase.
 
 ## 15. Required evidence before declaring the migration complete
 
@@ -249,6 +263,6 @@ Do not delete the old Supabase project immediately after cutover. Keep it unchan
 - source contract validator passed;
 - build passed;
 - staging browser/admin/security QA passed;
-- production Worker version and hostname verified;
+- production Worker version, exact Route ID and apex hostname verified;
 - production smoke/browser/admin QA passed;
 - no unapproved stage/commit/push/PR/merge/migration/deploy action occurred.
