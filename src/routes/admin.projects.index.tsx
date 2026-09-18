@@ -69,6 +69,7 @@ function AdminProjectsList() {
       </div>
 
       <div className="mt-8 overflow-hidden rounded-2xl border border-border">
+        <div className="overflow-x-auto">
         <table className="min-w-full text-sm">
           <thead className="bg-white/[0.03] text-left text-xs uppercase tracking-widest text-subtle">
             <tr>
@@ -172,6 +173,7 @@ function AdminProjectsList() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

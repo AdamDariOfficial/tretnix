@@ -1,0 +1,14 @@
+{
+  // SOURCE BUILD CONFIG ONLY — DO NOT DEPLOY THIS UNPROVISIONED FILE.
+  // D1, R2, rate-limit bindings and AdminAuth secrets are supplied only by a separately
+  // approved environment provisioning gate. Production remains a separate gate.
+  "name": "tretnix-unprovisioned-do-not-deploy",
+  "compatibility_date": "2026-09-07",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "run_worker_first": ["/*", "!/assets/*", "!/favicon.ico", "!/favicon.svg"]
+  },
+  "vars": {
+    "TRETNIX_ENV": "unprovisioned"
+  }
+}

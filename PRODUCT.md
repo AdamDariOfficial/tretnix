@@ -192,8 +192,8 @@ The supporting source, assets, scope, or delivery evidence for the Food & Hospit
 
 ### Confirmed Repository Facts
 
-- This repository implements the Tretnix public website and its administrative content-management surfaces using React, TanStack, and Supabase. It does not define Tretnix as a SaaS product.
-- Public project data, project media, contact requests, site settings, and analytics use versioned database migrations and Row Level Security policies.
+- This repository implements the Tretnix public website and its administrative content-management surfaces using React, TanStack Start, a Cloudflare Worker, D1, R2, and native D1-backed AdminAuth. It does not define Tretnix as a SaaS product.
+- Public project data, project-media metadata, contact requests, site settings, analytics, and admin identities/sessions use versioned D1 migrations; R2 stores media bytes.
 - Administrative functions include project management, media management, contact-request handling, site settings, and anonymous analytics reporting.
 - Repository project records support an explicit `is_concept` field; new admin records default to a concept/demo badge and `is_concept: true`.
 - Public case-study copy currently identifies the collection as case studies and concepts.
@@ -205,7 +205,7 @@ The supporting source, assets, scope, or delivery evidence for the Food & Hospit
 - Start below-the-fold reveals when their content enters the viewport.
 - On mobile editorial sections, place text before imagery unless a documented hero, gallery, or visual-first component requires a different order.
 - Preserve each client's visual identity; do not impose indiscriminate aesthetic uniformity.
-- Do not change security, authorization, or Row Level Security to conceal a frontend error.
+- Do not change security or authorization controls to conceal a frontend error.
 - Use versioned migrations and least privilege for database changes.
 
 These are durable requirements for future work. Their inclusion here does not assert that every current route or component has already been tested against them.
@@ -270,7 +270,7 @@ Copy should make the need, decision, process, and value easier to understand. It
 - Project and concept model: `src/lib/projects.ts` and `src/routes/admin.projects.new.tsx`.
 - Public concept and case-study presentation: `src/routes/case-studies.index.tsx` and `src/routes/case-studies.$slug.tsx`.
 - Current legal and geographic references: `src/routes/privacy.tsx` and `src/lib/site-settings.ts`.
-- Versioned schema, seed concepts, authorization, and RLS policies: `supabase/migrations/`.
+- Versioned Cloudflare schema, seed concepts, and native authorization: `migrations/`.
 
 The repository contains demonstrative concept content. No authorized real-client case study, testimonial, client result, benchmark, certification, award, partnership, or verified performance metric was identified during initialization.
 

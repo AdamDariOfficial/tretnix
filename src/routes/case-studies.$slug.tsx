@@ -1,35 +1,48 @@
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { ArrowRight, ArrowUpRight, Check } from "lucide-react";
 import { Navbar, Footer, BackToTopButton, Breadcrumb } from "@/components/TretnixChrome";
 import { StorageImage } from "@/components/StorageMedia";
 import { ProjectVisual } from "@/components/ProjectVisual";
 import { ProjectGallery } from "@/components/ProjectGallery";
-import { getProjectBySlug, type Project } from "@/lib/projects";
-import { listProjectMedia, type ProjectMedia } from "@/lib/project-media";
+import { ProjectVariantTimeline } from "@/components/ProjectVariantTimeline";
+import { getProjectBySlug } from "@/lib/projects";
+import { listProjectMedia } from "@/lib/project-media";
 import { getProjectDemos } from "@/lib/project-demos";
+import { listPublishedProjectVariants } from "@/lib/project-variants";
 import { trackEvent } from "@/lib/analytics";
 
 export const Route = createFileRoute("/case-studies/$slug")({
   loader: async ({ params }) => {
     const project = await getProjectBySlug(params.slug);
     if (!project) throw notFound();
-    return { project };
+
+    const [variants, media] = await Promise.all([
+      listPublishedProjectVariants(project.id),
+      listProjectMedia(project.id),
+    ]);
+
+    return { project, variants, media };
   },
   head: ({ loaderData }) => {
     if (!loaderData) {
       return {
         meta: [
-          { title: "Case study non trovato — Tretnix" },
+          { title: "Progetto non trovato — Tretnix" },
           { name: "robots", content: "noindex" },
         ],
       };
     }
+
     const { project } = loaderData;
     const canonicalUrl = `https://tretnix.com/case-studies/${encodeURIComponent(project.slug)}`;
+    const socialImage = project.image_url?.startsWith("media:")
+      ? `https://tretnix.com/api/tretnix/media/${encodeURIComponent(project.image_url.slice(6))}`
+      : project.image_url;
     const pageTitle = project.is_concept
       ? `${project.title} — Concept ${project.category} | Tretnix`
       : `${project.title} — Case study | Tretnix`;
+
     return {
       meta: [
         { title: pageTitle },
@@ -40,10 +53,10 @@ export const Route = createFileRoute("/case-studies/$slug")({
         { property: "og:url", content: canonicalUrl },
         { name: "twitter:title", content: pageTitle },
         { name: "twitter:description", content: project.short_description },
-        ...(project.image_url
+        ...(socialImage
           ? [
-              { property: "og:image", content: project.image_url },
-              { name: "twitter:image", content: project.image_url },
+              { property: "og:image", content: socialImage },
+              { name: "twitter:image", content: socialImage },
             ]
           : []),
       ],
@@ -55,12 +68,12 @@ export const Route = createFileRoute("/case-studies/$slug")({
       <Navbar />
       <main className="flex min-h-[70vh] items-center justify-center px-6 pt-40">
         <div className="text-center">
-          <h1 className="font-serif text-4xl">Case study non trovato</h1>
+          <h1 className="font-serif text-4xl">Progetto non trovato</h1>
           <p className="mt-3 text-muted-foreground">
             Il progetto richiesto non esiste o è stato spostato.
           </p>
           <Link to="/case-studies" className="btn-primary mt-8">
-            Vedi tutti i case study
+            Vedi tutti i progetti
           </Link>
         </div>
       </main>
@@ -85,50 +98,33 @@ export const Route = createFileRoute("/case-studies/$slug")({
 });
 
 function CaseStudyPage() {
-  const { project } = Route.useLoaderData();
+  const { project, variants, media } = Route.useLoaderData();
   const navigate = useNavigate();
-  const [p, setP] = useState<Project>(project);
-  const [media, setMedia] = useState<ProjectMedia[]>([]);
 
   useEffect(() => {
-    trackEvent("case_study_view", { path: `/case-studies/${p.slug}`, project_slug: p.slug });
-  }, [p.slug]);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    void getProjectBySlug(project.slug)
-      .then((fresh) => {
-        if (cancelled || !fresh) return;
-        setP(fresh);
-        void listProjectMedia(fresh.id)
-          .then((nextMedia) => {
-            if (!cancelled) setMedia(nextMedia);
-          })
-          .catch(() => {
-            if (!cancelled) setMedia([]);
-          });
-      })
-      .catch(() => {
-        // Keep the server-rendered project when a background refresh fails.
-      });
-
-    return () => {
-      cancelled = true;
-    };
+    trackEvent("case_study_view", {
+      path: `/case-studies/${project.slug}`,
+      project_slug: project.slug,
+    });
   }, [project.slug]);
 
-  const includes = [...new Set([...p.modules, ...p.features])].slice(0, 12);
-  const demos = getProjectDemos(p.slug);
+  const includes = [...new Set([...project.modules, ...project.features])].slice(0, 12);
+  const demos = getProjectDemos(project.slug);
 
-  function goToContact(e: React.MouseEvent) {
-    trackEvent("cta_click", { project_slug: p.slug });
+  function goToContact(event: React.MouseEvent<HTMLAnchorElement>) {
+    trackEvent("cta_click", { project_slug: project.slug });
 
-    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
+    if (
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    ) {
       return;
     }
 
-    e.preventDefault();
+    event.preventDefault();
     void navigate({
       to: "/",
       state: { scrollToSection: "contatti" },
@@ -149,43 +145,43 @@ function CaseStudyPage() {
           <Breadcrumb
             items={[
               { label: "Home", to: "/" },
-              { label: "Case study", to: "/case-studies" },
-              { label: p.title },
+              { label: "Progetti", to: "/case-studies" },
+              { label: project.title },
             ]}
           />
 
-          {/* Compact hero */}
           <header className="mt-6">
-            {p.badge && (
-              <span className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-[0.7rem] uppercase tracking-[0.22em] text-primary-glow">
-                {p.badge}
+            {(project.badge || project.is_concept) && (
+              <span className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-[0.7rem] uppercase tracking-[0.2em] text-primary-glow">
+                {project.badge || "Concept Tretnix"}
               </span>
             )}
-            <div className="mt-4 section-label !text-primary-glow">{p.category}</div>
+            <div className="mt-4 section-label !text-primary-glow">{project.category}</div>
             <h1 className="font-serif mt-3 text-4xl leading-[1.05] tracking-tight sm:text-5xl lg:text-[64px]">
-              {p.title}
+              {project.title}
             </h1>
-            <p className="mt-5 max-w-2xl text-lg text-muted-foreground">{p.short_description}</p>
-            {p.is_concept && (
-              <p className="mt-4 max-w-2xl text-sm leading-relaxed text-subtle">
-                Progetto dimostrativo ideato e sviluppato da Tretnix; non rappresenta un incarico
-                cliente.
+            <p className="mt-5 max-w-2xl text-lg text-muted-foreground">
+              {project.short_description}
+            </p>
+            {project.is_concept && (
+              <p className="mt-5 max-w-2xl border-l border-primary/45 pl-4 text-sm leading-relaxed text-subtle">
+                Progetto dimostrativo progettato e sviluppato da Tretnix. Non rappresenta un cliente
+                o un&apos;attività reale e non attribuisce risultati commerciali non verificati.
               </p>
             )}
           </header>
 
-          {/* Main visual */}
           <div
-            className={`relative mt-10 aspect-[16/9] w-full overflow-hidden rounded-3xl border border-border ${p.gradient}`}
+            className={`relative mt-10 aspect-[16/9] w-full overflow-hidden rounded-3xl border border-border ${project.gradient}`}
           >
-            {p.image_url ? (
+            {project.image_url ? (
               <StorageImage
-                src={p.image_url}
-                alt={p.title}
+                src={project.image_url}
+                alt={`Anteprima del progetto ${project.title}`}
                 className="absolute inset-0 h-full w-full object-cover"
               />
             ) : (
-              <ProjectVisual project={p} />
+              <ProjectVisual project={project} />
             )}
           </div>
 
@@ -195,8 +191,7 @@ function CaseStudyPage() {
                 <div>
                   <h2 className="text-xl font-medium">Esplora il concept</h2>
                   <p className="mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">
-                    Le demo START e BUSINESS mostrano due livelli della stessa direzione
-                    progettuale.
+                    Le demo START e BUSINESS mostrano due livelli della stessa direzione progettuale.
                   </p>
                 </div>
                 <ul className="divide-y divide-border border-y border-border sm:border-b-0 sm:border-t-0">
@@ -226,44 +221,52 @@ function CaseStudyPage() {
             </section>
           )}
 
-          {(p.overview || p.audience) && (
+          {(project.overview || project.audience) && (
             <section className="mt-16 grid grid-cols-1 gap-10 lg:grid-cols-[1.5fr_1fr] lg:gap-14">
-              {p.overview && (
-                <Block title={p.is_concept ? "Il concept" : "Il progetto"}>{p.overview}</Block>
+              {project.overview && (
+                <Block title={project.is_concept ? "Il concept" : "Il progetto"}>
+                  {project.overview}
+                </Block>
               )}
-              {p.audience && <Block title="Per chi è pensato">{p.audience}</Block>}
+              {project.audience && <Block title="Per chi è pensato">{project.audience}</Block>}
             </section>
           )}
 
-          {/* Problem / Solution */}
           <div className="mt-16 grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-14">
-            {p.problem && <Block title="Il problema">{p.problem}</Block>}
-            {p.solution && <Block title="La soluzione">{p.solution}</Block>}
+            {project.problem && (
+              <Block title={project.is_concept ? "L'esigenza esplorata" : "Il problema"}>
+                {project.problem}
+              </Block>
+            )}
+            {project.solution && <Block title="La direzione">{project.solution}</Block>}
           </div>
 
-          {/* Cosa include */}
+          <ProjectVariantTimeline variants={variants} />
+
           {includes.length > 0 && (
-            <section className="mt-16">
-              <h2 className="text-2xl font-medium sm:text-3xl">Cosa include</h2>
-              <ul className="mt-6 flex flex-wrap gap-2">
-                {includes.map((f) => (
+            <section className="mt-20">
+              <h2 className="text-2xl font-medium sm:text-3xl">
+                {project.is_concept ? "Cosa dimostra" : "Cosa include"}
+              </h2>
+              <ul className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {includes.map((feature) => (
                   <li
-                    key={f}
-                    className="inline-flex items-center gap-2 rounded-full border border-border bg-white/[0.03] px-3.5 py-1.5 text-sm text-foreground"
+                    key={feature}
+                    className="flex items-start gap-3 rounded-xl border border-border bg-white/[0.02] px-4 py-3 text-sm text-foreground"
                   >
-                    <Check className="h-3.5 w-3.5 text-primary-glow" strokeWidth={2.4} />
-                    {f}
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary-glow" strokeWidth={2.4} />
+                    {feature}
                   </li>
                 ))}
               </ul>
             </section>
           )}
 
-          {p.workflow_steps.length > 0 && (
+          {project.workflow_steps.length > 0 && (
             <section className="mt-16">
               <h2 className="text-2xl font-medium sm:text-3xl">Percorso principale</h2>
               <ol className="mt-6 divide-y divide-border border-y border-border">
-                {p.workflow_steps.map((step, index) => (
+                {project.workflow_steps.map((step, index) => (
                   <li key={step} className="grid grid-cols-[2.5rem_1fr] gap-4 py-4 text-foreground">
                     <span className="font-serif text-primary-glow" aria-hidden="true">
                       {String(index + 1).padStart(2, "0")}
@@ -275,32 +278,31 @@ function CaseStudyPage() {
             </section>
           )}
 
-          {/* Impatto */}
-          {p.impact_points.length > 0 && (
+          {project.impact_points.length > 0 && (
             <section className="mt-16">
               <h2 className="text-2xl font-medium sm:text-3xl">
-                {p.is_concept ? "Valore progettuale" : "Impatto sul lavoro"}
+                {project.is_concept ? "Principi del progetto" : "Impatto sul lavoro"}
               </h2>
               <ul className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                {p.impact_points.map((i) => (
+                {project.impact_points.map((item) => (
                   <li
-                    key={i}
-                    className="flex items-start gap-3 border-l border-primary-glow/60 bg-white/[0.02] px-5 py-4 text-foreground"
+                    key={item}
+                    className="border-l border-primary-glow/60 bg-white/[0.02] px-5 py-4 text-foreground"
                   >
-                    {i}
+                    {item}
                   </li>
                 ))}
               </ul>
             </section>
           )}
 
-          {(p.customizations.length > 0 || p.tech_stack.length > 0) && (
+          {(project.customizations.length > 0 || project.tech_stack.length > 0) && (
             <section className="mt-16 grid grid-cols-1 gap-10 border-t border-border pt-10 lg:grid-cols-2 lg:gap-14">
-              {p.customizations.length > 0 && (
+              {project.customizations.length > 0 && (
                 <div>
                   <h2 className="text-xl font-medium sm:text-2xl">Adattabile al progetto</h2>
                   <ul className="mt-5 space-y-3 text-sm leading-relaxed text-muted-foreground">
-                    {p.customizations.map((item) => (
+                    {project.customizations.map((item) => (
                       <li key={item} className="flex items-start gap-3">
                         <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary-glow" />
                         {item}
@@ -309,11 +311,11 @@ function CaseStudyPage() {
                   </ul>
                 </div>
               )}
-              {p.tech_stack.length > 0 && (
+              {project.tech_stack.length > 0 && (
                 <div>
                   <h2 className="text-xl font-medium sm:text-2xl">Tecnologie</h2>
                   <ul className="mt-5 flex flex-wrap gap-2">
-                    {p.tech_stack.map((item) => (
+                    {project.tech_stack.map((item) => (
                       <li
                         key={item}
                         className="rounded-full border border-border px-3 py-1.5 text-xs text-muted-foreground"
@@ -327,27 +329,24 @@ function CaseStudyPage() {
             </section>
           )}
 
-          {/* Galleria */}
           {media.length > 0 && (
             <section className="mt-16">
               <h2 className="text-2xl font-medium sm:text-3xl">Galleria</h2>
-              <ProjectGallery items={media} projectTitle={p.title} />
+              <ProjectGallery items={media} projectTitle={project.title} />
             </section>
           )}
 
-          {/* Final CTA */}
           <section className="mt-20">
             <div className="glass-card relative overflow-hidden rounded-3xl p-8 sm:p-10 lg:p-14 soft-glow">
               <div className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-[radial-gradient(circle,rgba(11,99,255,0.35),transparent_70%)] blur-2xl" />
               <div className="relative grid grid-cols-1 items-center gap-8 lg:grid-cols-[1.4fr_auto]">
                 <div>
                   <h2 className="font-serif text-3xl leading-[1.05] sm:text-4xl">
-                    Vuoi un sistema simile per la{" "}
-                    <span className="text-accent italic">tua azienda?</span>
+                    Hai un&apos;attività con esigenze <span className="text-accent italic">simili?</span>
                   </h2>
                   <p className="mt-5 max-w-2xl text-muted-foreground lg:text-lg">
-                    Raccontaci il tuo processo. Ti aiuteremo a capire quale prima versione può
-                    semplificarlo.
+                    Non replichiamo il concept: partiamo dalla tua identità, dai contenuti e dal modo
+                    in cui lavori per definire la soluzione adatta al tuo progetto.
                   </p>
                 </div>
                 <a href="/#contatti" onClick={goToContact} className="btn-primary shrink-0 group">

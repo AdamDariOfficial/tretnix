@@ -327,8 +327,8 @@ function ProjectsSection() {
               pensati per il <span className="text-accent italic">lavoro reale.</span>
             </h2>
             <p className="mt-6 max-w-md text-muted-foreground">
-              Concept e sistemi digitali progettati per mostrare il tipo di soluzioni
-              che Tretnix può realizzare per aziende e team operativi.
+              Una selezione di progetti e concept che mostra come Tretnix può costruire
+              soluzioni diverse per identità, settore e livello di complessità.
             </p>
             <Link
               to="/case-studies"
@@ -349,7 +349,7 @@ function ProjectsSection() {
                 role="status"
                 className="glass-card col-span-full flex min-h-56 items-center justify-center rounded-2xl p-8 text-center text-sm text-muted-foreground"
               >
-                I case study non sono disponibili in questo momento. Riprova più tardi.
+                I progetti non sono disponibili in questo momento. Riprova più tardi.
               </div>
             )}
             {!loading &&
@@ -361,7 +361,7 @@ function ProjectsSection() {
               ))}
             {!loading && !loadFailed && projects.length === 0 && (
               <div className="glass-card col-span-full flex min-h-56 items-center justify-center rounded-2xl p-8 text-center text-sm text-muted-foreground">
-                I case study saranno disponibili a breve.
+                I progetti saranno disponibili a breve.
               </div>
             )}
           </div>
