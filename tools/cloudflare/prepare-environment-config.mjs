@@ -91,11 +91,18 @@ const environment = validateEnvironment(required(args, "environment"));
 const databaseName = validateDatabaseName(required(args, "database-name"));
 const databaseId = validateDatabaseId(required(args, "database-id"));
 const bucketName = validateBucketName(required(args, "bucket-name"));
-if (environment === "staging" && args.has("hostname")) {
-  fail("--hostname is not supported for staging; use workers.dev and Preview URLs.");
+if (environment === "staging" && (args.has("hostname") || args.has("production-routing"))) {
+  fail("Production routing flags are not supported for staging; use workers.dev and Preview URLs.");
+}
+const productionRouting = environment === "production" ? required(args, "production-routing") : undefined;
+if (productionRouting && !["none", "custom-domain"].includes(productionRouting)) {
+  fail("--production-routing must be none or custom-domain.");
+}
+if (productionRouting === "none" && args.has("hostname")) {
+  fail("--hostname is not supported with --production-routing none.");
 }
 const hostname =
-  environment === "production" ? validateHostname(required(args, "hostname")) : undefined;
+  productionRouting === "custom-domain" ? validateHostname(required(args, "hostname")) : undefined;
 const loginRateNamespaceId = validateNamespaceId(
   required(args, "login-rate-namespace-id"),
   "login-rate-namespace-id",
@@ -175,7 +182,11 @@ if (environment === "staging") {
 } else {
   config.workers_dev = false;
   config.preview_urls = false;
-  config.routes = [{ pattern: hostname, custom_domain: true }];
+  delete config.route;
+  delete config.routes;
+  if (productionRouting === "custom-domain") {
+    config.routes = [{ pattern: hostname, custom_domain: true }];
+  }
 }
 config.vars = {
   ...(config.vars ?? {}),
@@ -227,7 +238,9 @@ console.log(`Worker:      ${workerName}`);
 console.log(
   environment === "staging"
     ? "Exposure:    workers.dev and Preview URLs (no custom-domain route)"
-    : `Hostname:    https://${hostname}`,
+    : productionRouting === "none"
+      ? "Exposure:    none (workers.dev, Preview URLs and routes disabled)"
+      : `Hostname:    https://${hostname} (explicit custom-domain mode)`,
 );
 console.log(`D1:          ${databaseName} (${databaseId})`);
 console.log(`R2:          ${bucketName} (EU jurisdiction binding)`);
